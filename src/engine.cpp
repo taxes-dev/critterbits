@@ -7,22 +7,39 @@
 namespace Critterbits {
 
 Engine::~Engine() {
-    SDL::SDL_CleanUp(this->window);
+    SDL::SDL_CleanUp(renderer, window);
     SDL_Quit();
 }
 
 int Engine::Run() {
+    // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    this->window = SDL_CreateWindow("Critterbits", 100, 100, this->window_width, this->window_height, SDL_WINDOW_SHOWN);
+    // discover center of screen for window display
+    SDL_GetDisplayBounds(0, &this->display_bounds);
+
+    int init_x = this->display_bounds.w / 2 - this->window_width / 2;
+    int init_y = this->display_bounds.h / 2 - this->window_height / 2;
+
+    // create display window
+    this->window =
+        SDL_CreateWindow("Critterbits", init_x, init_y, this->window_width, this->window_height, SDL_WINDOW_SHOWN);
     if (this->window == nullptr) {
         std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
+    // create renderer
+    this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (this->renderer == nullptr) {
+        std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    // start main loop
     SDL_Event e;
     bool quit = false;
     while (!quit) {
@@ -32,6 +49,12 @@ int Engine::Run() {
                 quit = true;
             }
         }
+
+        // Render pass
+        SDL_RenderClear(this->renderer);
+
+        SDL_RenderPresent(this->renderer);
+        SDL_Delay(1000);
     }
 
     return 0;

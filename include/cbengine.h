@@ -11,8 +11,9 @@ namespace Critterbits {
 
 class Engine {
   public:
-    int window_width = CB_DEFAULT_WINDOW_H;
+    int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
+    SDL_Rect display_bounds;
 
     Engine(){};
     ~Engine();
@@ -20,6 +21,7 @@ class Engine {
 
   private:
     SDL_Window * window = nullptr;
+    SDL_Renderer * renderer = nullptr;
 
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;

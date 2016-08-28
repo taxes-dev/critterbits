@@ -4,7 +4,8 @@
 
 #include <SDL.h>
 
-namespace Critterbits { namespace SDL {
+namespace Critterbits {
+namespace SDL {
 
 // Cleanup functions
 // Source: http://www.willusher.io/sdl2%20tutorials/2014/08/01/postscript-1-easy-cleanup
@@ -61,6 +62,6 @@ inline void SDL_CleanUp<SDL_Surface>(SDL_Surface * surface) {
     }
     SDL_FreeSurface(surface);
 }
-
-}}
+}
+}
 #endif
