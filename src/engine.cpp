@@ -13,6 +13,8 @@ Engine::~Engine() {
 }
 
 int Engine::Run() {
+    LOG_INFO("Entering Engine::Run()");
+
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         LOG_SDL_ERR("SDL_Init");
@@ -55,9 +57,9 @@ int Engine::Run() {
         SDL_RenderClear(this->renderer);
 
         SDL_RenderPresent(this->renderer);
-        SDL_Delay(1000);
     }
 
+    LOG_INFO("Exiting Engine::Run()");
     return 0;
 }
 }

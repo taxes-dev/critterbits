@@ -62,6 +62,7 @@ inline void SDL_CleanUp<SDL_Surface>(SDL_Surface * surface) {
     }
     SDL_FreeSurface(surface);
 }
+
 }
 }
 #endif

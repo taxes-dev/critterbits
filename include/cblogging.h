@@ -11,7 +11,7 @@
 
 namespace Critterbits {
 
-inline void LogInfo(std::ostream & os, const std::string & msg) { os << "[INFO]" << msg << std::endl; }
+inline void LogInfo(std::ostream & os, const std::string & msg) { os << "[INFO] " << msg << std::endl; }
 
 inline void LogError(std::ostream & os, const std::string & msg) { os << "[ERROR] " << msg << std::endl; }
 
