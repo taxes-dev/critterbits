@@ -1,0 +1,17 @@
+---
+# We'll use defaults from the LLVM style, but with 4 columns indentation.
+BasedOnStyle: LLVM
+IndentWidth: 4
+---
+Language: Cpp
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Attach
+ColumnLimit: 120
+DerivePointerAlignment: false
+IndentCaseLabels: true
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Middle
+UseTab: Never

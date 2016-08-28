@@ -1,3 +1,10 @@
+# CMake output
+bin/
+build/
+
+# Visual Studio Code
+.vscode/
+
 # Compiled Object files
 *.slo
 *.lo
