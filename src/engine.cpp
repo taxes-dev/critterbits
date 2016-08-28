@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "cbengine.h"
+#include "cblogging.h"
 #include "cbsdl.h"
 
 namespace Critterbits {
@@ -14,7 +15,7 @@ Engine::~Engine() {
 int Engine::Run() {
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        LOG_SDL_ERR("SDL_Init");
         return 1;
     }
 
@@ -28,14 +29,14 @@ int Engine::Run() {
     this->window =
         SDL_CreateWindow("Critterbits", init_x, init_y, this->window_width, this->window_height, SDL_WINDOW_SHOWN);
     if (this->window == nullptr) {
-        std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+        LOG_SDL_ERR("SDL_CreateWindow");
         return 1;
     }
 
     // create renderer
     this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (this->renderer == nullptr) {
-        std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+        LOG_SDL_ERR("SDL_CreateRenderer");
         return 1;
     }
 
