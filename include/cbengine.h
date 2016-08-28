@@ -19,13 +19,11 @@ class EngineConfiguration {
 
     EngineConfiguration(){};
     EngineConfiguration(const std::string &);
-    inline bool is_valid() { return this->valid; };
+    inline bool is_valid() const { return this->valid; };
     bool ReloadConfiguration();
 
   private:
     bool valid = false;
-
-    void ParseYaml(const std::string &);
 };
 
 class Engine {
