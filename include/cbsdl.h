@@ -1,7 +1,12 @@
 #pragma once
-#ifndef CLEANUP_H
-#define CLEANUP_H
+#ifndef CBSDL_H
+#define CBSDL_H
 
+#include <SDL.h>
+
+namespace Critterbits { namespace SDL {
+
+// Cleanup functions
 // Source: http://www.willusher.io/sdl2%20tutorials/2014/08/01/postscript-1-easy-cleanup
 
 /*
@@ -9,11 +14,11 @@
  * the first one in the list each iteration.
  */
 template <typename T, typename... Args>
-void cleanup(T * t, Args &&... args) {
+void SDL_CleanUp(T * t, Args &&... args) {
     // Cleanup the first item in the list
-    cleanup(t);
+    SDL_CleanUp(t);
     // Recurse to clean up the remaining arguments
-    cleanup(std::forward<Args>(args)...);
+    SDL_CleanUp(std::forward<Args>(args)...);
 }
 
 /*
@@ -26,35 +31,36 @@ void cleanup(T * t, Args &&... args) {
  * but rather just want to clean everything up and let cleanup sort it out
  */
 template <>
-inline void cleanup<SDL_Window>(SDL_Window * win) {
-    if (!win) {
+inline void SDL_CleanUp<SDL_Window>(SDL_Window * window) {
+    if (window == nullptr) {
         return;
     }
-    SDL_DestroyWindow(win);
+    SDL_DestroyWindow(window);
 }
 
 template <>
-inline void cleanup<SDL_Renderer>(SDL_Renderer * ren) {
-    if (!ren) {
+inline void SDL_CleanUp<SDL_Renderer>(SDL_Renderer * renderer) {
+    if (renderer == nullptr) {
         return;
     }
-    SDL_DestroyRenderer(ren);
+    SDL_DestroyRenderer(renderer);
 }
 
 template <>
-inline void cleanup<SDL_Texture>(SDL_Texture * tex) {
-    if (!tex) {
+inline void SDL_CleanUp<SDL_Texture>(SDL_Texture * texture) {
+    if (texture == nullptr) {
         return;
     }
-    SDL_DestroyTexture(tex);
+    SDL_DestroyTexture(texture);
 }
 
 template <>
-inline void cleanup<SDL_Surface>(SDL_Surface * surf) {
-    if (!surf) {
+inline void SDL_CleanUp<SDL_Surface>(SDL_Surface * surface) {
+    if (surface == nullptr) {
         return;
     }
-    SDL_FreeSurface(surf);
+    SDL_FreeSurface(surface);
 }
 
+}}
 #endif

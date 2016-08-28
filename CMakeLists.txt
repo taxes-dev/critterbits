@@ -28,7 +28,7 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} include)
 
-#file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
+file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
 
 # clang-format the files on build
 #foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
@@ -37,7 +37,7 @@ include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INC
 #        list(REMOVE_ITEM ALL_SOURCE_FILES ${SOURCE_FILE})
 #    endif()
 #endforeach()
-#add_custom_target(clangformat ALL COMMAND /usr/bin/clang-format -style=file -i ${ALL_SOURCE_FILES} )
+add_custom_target(clangformat ALL COMMAND /usr/bin/clang-format -style=file -i ${ALL_SOURCE_FILES} )
 
 # Look in the subdirectories to find additional CMakeLists.txt so we can build executables
 add_subdirectory(src)
