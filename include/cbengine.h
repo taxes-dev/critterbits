@@ -33,7 +33,7 @@ class Engine {
     EngineConfiguration config;
     SDL_Rect display_bounds;
 
-    Engine(){};
+    Engine(EngineConfiguration & engine_config) : config(engine_config){};
     ~Engine();
     int Run();
 

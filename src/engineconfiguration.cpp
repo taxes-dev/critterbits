@@ -1,7 +1,11 @@
 #include <SDL.h>
+#include <cerrno>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <functional>
 #include <limits.h>
+#include <map>
 #include <stdlib.h>
 #include <string>
 
@@ -62,6 +66,37 @@ bool EngineConfiguration::ReloadConfiguration() {
     return this->valid;
 }
 
+/*
+ * Support functions for EngineConfiguration::ParseYaml(const std::string&)
+ */
+typedef enum { E_CFG_KEY_TOKEN, E_CFG_VAL_TOKEN, E_CFG_OTHER_TOKEN } ConfigTokenType;
+typedef std::function<void(EngineConfiguration *, yaml_token_t &)> ConfigTokenParser;
+
+static void window_height_parser(EngineConfiguration * config, yaml_token_t & token) {
+    if (token.data.scalar.style == YAML_PLAIN_SCALAR_STYLE) {
+        long int h = strtol((const char *)token.data.scalar.value, NULL, 10);
+        if (errno == ERANGE) {
+            LOG_ERR("window_height_parser invalid value");
+        } else {
+            config->window_height = (int)h;
+        }
+    }
+}
+
+static void window_width_parser(EngineConfiguration * config, yaml_token_t & token) {
+    if (token.data.scalar.style == YAML_PLAIN_SCALAR_STYLE) {
+        long int w = strtol((const char *)token.data.scalar.value, NULL, 10);
+        if (errno == ERANGE) {
+            LOG_ERR("window_width_parser invalid value");
+        } else {
+            config->window_width = (int)w;
+        }
+    }
+}
+/*
+ * End support functions
+ */
+
 void EngineConfiguration::ParseYaml(const std::string & yaml_content) {
     // TODO: make generic... will likely want to parse YAML elsewhere
 
@@ -72,6 +107,11 @@ void EngineConfiguration::ParseYaml(const std::string & yaml_content) {
     unsigned char * yaml_content_u = new unsigned char[yaml_content.size() + 1];
     strncpy((char *)yaml_content_u, yaml_content.c_str(), yaml_content.length());
     yaml_parser_set_input_string(&parser, yaml_content_u, yaml_content.length());
+
+    static std::map<std::string, ConfigTokenParser> parsers = {{"window_height", window_height_parser},
+                                                               {"window_width", window_width_parser}};
+    ConfigTokenParser * current_parser = nullptr;
+    ConfigTokenType last_token = E_CFG_OTHER_TOKEN;
 
     while (true) {
         if (!yaml_parser_scan(&parser, &token)) {
@@ -86,12 +126,14 @@ void EngineConfiguration::ParseYaml(const std::string & yaml_content) {
             /* Token types (read before actual token) */
             case YAML_KEY_TOKEN:
                 LOG_INFO("(Key token)   ");
+                last_token = E_CFG_KEY_TOKEN;
                 break;
             case YAML_VALUE_TOKEN:
                 LOG_INFO("(Value token) ");
+                last_token = E_CFG_VAL_TOKEN;
                 break;
             /* Block delimeters */
-            case YAML_BLOCK_SEQUENCE_START_TOKEN:
+            /*case YAML_BLOCK_SEQUENCE_START_TOKEN:
                 LOG_INFO("Start Block (Sequence)");
                 break;
             case YAML_BLOCK_ENTRY_TOKEN:
@@ -99,13 +141,31 @@ void EngineConfiguration::ParseYaml(const std::string & yaml_content) {
                 break;
             case YAML_BLOCK_END_TOKEN:
                 LOG_INFO("End block");
-                break;
+                break;*/
             /* Data */
-            case YAML_BLOCK_MAPPING_START_TOKEN:
+            /*case YAML_BLOCK_MAPPING_START_TOKEN:
                 LOG_INFO("[Block mapping]");
-                break;
+                break;*/
             case YAML_SCALAR_TOKEN:
                 LOG_INFO("Scalar " + std::string((char *)token.data.scalar.value));
+                if (last_token == E_CFG_KEY_TOKEN) {
+                    auto search = parsers.find(std::string((char *)token.data.scalar.value));
+                    if (search != parsers.end()) {
+                        current_parser = &search->second;
+                    }
+                } else if (last_token == E_CFG_VAL_TOKEN) {
+                    if (current_parser != nullptr) {
+                        (*current_parser)(this, token);
+                        current_parser = nullptr;
+                    }
+                } else {
+                    LOG_ERR("EngineConfiguration::ParseYaml unexpected scalar");
+                }
+                last_token = E_CFG_OTHER_TOKEN;
+                break;
+            default:
+                // LOG_INFO("(other token)");
+                last_token = E_CFG_OTHER_TOKEN;
                 break;
         }
 

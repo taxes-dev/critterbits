@@ -21,6 +21,9 @@ int Engine::Run() {
         LOG_ERR("Engine configuration is not valid");
         return 1;
     }
+    LOG_INFO("Final asset path: " + config.asset_path);
+    LOG_INFO("Final window width: " + std::to_string(config.window_width));
+    LOG_INFO("Final window height: " + std::to_string(config.window_height));
 
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
