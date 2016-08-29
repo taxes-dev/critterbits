@@ -3,14 +3,9 @@
 #include <string>
 
 #include "cbengine.h"
+#include "cbfiles.h"
 #include "cblogging.h"
 #include "cbyaml.h"
-
-#ifdef _WIN32
-const char PATH_SEP = '\\';
-#else
-const char PATH_SEP = '/';
-#endif
 
 namespace Critterbits {
 

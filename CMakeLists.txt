@@ -33,7 +33,7 @@ find_package(YAML REQUIRED)
 # TMX library
 find_library(LIBTMX_LIBRARY NAMES libtmx tmx PATHS 3pp/tmx NO_DEFAULT_PATH)
 
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${LIBYAML_INCLUDE_DIR} 3pp/tmx include)
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${LIBYAML_INCLUDE_DIR} 3pp include)
 
 file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
 

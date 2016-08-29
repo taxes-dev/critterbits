@@ -5,6 +5,8 @@
 #include <SDL.h>
 #include <string>
 
+#include "cbscene.h"
+
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768
 #define CB_CONFIG_YAML "cbconfig.yml"
@@ -31,6 +33,7 @@ class Engine {
   public:
     EngineConfiguration config;
     SDL_Rect display_bounds;
+    SceneManager scenes;
 
     Engine(EngineConfiguration & engine_config) : config(engine_config){};
     ~Engine();
