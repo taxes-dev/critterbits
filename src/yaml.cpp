@@ -37,11 +37,11 @@ void YamlParser::Parse(void * context, const YamlParserCollection & parsers, con
         switch (token.type) {
             /* Token types (read before actual token) */
             case YAML_KEY_TOKEN:
-                LOG_INFO("YamlParser::Parse key token");
+                // LOG_INFO("YamlParser::Parse key token");
                 last_token = CBE_YAML_KEY_TOKEN;
                 break;
             case YAML_VALUE_TOKEN:
-                LOG_INFO("YamlParser::Parse value token");
+                // LOG_INFO("YamlParser::Parse value token");
                 last_token = CBE_YAML_VAL_TOKEN;
                 break;
             /* Block delimeters */
@@ -59,11 +59,13 @@ void YamlParser::Parse(void * context, const YamlParserCollection & parsers, con
                 LOG_INFO("[Block mapping]");
                 break;*/
             case YAML_SCALAR_TOKEN:
-                LOG_INFO("YamlParser::Parse scalar " + std::string((char *)token.data.scalar.value));
+                // LOG_INFO("YamlParser::Parse scalar " + std::string((char *)token.data.scalar.value));
                 if (last_token == CBE_YAML_KEY_TOKEN) {
                     auto search = parsers.find(std::string((char *)token.data.scalar.value));
                     if (search != parsers.end()) {
                         current_parser = &search->second;
+                    } else {
+                        LOG_ERR("YamlParser::Parse no parser for key " + std::string((char *)token.data.scalar.value));
                     }
                 } else if (last_token == CBE_YAML_VAL_TOKEN) {
                     if (current_parser != nullptr) {
@@ -71,7 +73,7 @@ void YamlParser::Parse(void * context, const YamlParserCollection & parsers, con
                         current_parser = nullptr;
                     }
                 } else {
-                    LOG_ERR("YamlParser::Parse unexpected scalar");
+                    LOG_ERR("YamlParser::Parse unexpected scalar " + std::string((char *)token.data.scalar.value));
                 }
                 last_token = CBE_YAML_OTHER_TOKEN;
                 break;

@@ -25,7 +25,12 @@ static void window_width_parser(void * context, const char * value, const size_t
     static_cast<EngineConfiguration *>(context)->window_width = YamlParser::to_int(value);
 }
 
+static void window_title_parser(void * context, const char * value, const size_t size) {
+    static_cast<EngineConfiguration *>(context)->window_title = std::string(value, size);
+}
+
 static YamlParserCollection config_parsers = {{"window_height", window_height_parser},
+                                              {"window_title", window_title_parser},
                                               {"window_width", window_width_parser}};
 /*
  * End support functions

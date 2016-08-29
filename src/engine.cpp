@@ -21,9 +21,6 @@ int Engine::Run() {
         LOG_ERR("Engine configuration is not valid");
         return 1;
     }
-    LOG_INFO("Final asset path: " + config.asset_path);
-    LOG_INFO("Final window width: " + std::to_string(config.window_width));
-    LOG_INFO("Final window height: " + std::to_string(config.window_height));
 
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -37,7 +34,7 @@ int Engine::Run() {
         center_inside(display_bounds.w, display_bounds.h, config.window_width, config.window_height);
 
     // create display window
-    this->window = SDL_CreateWindow("Critterbits", window_origin.x, window_origin.y, config.window_width,
+    this->window = SDL_CreateWindow(config.window_title.c_str(), window_origin.x, window_origin.y, config.window_width,
                                     config.window_height, SDL_WINDOW_SHOWN);
     if (this->window == nullptr) {
         LOG_SDL_ERR("SDL_CreateWindow");

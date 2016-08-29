@@ -16,6 +16,7 @@ class EngineConfiguration {
     std::string asset_path;
     int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
+    std::string window_title;
 
     EngineConfiguration(){};
     EngineConfiguration(const std::string &);
