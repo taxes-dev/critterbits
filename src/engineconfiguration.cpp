@@ -11,6 +11,10 @@ namespace Critterbits {
 /*
  * Support functions for EngineConfiguration::ReloadConfiguration()
  */
+static void draw_map_regions_parser(void * context, const char * value, const size_t size) {
+    static_cast<EngineConfiguration *>(context)->draw_map_regions = YamlParser::ToBool(value);
+}
+
 static void window_height_parser(void * context, const char * value, const size_t size) {
     static_cast<EngineConfiguration *>(context)->window_height = YamlParser::ToInt(value);
 }
@@ -23,7 +27,8 @@ static void window_title_parser(void * context, const char * value, const size_t
     static_cast<EngineConfiguration *>(context)->window_title = std::string(value, size);
 }
 
-static YamlParserCollection config_parsers = {{"window_height", window_height_parser},
+static YamlParserCollection config_parsers = {{"draw_map_regions", draw_map_regions_parser},
+                                              {"window_height", window_height_parser},
                                               {"window_title", window_title_parser},
                                               {"window_width", window_width_parser}};
 /*

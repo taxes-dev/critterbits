@@ -15,11 +15,12 @@
 namespace Critterbits {
 
 // messy, but some things need direct access to the renderer
-extern SDL_Renderer * main_renderer;
+extern SDL_Renderer * cb_main_renderer;
 
 class EngineConfiguration {
   public:
     std::string asset_path;
+    bool draw_map_regions = false;
     int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
     std::string window_title;

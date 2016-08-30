@@ -22,10 +22,10 @@ void renderTexture(SDL_Texture * tex, SDL_Renderer * ren, int x, int y) {
     dst.h = h;
     SDL_RenderCopy(ren, tex, NULL, &dst);
 }
-SDL_Renderer * main_renderer = nullptr;
+SDL_Renderer * cb_main_renderer = nullptr;
 
 Engine::~Engine() {
-    SDL::SDL_CleanUp(main_renderer, this->window);
+    SDLx::SDL_CleanUp(cb_main_renderer, this->window);
     IMG_Quit();
     SDL_Quit();
 }
@@ -50,7 +50,7 @@ int Engine::Run() {
     }
 
     // initialize TMX library
-    Tilemap::Tilemap_Init();
+    Tilemap::Tilemap_Init(this->config.draw_map_regions);
 
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
@@ -66,8 +66,8 @@ int Engine::Run() {
     }
 
     // create renderer
-    main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (main_renderer == nullptr) {
+    cb_main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (cb_main_renderer == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateRenderer");
         return 1;
     }
@@ -91,15 +91,15 @@ int Engine::Run() {
         }
 
         // Render pass
-        SDL_RenderClear(main_renderer);
+        SDL_RenderClear(cb_main_renderer);
         if (this->scenes.current_scene != nullptr) {
             SDL_Texture * tex = this->scenes.current_scene->GetMapTexture();
             if (tex != nullptr) {
-                renderTexture(tex, main_renderer, 0, 0);
+                renderTexture(tex, cb_main_renderer, 0, 0);
             }
         }
 
-        SDL_RenderPresent(main_renderer);
+        SDL_RenderPresent(cb_main_renderer);
     }
 
     LOG_INFO("Exiting Engine::Run()");

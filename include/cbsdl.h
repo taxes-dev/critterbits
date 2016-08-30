@@ -5,7 +5,7 @@
 #include <SDL.h>
 
 namespace Critterbits {
-namespace SDL {
+namespace SDLx {
 
 // Cleanup functions
 // Source: http://www.willusher.io/sdl2%20tutorials/2014/08/01/postscript-1-easy-cleanup
