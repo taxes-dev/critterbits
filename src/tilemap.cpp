@@ -84,12 +84,12 @@ static void tilemap_draw_layer(const tmx_map * map, const tmx_layer * layer) {
     }
 }
 
-static void tilemap_draw_image_layer(const tmx_image * img) {
+static void tilemap_draw_image_layer(const tmx_image * img, int offset_x, int offset_y) {
     LOG_INFO("tilemap_draw_image_layer called");
     SDL_Rect dim;
 
-    dim.x = 0;
-    dim.y = 0;
+    dim.x = offset_x;
+    dim.y = offset_y;
     SDL_QueryTexture((SDL_Texture *)img->resource_image, NULL, NULL, &(dim.w), &(dim.h));
 
     SDL_RenderCopy(main_renderer, (SDL_Texture *)img->resource_image, NULL, &dim);
@@ -143,10 +143,12 @@ SDL_Texture * Tilemap::RenderMap() {
 
     while (layers) {
         if (layers->visible) {
+            int offX = layers->offsetx;
+            int offY = layers->offsety;
             if (layers->type == L_OBJGR) {
                 tilemap_draw_objects(layers->content.objgr);
             } else if (layers->type == L_IMAGE) {
-                tilemap_draw_image_layer(layers->content.image);
+                tilemap_draw_image_layer(layers->content.image, offX, offY);
             } else if (layers->type == L_LAYER) {
                 tilemap_draw_layer(this->map, layers);
             }
