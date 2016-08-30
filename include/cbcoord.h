@@ -16,5 +16,15 @@ typedef struct CB_Point {
     }
 
 } CB_Point;
+
+typedef struct CB_Rect {
+    int x;
+    int y;
+    int w;
+    int h;
+
+    inline int bottom() { return y + h; };
+    inline int right() { return x + w; };
+} CB_Rect;
 }
 #endif
