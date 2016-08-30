@@ -4,6 +4,14 @@
 
 namespace Critterbits {
 
+inline int Clamp(int value, int min, int max) {
+    if (value < min)
+        return min;
+    if (value > max)
+        return max;
+    return value;
+}
+
 typedef struct CB_Point {
     int x;
     int y;
@@ -25,6 +33,9 @@ typedef struct CB_Rect {
 
     inline int bottom() { return y + h; };
     inline int right() { return x + w; };
+    inline bool intersects(CB_Rect & rect) {
+        return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
+    };
 } CB_Rect;
 }
 #endif

@@ -21,6 +21,7 @@ void Scene::NotifyLoaded() {
             LOG_ERR("Scene::NotifyLoaded unable to generate textures for tilemap " + this->map_path);
         }
     }
+    this->state = CBE_ACTIVE;
 }
 
 void Scene::NotifyUnloaded() { LOG_INFO("Scene::NotifyUnloaded scene was unloaded: " + this->scene_name); }

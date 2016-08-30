@@ -66,20 +66,28 @@ bool Tilemap::CreateTextures(float scale) {
 
     this->tile_height = this->map->tile_height * scale;
     this->tile_width = this->map->tile_width * scale;
-    this->map_rect.w = this->map->width * this->tile_height;
-    this->map_rect.h = this->map->height * this->tile_width;
-    this->map_rect.x = 0;
-    this->map_rect.y = 0;
+    this->dim.w = this->map->width * this->tile_height;
+    this->dim.h = this->map->height * this->tile_width;
+    this->dim.x = 0;
+    this->dim.y = 0;
 
     this->map_texture = this->RenderMap(cb_main_renderer, scale);
 
     return this->map_texture != nullptr;
 }
 
+void Tilemap::Render(SDL_Renderer * renderer, const CB_Rect & offset) {
+    if (this->map_texture != nullptr) {
+        LOG_INFO("Got offset " + std::to_string(offset.x) + " " + std::to_string(offset.y) + " " +
+                 std::to_string(offset.w) + " " + std::to_string(offset.h));
+        SDLx::SDL_RenderTextureClipped(renderer, this->map_texture, offset.x, offset.y, offset.w, offset.h);
+    }
+}
+
 SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // create texture to hold the map
-    SDL_Texture * texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                                              this->map_rect.w, this->map_rect.h);
+    SDL_Texture * texture =
+        SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
 
     if (texture == nullptr) {
         LOG_SDL_ERR("Tilemap::Rendermap unable to create texture for map");

@@ -44,6 +44,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     // requested scene
     for (auto & scene : this->loaded_scenes) {
         if (scene->scene_name == scene_name) {
+            scene->state = CBE_ACTIVE;
             this->current_scene = scene;
             break;
         }
@@ -86,7 +87,10 @@ void SceneManager::UnloadCurrentScene() {
         this->current_scene->NotifyUnloaded();
 
         // remove scene from loaded scenes if it's not marked persistent
-        if (!this->current_scene->persistent) {
+        if (this->current_scene->persistent) {
+            this->current_scene->state = CBE_INACTIVE;
+        } else {
+            this->current_scene->state = CBE_UNLOADED;
             for (auto it = this->loaded_scenes.begin(); it != this->loaded_scenes.end(); it++) {
                 if (*it == this->current_scene) {
                     this->loaded_scenes.erase(it);

@@ -14,6 +14,8 @@
 
 namespace Critterbits {
 
+typedef enum { CBE_NEW, CBE_ACTIVE, CBE_INACTIVE, CBE_UNLOADED } SceneState;
+
 class Scene {
   public:
     bool persistent = false;
@@ -21,16 +23,13 @@ class Scene {
     std::string map_path;
     std::string scene_path;
     float map_scale = 1.0f;
+    SceneState state = CBE_NEW;
 
     Scene(){};
     ~Scene();
+    Tilemap * GetTilemap() { return this->tilemap; };
     void NotifyLoaded();
     void NotifyUnloaded();
-    SDL_Texture * GetMapTexture() const {
-        if (this->tilemap != nullptr)
-            return this->tilemap->GetMapTexture();
-        return nullptr;
-    };
 
   private:
     Tilemap * tilemap = nullptr;

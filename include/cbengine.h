@@ -6,6 +6,7 @@
 #include <string>
 
 #include "cbscene.h"
+#include "cbviewport.h"
 
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768
@@ -39,6 +40,7 @@ class Engine {
     EngineConfiguration config;
     SDL_Rect display_bounds;
     SceneManager scenes;
+    Viewport viewport;
 
     Engine(EngineConfiguration & engine_config) : config(engine_config){};
     ~Engine();

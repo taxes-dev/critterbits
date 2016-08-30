@@ -2,16 +2,17 @@
 #ifndef CBTILEMAP_H
 #define CBTILEMAP_H
 
+#include <SDL.h>
 #include <tmx/tmx.h>
 
 #include "cbcoord.h"
+#include "cbentity.h"
 
 namespace Critterbits {
 extern bool cb_force_draw_map_regions;
 
-class Tilemap {
+class Tilemap : public Entity {
   public:
-    CB_Rect map_rect;
     int tile_width;
     int tile_height;
 
@@ -19,6 +20,7 @@ class Tilemap {
     ~Tilemap();
     bool CreateTextures(float scale);
     SDL_Texture * GetMapTexture() const { return this->map_texture; };
+    void Render(SDL_Renderer *, const CB_Rect &);
     static void Tilemap_Init(bool);
 
   private:

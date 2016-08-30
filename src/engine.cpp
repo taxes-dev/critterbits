@@ -1,6 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
-#include <iostream>
+#include <list>
 
 #include "cbcoord.h"
 #include "cbengine.h"
@@ -8,20 +8,9 @@
 #include "cbscene.h"
 #include "cbsdl.h"
 #include "cbtilemap.h"
+#include "cbviewport.h"
 
 namespace Critterbits {
-// TODO: remove this
-void renderTexture(SDL_Texture * tex, SDL_Renderer * ren, int x, int y) {
-    int w, h;
-    SDL_QueryTexture(tex, NULL, NULL, &w, &h);
-    // Setup the destination rectangle to be at the position we want
-    SDL_Rect dst;
-    dst.x = x;
-    dst.y = y;
-    dst.w = w;
-    dst.h = h;
-    SDL_RenderCopy(ren, tex, NULL, &dst);
-}
 SDL_Renderer * cb_main_renderer = nullptr;
 
 Engine::~Engine() {
@@ -65,6 +54,9 @@ int Engine::Run() {
         return 1;
     }
 
+    // configure viewport
+    this->viewport.dim = {220, 50, this->config.window_width, this->config.window_height};
+
     // create renderer
     cb_main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (cb_main_renderer == nullptr) {
@@ -79,6 +71,9 @@ int Engine::Run() {
         return 1;
     }
 
+    // entities to iterate
+    std::list<Entity *> entities;
+
     // start main loop
     SDL_Event e;
     bool quit = false;
@@ -90,16 +85,24 @@ int Engine::Run() {
             }
         }
 
-        // Render pass
-        SDL_RenderClear(cb_main_renderer);
-        if (this->scenes.current_scene != nullptr) {
-            SDL_Texture * tex = this->scenes.current_scene->GetMapTexture();
-            if (tex != nullptr) {
-                renderTexture(tex, cb_main_renderer, 0, 0);
+        // Cull entities not in viewport
+        entities.clear();
+        if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_ACTIVE) {
+            Entity * tilemap = this->scenes.current_scene->GetTilemap();
+            if (tilemap != nullptr && tilemap->dim.intersects(this->viewport.dim)) {
+                entities.push_back(tilemap);
             }
         }
 
+        // Render pass
+        SDL_SetRenderDrawColor(cb_main_renderer, 0, 0, 0, 0);
+        SDL_RenderClear(cb_main_renderer);
+        for (auto & entity : entities) {
+            entity->Render(cb_main_renderer, this->viewport.GetViewableRect(entity->dim));
+        }
+
         SDL_RenderPresent(cb_main_renderer);
+        SDL_Delay(5000);
     }
 
     LOG_INFO("Exiting Engine::Run()");
