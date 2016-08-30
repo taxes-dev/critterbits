@@ -26,10 +26,11 @@ class Tilemap {
     tmx_map * map = nullptr;
     SDL_Texture * map_texture = nullptr;
 
-    SDL_Texture * RenderMap(SDL_Renderer *, float) const;
-    void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *) const;
-    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *) const;
-    void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *) const;
+    SDL_Texture * RenderMap(SDL_Renderer *, float);
+    void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
+    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
+    void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
+    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int);
 };
 }
 #endif

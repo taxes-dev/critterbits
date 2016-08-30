@@ -76,7 +76,7 @@ bool Tilemap::CreateTextures(float scale) {
     return this->map_texture != nullptr;
 }
 
-SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) const {
+SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // create texture to hold the map
     SDL_Texture * texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                                               this->map_rect.w, this->map_rect.h);
@@ -119,7 +119,7 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) const {
     return texture;
 }
 
-void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) const {
+void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
     SDL_Rect dim;
     SDL_Texture * source_image = static_cast<SDL_Texture *>(layer->content.image->resource_image);
     float op = layer->opacity;
@@ -141,12 +141,7 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     }
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) const {
-    tmx_tileset * ts;
-    tmx_image * im;
-    SDL_Rect srcrect, dstrect;
-    SDL_Texture * tile;
-
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
     // prepare blend mode if opacity less than 100%
     float op = layer->opacity;
     int alpha_mod = op * SDL_ALPHA_OPAQUE;
@@ -156,49 +151,11 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     }
 
     // loop through tiles in map
-    for (unsigned long i = 0; i < map->height; i++) {
-        for (unsigned long j = 0; j < map->width; j++) {
-            unsigned int gid = (layer->content.gids[(i * map->width) + j]) & TMX_FLIP_BITS_REMOVAL;
+    for (unsigned long i = 0; i < this->map->height; i++) {
+        for (unsigned long j = 0; j < this->map->width; j++) {
+            unsigned int gid = (layer->content.gids[(i * this->map->width) + j]) & TMX_FLIP_BITS_REMOVAL;
 
-            // if we have a tile at this position, draw it
-            if (map->tiles[gid] != NULL) {
-                // source tileset and image
-                ts = map->tiles[gid]->tileset;
-                im = map->tiles[gid]->image;
-
-                // source dimensions and position
-                srcrect.x = map->tiles[gid]->ul_x;
-                srcrect.y = map->tiles[gid]->ul_y;
-                srcrect.w = ts->tile_width;
-                srcrect.h = ts->tile_height;
-
-                // destination dimensions and position
-                dstrect.w = ts->tile_width;
-                dstrect.h = ts->tile_height;
-                dstrect.x = j * ts->tile_width;
-                dstrect.y = i * ts->tile_height;
-
-                /* TODO Flips */
-                // select source tile or image
-                if (im) {
-                    tile = static_cast<SDL_Texture *>(im->resource_image);
-                } else {
-                    tile = static_cast<SDL_Texture *>(ts->image->resource_image);
-                }
-
-                // set alpha modulation based on layer opacity
-                if (alpha_mod < SDL_ALPHA_OPAQUE) {
-                    SDL_SetTextureAlphaMod(tile, alpha_mod);
-                }
-
-                // render tile
-                SDL_RenderCopy(renderer, tile, &srcrect, &dstrect);
-
-                // reset alpha modulation
-                if (alpha_mod < SDL_ALPHA_OPAQUE) {
-                    SDL_SetTextureAlphaMod(tile, SDL_ALPHA_OPAQUE);
-                }
-            }
+            this->DrawTileOnMap(renderer, gid, i, j, alpha_mod);
         }
     }
 
@@ -209,7 +166,7 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     }
 }
 
-void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) const {
+void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
     SDL_Rect rect;
 
     tmx_object_group * object_group = layer->content.objgr;
@@ -220,7 +177,8 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
     while (current_obj) {
         if (current_obj->visible) {
             if (current_obj->shape == S_TILE) {
-                // TODO: draw tile
+                this->DrawTileOnMap(renderer, current_obj->gid & TMX_FLIP_BITS_REMOVAL, current_obj->x * -1,
+                                    current_obj->y * -1, SDL_ALPHA_OPAQUE);
             } else if (cb_force_draw_map_regions) {
                 switch (current_obj->shape) {
                     case S_SQUARE:
@@ -251,6 +209,59 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
             }
         }
         current_obj = current_obj->next;
+    }
+}
+
+void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int alpha_mod) {
+    SDL_Rect srcrect, dstrect;
+    SDL_Texture * tile;
+    tmx_tileset * ts;
+    tmx_image * im;
+
+    // if we have a tile at this position, draw it
+    if (this->map->tiles[gid] != NULL) {
+        // source tileset and image
+        ts = this->map->tiles[gid]->tileset;
+        im = this->map->tiles[gid]->image;
+
+        // source dimensions and position
+        srcrect.x = this->map->tiles[gid]->ul_x;
+        srcrect.y = this->map->tiles[gid]->ul_y;
+        srcrect.w = ts->tile_width;
+        srcrect.h = ts->tile_height;
+
+        // destination dimensions and position
+        dstrect.w = ts->tile_width;
+        dstrect.h = ts->tile_height;
+        // FIXME: this is a hack hack hack
+        if (row < 0) {
+            dstrect.x = row * -1;
+            dstrect.y = col * -1;
+        } else {
+            dstrect.x = col * ts->tile_width;
+            dstrect.y = row * ts->tile_height;
+        }
+
+        /* TODO Flips */
+        // select source tile or image
+        if (im) {
+            tile = static_cast<SDL_Texture *>(im->resource_image);
+        } else {
+            tile = static_cast<SDL_Texture *>(ts->image->resource_image);
+        }
+
+        // set alpha modulation based on layer opacity
+        if (alpha_mod < SDL_ALPHA_OPAQUE) {
+            SDL_SetTextureAlphaMod(tile, alpha_mod);
+        }
+
+        // render tile
+        SDL_RenderCopy(renderer, tile, &srcrect, &dstrect);
+
+        // reset alpha modulation
+        if (alpha_mod < SDL_ALPHA_OPAQUE) {
+            SDL_SetTextureAlphaMod(tile, SDL_ALPHA_OPAQUE);
+        }
     }
 }
 
