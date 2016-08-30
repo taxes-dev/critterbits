@@ -1,5 +1,4 @@
 #include <SDL.h>
-#include <fstream>
 #include <string>
 
 #include "cbengine.h"
@@ -10,7 +9,7 @@
 namespace Critterbits {
 
 /*
- * Support functions for EngineConfiguration::ParseYaml(const std::string&)
+ * Support functions for EngineConfiguration::ReloadConfiguration()
  */
 static void window_height_parser(void * context, const char * value, const size_t size) {
     static_cast<EngineConfiguration *>(context)->window_height = YamlParser::to_int(value);
@@ -55,22 +54,17 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
 }
 
 bool EngineConfiguration::ReloadConfiguration() {
-    std::fstream config_file;
-
     this->valid = false;
 
     LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " + this->asset_path +
              CB_CONFIG_YAML);
-    config_file.open(this->asset_path + CB_CONFIG_YAML, std::fstream::in);
-    if (config_file.good()) {
-        // read entire contents into a string (config file should not be very big, so this is fine)
-        std::string config_content((std::istreambuf_iterator<char>(config_file)), (std::istreambuf_iterator<char>()));
-        config_file.close();
-
+    std::string * config_content = nullptr;
+    if (ReadTextFile(this->asset_path + CB_CONFIG_YAML, &config_content)) {
         // parse YAML into configuration
         YamlParser parser;
-        parser.Parse(this, config_parsers, config_content);
+        parser.Parse(this, config_parsers, *config_content);
 
+        delete config_content;
         this->valid = true;
     }
 

@@ -90,6 +90,16 @@ void YamlParser::Parse(void * context, const YamlParserCollection & parsers, con
     delete yaml_content_u;
 }
 
+bool YamlParser::to_bool(const char * value) {
+    if (value == NULL) {
+        return false;
+    }
+    if (strcmp("true", value) == 0 || strcmp("on", value) == 0 || strcmp("yes", value) == 0) {
+        return true;
+    }
+    return false;
+}
+
 int YamlParser::to_int(const char * value) {
     if (value == NULL) {
         return 0;

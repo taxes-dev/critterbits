@@ -8,4 +8,7 @@ const char PATH_SEP = '\\';
 const char PATH_SEP = '/';
 #endif
 
+namespace Critterbits {
+bool ReadTextFile(const std::string & file_name, std::string ** file_contents);
+}
 #endif
