@@ -13,6 +13,10 @@
 #define CB_DEFAULT_ASSET_PATH "./assets"
 
 namespace Critterbits {
+
+// messy, but some things need direct access to the renderer
+extern SDL_Renderer * main_renderer;
+
 class EngineConfiguration {
   public:
     std::string asset_path;
@@ -41,7 +45,6 @@ class Engine {
 
   private:
     SDL_Window * window = nullptr;
-    SDL_Renderer * renderer = nullptr;
 
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;

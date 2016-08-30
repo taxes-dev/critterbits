@@ -1,4 +1,5 @@
 #include <list>
+#include <memory>
 #include <string>
 
 #include "cbfiles.h"
@@ -11,11 +12,21 @@ namespace Critterbits {
 /*
  * Support functions for SceneManager::ReloadConfiguraLoadScenetion()
  */
+static void map_parser(void * context, const char * value, const size_t size) {
+    Scene * scene = static_cast<Scene *>(context);
+    scene->map_path = scene->scene_path + std::string(value, size);
+}
+
+static void map_scale_parser(void * context, const char * value, const size_t size) {
+    static_cast<Scene *>(context)->map_scale = YamlParser::ToFloat(value);
+}
+
 static void persistent_parser(void * context, const char * value, const size_t size) {
     static_cast<Scene *>(context)->persistent = YamlParser::ToBool(value);
 }
 
-static YamlParserCollection scene_parsers = {{"persistent", persistent_parser}};
+static YamlParserCollection scene_parsers = {
+    {"map", map_parser}, {"map_scale", map_scale_parser}, {"persistent", persistent_parser}};
 /*
  * End support functions
  */
@@ -32,16 +43,17 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     // look in the list of loaded scenes to see if we already have an instance of the
     // requested scene
     for (auto & scene : this->loaded_scenes) {
-        if (scene.scene_name == scene_name) {
-            this->current_scene = &scene;
+        if (scene->scene_name == scene_name) {
+            this->current_scene = scene;
             break;
         }
     }
 
     // if we didn't have it loaded, fetch from disk
     if (this->current_scene == nullptr) {
-        Scene new_scene;
-        new_scene.scene_name = scene_name;
+        std::shared_ptr<Scene> new_scene(new Scene());
+        new_scene->scene_name = scene_name;
+        new_scene->scene_path = this->scene_path;
 
         std::string * scene_content = nullptr;
         if (!ReadTextFile(this->scene_path + scene_name + CB_SCENE_EXT, &scene_content)) {
@@ -51,11 +63,11 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         }
 
         YamlParser parser;
-        parser.Parse(&new_scene, scene_parsers, *scene_content);
+        parser.Parse(new_scene.get(), scene_parsers, *scene_content);
         delete scene_content;
 
         this->loaded_scenes.push_back(new_scene);
-        this->current_scene = &new_scene;
+        this->current_scene = new_scene;
     }
 
     // notify the newly loaded scene that it is active
@@ -76,7 +88,7 @@ void SceneManager::UnloadCurrentScene() {
         // remove scene from loaded scenes if it's not marked persistent
         if (!this->current_scene->persistent) {
             for (auto it = this->loaded_scenes.begin(); it != this->loaded_scenes.end(); it++) {
-                if (&*it == this->current_scene) {
+                if (*it == this->current_scene) {
                     this->loaded_scenes.erase(it);
                     break;
                 }

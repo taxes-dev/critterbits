@@ -100,13 +100,25 @@ bool YamlParser::ToBool(const char * value) {
     return false;
 }
 
+float YamlParser::ToFloat(const char * value) {
+    if (value == NULL) {
+        return 0.0f;
+    }
+    float converted = strtof(value, NULL);
+    if (errno == ERANGE) {
+        LOG_ERR("YamlParser::ToFloat invalid value");
+        return 0.0f;
+    }
+    return converted;
+}
+
 int YamlParser::ToInt(const char * value) {
     if (value == NULL) {
         return 0;
     }
     long int converted = strtol(value, NULL, 10);
     if (errno == ERANGE) {
-        LOG_ERR("YamlParser::to_int invalid value");
+        LOG_ERR("YamlParser::ToFloat invalid value");
         return 0;
     }
     return (int)converted;

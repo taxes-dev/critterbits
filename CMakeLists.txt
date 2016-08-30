@@ -30,6 +30,10 @@ find_package(SDL2_ttf REQUIRED)
 # Look up libyaml and add dependencies
 find_package(YAML REQUIRED)
 
+# Look up zlib and libxml2 (used by TMX)
+find_package(ZLIB REQUIRED)
+find_package(LibXml2 REQUIRED)
+
 # TMX library
 find_library(LIBTMX_LIBRARY NAMES libtmx tmx PATHS 3pp/tmx NO_DEFAULT_PATH)
 

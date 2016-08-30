@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_image.h>
 #include <iostream>
 
 #include "cbcoord.h"
@@ -6,11 +7,26 @@
 #include "cblogging.h"
 #include "cbscene.h"
 #include "cbsdl.h"
+#include "cbtilemap.h"
 
 namespace Critterbits {
+// TODO: remove this
+void renderTexture(SDL_Texture * tex, SDL_Renderer * ren, int x, int y) {
+    int w, h;
+    SDL_QueryTexture(tex, NULL, NULL, &w, &h);
+    // Setup the destination rectangle to be at the position we want
+    SDL_Rect dst;
+    dst.x = x;
+    dst.y = y;
+    dst.w = w;
+    dst.h = h;
+    SDL_RenderCopy(ren, tex, NULL, &dst);
+}
+SDL_Renderer * main_renderer = nullptr;
 
 Engine::~Engine() {
-    SDL::SDL_CleanUp(renderer, window);
+    SDL::SDL_CleanUp(main_renderer, this->window);
+    IMG_Quit();
     SDL_Quit();
 }
 
@@ -28,6 +44,13 @@ int Engine::Run() {
         LOG_SDL_ERR("Engine::Run SDL_Init");
         return 1;
     }
+    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG) {
+        LOG_SDL_ERR("Engine::Run IMG_Init");
+        return 1;
+    }
+
+    // initialize TMX library
+    Tilemap::Tilemap_Init();
 
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
@@ -43,8 +66,8 @@ int Engine::Run() {
     }
 
     // create renderer
-    this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (this->renderer == nullptr) {
+    main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (main_renderer == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateRenderer");
         return 1;
     }
@@ -68,9 +91,15 @@ int Engine::Run() {
         }
 
         // Render pass
-        SDL_RenderClear(this->renderer);
+        SDL_RenderClear(main_renderer);
+        if (this->scenes.current_scene != nullptr) {
+            SDL_Texture * tex = this->scenes.current_scene->GetMapTexture();
+            if (tex != nullptr) {
+                renderTexture(tex, main_renderer, 0, 0);
+            }
+        }
 
-        SDL_RenderPresent(this->renderer);
+        SDL_RenderPresent(main_renderer);
     }
 
     LOG_INFO("Exiting Engine::Run()");

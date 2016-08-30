@@ -16,6 +16,7 @@ class YamlParser {
     YamlParser(){};
     void Parse(void *, const YamlParserCollection &, const std::string &) const;
     static bool ToBool(const char *);
+    static float ToFloat(const char *);
     static int ToInt(const char *);
 };
 }
