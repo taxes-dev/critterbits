@@ -22,7 +22,7 @@ class EngineConfiguration {
 
     EngineConfiguration(){};
     EngineConfiguration(const std::string &);
-    inline bool is_valid() const { return this->valid; };
+    inline bool IsValid() const { return this->valid; };
     bool ReloadConfiguration();
 
   private:

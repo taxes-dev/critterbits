@@ -12,7 +12,7 @@ namespace Critterbits {
  * Support functions for SceneManager::ReloadConfiguraLoadScenetion()
  */
 static void persistent_parser(void * context, const char * value, const size_t size) {
-    static_cast<Scene *>(context)->persistent = YamlParser::to_bool(value);
+    static_cast<Scene *>(context)->persistent = YamlParser::ToBool(value);
 }
 
 static YamlParserCollection scene_parsers = {{"persistent", persistent_parser}};
@@ -27,7 +27,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     }
 
     // unload the current scene before proceeding
-    UnloadCurrentScene();
+    this->UnloadCurrentScene();
 
     // look in the list of loaded scenes to see if we already have an instance of the
     // requested scene
@@ -64,7 +64,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     return true;
 }
 
-void SceneManager::set_asset_path(const std::string & asset_path) {
+void SceneManager::SetAssetPath(const std::string & asset_path) {
     this->scene_path = asset_path + CB_SCENE_PATH + PATH_SEP;
 }
 
@@ -74,7 +74,7 @@ void SceneManager::UnloadCurrentScene() {
         this->current_scene->NotifyUnloaded();
 
         // remove scene from loaded scenes if it's not marked persistent
-        if (!current_scene->persistent) {
+        if (!this->current_scene->persistent) {
             for (auto it = this->loaded_scenes.begin(); it != this->loaded_scenes.end(); it++) {
                 if (&*it == this->current_scene) {
                     this->loaded_scenes.erase(it);
@@ -84,7 +84,7 @@ void SceneManager::UnloadCurrentScene() {
         }
 
         // clear current scene
-        current_scene = nullptr;
+        this->current_scene = nullptr;
     }
 }
 }

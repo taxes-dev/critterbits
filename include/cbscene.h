@@ -27,7 +27,7 @@ class SceneManager {
 
     SceneManager(){};
     bool LoadScene(const std::string &);
-    void set_asset_path(const std::string &);
+    void SetAssetPath(const std::string &);
 
   private:
     std::string scene_path;

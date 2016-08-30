@@ -12,11 +12,11 @@ namespace Critterbits {
  * Support functions for EngineConfiguration::ReloadConfiguration()
  */
 static void window_height_parser(void * context, const char * value, const size_t size) {
-    static_cast<EngineConfiguration *>(context)->window_height = YamlParser::to_int(value);
+    static_cast<EngineConfiguration *>(context)->window_height = YamlParser::ToInt(value);
 }
 
 static void window_width_parser(void * context, const char * value, const size_t size) {
-    static_cast<EngineConfiguration *>(context)->window_width = YamlParser::to_int(value);
+    static_cast<EngineConfiguration *>(context)->window_width = YamlParser::ToInt(value);
 }
 
 static void window_title_parser(void * context, const char * value, const size_t size) {

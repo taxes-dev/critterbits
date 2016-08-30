@@ -18,7 +18,7 @@ int Engine::Run() {
     LOG_INFO("Entering Engine::Run()");
 
     // check that we have valid configuration
-    if (!this->config.is_valid()) {
+    if (!this->config.IsValid()) {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
@@ -31,12 +31,12 @@ int Engine::Run() {
 
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
-    CB_Point window_origin =
-        center_inside(display_bounds.w, display_bounds.h, config.window_width, config.window_height);
+    CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
+                                                    this->config.window_width, this->config.window_height);
 
     // create display window
-    this->window = SDL_CreateWindow(config.window_title.c_str(), window_origin.x, window_origin.y, config.window_width,
-                                    config.window_height, SDL_WINDOW_SHOWN);
+    this->window = SDL_CreateWindow(this->config.window_title.c_str(), window_origin.x, window_origin.y,
+                                    this->config.window_width, this->config.window_height, SDL_WINDOW_SHOWN);
     if (this->window == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateWindow");
         return 1;
@@ -50,8 +50,8 @@ int Engine::Run() {
     }
 
     // configure scene manager and load first scene
-    this->scenes.set_asset_path(config.asset_path);
-    if (!scenes.LoadScene(CB_FIRST_SCENE)) {
+    this->scenes.SetAssetPath(this->config.asset_path);
+    if (!this->scenes.LoadScene(CB_FIRST_SCENE)) {
         LOG_ERR("Engine::Run cannot load startup scene");
         return 1;
     }
