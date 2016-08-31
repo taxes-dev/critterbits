@@ -21,6 +21,7 @@ extern SDL_Renderer * cb_main_renderer;
 class EngineConfiguration {
   public:
     std::string asset_path;
+    bool draw_debug_pane = false;
     bool draw_map_regions = false;
     int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
@@ -51,6 +52,7 @@ class Engine {
 
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
+    void RenderDebugPane(SDL_Renderer * renderer, int, int);
 };
 }
 #endif

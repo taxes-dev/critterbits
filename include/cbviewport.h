@@ -6,10 +6,11 @@
 #include "cbentity.h"
 
 namespace Critterbits {
+
 class Viewport : public Entity {
   public:
     Viewport(){};
-    CB_Rect GetViewableRect(CB_Rect &) const;
+    CB_ViewClippingInfo GetViewableRect(CB_Rect &) const;
 };
 }
 

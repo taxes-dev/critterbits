@@ -20,7 +20,7 @@ class Tilemap : public Entity {
     ~Tilemap();
     bool CreateTextures(float scale);
     SDL_Texture * GetMapTexture() const { return this->map_texture; };
-    void Render(SDL_Renderer *, const CB_Rect &);
+    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     static void Tilemap_Init(bool);
 
   private:

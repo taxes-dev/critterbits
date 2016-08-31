@@ -1,6 +1,9 @@
 #include <SDL.h>
+#include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
+#include <iostream>
 #include <list>
+#include <sstream>
 
 #include "cbcoord.h"
 #include "cbengine.h"
@@ -55,7 +58,7 @@ int Engine::Run() {
     }
 
     // configure viewport
-    this->viewport.dim = {220, 50, this->config.window_width, this->config.window_height};
+    this->viewport.dim = {0, 0, this->config.window_width, this->config.window_height};
 
     // create renderer
     cb_main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -83,6 +86,23 @@ int Engine::Run() {
             if (e.type == SDL_QUIT) {
                 quit = true;
             }
+
+            if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_LEFT:
+                        this->viewport.dim.x -= 10;
+                        break;
+                    case SDLK_RIGHT:
+                        this->viewport.dim.x += 10;
+                        break;
+                    case SDLK_UP:
+                        this->viewport.dim.y -= 10;
+                        break;
+                    case SDLK_DOWN:
+                        this->viewport.dim.y += 10;
+                        break;
+                }
+            }
         }
 
         // Cull entities not in viewport
@@ -101,11 +121,26 @@ int Engine::Run() {
             entity->Render(cb_main_renderer, this->viewport.GetViewableRect(entity->dim));
         }
 
+        if (this->config.draw_debug_pane) {
+            this->RenderDebugPane(cb_main_renderer, entities.size(), entities.size());
+        }
+
         SDL_RenderPresent(cb_main_renderer);
-        SDL_Delay(5000);
     }
 
     LOG_INFO("Exiting Engine::Run()");
     return 0;
+}
+
+void Engine::RenderDebugPane(SDL_Renderer * renderer, int entity_count, int entities_in_view) {
+    std::stringbuf info;
+    std::ostream os(&info);
+
+    os << "view(" << this->viewport.dim.x << "," << this->viewport.dim.y << ")";
+    os << " ent(" << entities_in_view << "/" << entity_count << ")";
+
+    roundedBoxRGBA(renderer, -6, this->viewport.dim.h - 12, this->viewport.dim.w / 2, this->viewport.dim.h + 6, 6, 0, 0,
+                   0, 127);
+    stringRGBA(renderer, 2, this->viewport.dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
 }
 }

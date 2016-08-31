@@ -9,7 +9,7 @@ namespace Critterbits {
 class Entity {
   public:
     CB_Rect dim;
-    virtual void Render(SDL_Renderer *, const CB_Rect &){};
+    virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
     virtual ~Entity(){};
 
   protected:

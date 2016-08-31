@@ -37,5 +37,7 @@ typedef struct CB_Rect {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
 } CB_Rect;
+
+typedef struct CB_ViewClippingInfo { CB_Rect source, dest; } CB_ViewClippingInfo;
 }
 #endif

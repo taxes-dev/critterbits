@@ -76,11 +76,9 @@ bool Tilemap::CreateTextures(float scale) {
     return this->map_texture != nullptr;
 }
 
-void Tilemap::Render(SDL_Renderer * renderer, const CB_Rect & offset) {
+void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
     if (this->map_texture != nullptr) {
-        LOG_INFO("Got offset " + std::to_string(offset.x) + " " + std::to_string(offset.y) + " " +
-                 std::to_string(offset.w) + " " + std::to_string(offset.h));
-        SDLx::SDL_RenderTextureClipped(renderer, this->map_texture, offset.x, offset.y, offset.w, offset.h);
+        SDLx::SDL_RenderTextureClipped(renderer, this->map_texture, clip.source, clip.dest);
     }
 }
 

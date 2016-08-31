@@ -17,21 +17,20 @@ void SDL_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, int x, in
     SDL_RenderCopy(renderer, texture, NULL, &dst);
 }
 
-void SDL_RenderTextureClipped(SDL_Renderer * renderer, SDL_Texture * texture, int x, int y, int offset_x,
-                              int offset_y) {
+void SDL_RenderTextureClipped(SDL_Renderer * renderer, SDL_Texture * texture, const CB_Rect & source,
+                              const CB_Rect & dest) {
     int w, h;
     SDL_QueryTexture(texture, NULL, NULL, &w, &h);
     SDL_Rect src;
-    src.x = offset_x;
-    src.y = offset_y;
-    src.w = w - offset_x;
-    src.h = h - offset_y;
-    LOG_INFO("Got w/h " + std::to_string(src.w) + " " + std::to_string(src.h));
+    src.x = source.x;
+    src.y = source.y;
+    src.w = source.w;
+    src.h = source.h;
     SDL_Rect dst;
-    dst.x = x;
-    dst.y = y;
-    dst.w = src.w;
-    dst.h = src.h;
+    dst.x = dest.x;
+    dst.y = dest.y;
+    dst.w = dest.w;
+    dst.h = dest.h;
     SDL_RenderCopy(renderer, texture, &src, &dst);
 }
 }
