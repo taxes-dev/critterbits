@@ -1,17 +1,10 @@
-#include <SDL.h>
-#include <SDL2_gfxPrimitives.h>
-#include <SDL_image.h>
 #include <iostream>
 #include <list>
 #include <sstream>
 
-#include "cbcoord.h"
-#include "cbengine.h"
-#include "cblogging.h"
-#include "cbscene.h"
-#include "cbsdl.h"
-#include "cbtilemap.h"
-#include "cbviewport.h"
+#include <SDL2_gfxPrimitives.h>
+#include <SDL_image.h>
+#include <critterbits.h>
 
 namespace Critterbits {
 SDL_Renderer * cb_main_renderer = nullptr;

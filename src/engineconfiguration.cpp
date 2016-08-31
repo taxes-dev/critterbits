@@ -1,10 +1,6 @@
-#include <SDL.h>
 #include <string>
 
-#include "cbengine.h"
-#include "cbfiles.h"
-#include "cblogging.h"
-#include "cbyaml.h"
+#include <critterbits.h>
 
 namespace Critterbits {
 

@@ -8,8 +8,8 @@
 #include <string>
 #include <yaml.h>
 
-#include "cblogging.h"
-#include "cbyaml.h"
+#include <cblogging.h>
+#include <cbyaml.h>
 
 namespace Critterbits {
 

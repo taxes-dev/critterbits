@@ -1,6 +1,4 @@
-#include "cblogging.h"
-#include "cbscene.h"
-#include "cbtilemap.h"
+#include <critterbits.h>
 
 namespace Critterbits {
 

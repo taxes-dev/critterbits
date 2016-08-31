@@ -1,7 +1,6 @@
 #include <SDL.h>
 
-#include "cblogging.h"
-#include "cbsdl.h"
+#include <cbsdl.h>
 
 namespace Critterbits {
 namespace SDLx {

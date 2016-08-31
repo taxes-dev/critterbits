@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "cbfiles.h"
+#include <cbfiles.h>
 
 namespace Critterbits {
 bool ReadTextFile(const std::string & file_name, std::string ** file_contents) {

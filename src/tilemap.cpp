@@ -1,12 +1,6 @@
-#include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
-#include <tmx/tmx.h>
-
-#include "cbengine.h"
-#include "cblogging.h"
-#include "cbsdl.h"
-#include "cbtilemap.h"
+#include <critterbits.h>
 
 namespace Critterbits {
 

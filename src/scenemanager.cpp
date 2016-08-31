@@ -2,10 +2,7 @@
 #include <memory>
 #include <string>
 
-#include "cbfiles.h"
-#include "cblogging.h"
-#include "cbscene.h"
-#include "cbyaml.h"
+#include <critterbits.h>
 
 namespace Critterbits {
 

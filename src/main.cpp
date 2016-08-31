@@ -1,7 +1,6 @@
 #include <string>
 
-#include "cbengine.h"
-#include "cblogging.h"
+#include <critterbits.h>
 
 int main(int argc, char ** argv) {
     // determine asset path and load configuration

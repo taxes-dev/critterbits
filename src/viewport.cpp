@@ -1,5 +1,4 @@
-#include "cbcoord.h"
-#include "cbviewport.h"
+#include <critterbits.h>
 
 namespace Critterbits {
 
