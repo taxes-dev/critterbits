@@ -9,20 +9,26 @@ namespace Critterbits {
 /*
  * Support functions for SceneManager::ReloadConfiguraLoadScenetion()
  */
-static void map_parser(void * context, const char * value, const size_t size) {
+static void map_parser(void * context, const std::string & value) {
     Scene * scene = static_cast<Scene *>(context);
-    scene->map_path = scene->scene_path + std::string(value, size);
+    scene->map_path = scene->scene_path + value;
 }
 
-static void map_scale_parser(void * context, const char * value, const size_t size) {
+static void map_scale_parser(void * context, const std::string & value) {
     static_cast<Scene *>(context)->map_scale = YamlParser::ToFloat(value);
 }
 
-static void persistent_parser(void * context, const char * value, const size_t size) {
+static void persistent_parser(void * context, const std::string & value) {
     static_cast<Scene *>(context)->persistent = YamlParser::ToBool(value);
 }
 
-static YamlParserCollection scene_parsers = {
+static void sprites_parser(void * context, std::list<std::string> & values) {
+    LOG_INFO("Got collection with " + std::to_string(values.size()) + " items");
+}
+
+static YamlSequenceParserCollection scene_seq_parsers = {{"sprites", sprites_parser}};
+
+static YamlValueParserCollection scene_val_parsers = {
     {"map", map_parser}, {"map_scale", map_scale_parser}, {"persistent", persistent_parser}};
 /*
  * End support functions
@@ -61,7 +67,9 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         }
 
         YamlParser parser;
-        parser.Parse(new_scene.get(), scene_parsers, *scene_content);
+        parser.sequence_parsers = scene_seq_parsers;
+        parser.value_parsers = scene_val_parsers;
+        parser.Parse(new_scene.get(), *scene_content);
         delete scene_content;
 
         this->loaded_scenes.push_back(new_scene);

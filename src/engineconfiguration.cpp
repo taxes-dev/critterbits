@@ -7,31 +7,31 @@ namespace Critterbits {
 /*
  * Support functions for EngineConfiguration::ReloadConfiguration()
  */
-static void draw_debug_pane_parser(void * context, const char * value, const size_t size) {
+static void draw_debug_pane_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->draw_debug_pane = YamlParser::ToBool(value);
 }
 
-static void draw_map_regions_parser(void * context, const char * value, const size_t size) {
+static void draw_map_regions_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->draw_map_regions = YamlParser::ToBool(value);
 }
 
-static void window_height_parser(void * context, const char * value, const size_t size) {
+static void window_height_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->window_height = YamlParser::ToInt(value);
 }
 
-static void window_width_parser(void * context, const char * value, const size_t size) {
+static void window_width_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->window_width = YamlParser::ToInt(value);
 }
 
-static void window_title_parser(void * context, const char * value, const size_t size) {
-    static_cast<EngineConfiguration *>(context)->window_title = std::string(value, size);
+static void window_title_parser(void * context, const std::string & value) {
+    static_cast<EngineConfiguration *>(context)->window_title = value;
 }
 
-static YamlParserCollection config_parsers = {{"draw_debug_pane", draw_debug_pane_parser},
-                                              {"draw_map_regions", draw_map_regions_parser},
-                                              {"window_height", window_height_parser},
-                                              {"window_title", window_title_parser},
-                                              {"window_width", window_width_parser}};
+static YamlValueParserCollection config_parsers = {{"draw_debug_pane", draw_debug_pane_parser},
+                                                   {"draw_map_regions", draw_map_regions_parser},
+                                                   {"window_height", window_height_parser},
+                                                   {"window_title", window_title_parser},
+                                                   {"window_width", window_width_parser}};
 /*
  * End support functions
  */
@@ -68,7 +68,8 @@ bool EngineConfiguration::ReloadConfiguration() {
     if (ReadTextFile(this->asset_path + CB_CONFIG_YAML, &config_content)) {
         // parse YAML into configuration
         YamlParser parser;
-        parser.Parse(this, config_parsers, *config_content);
+        parser.value_parsers = config_parsers;
+        parser.Parse(this, *config_content);
 
         delete config_content;
         this->valid = true;

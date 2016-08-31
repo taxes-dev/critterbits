@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 
+#include "cbsprite.h"
 #include "cbtilemap.h"
 
 #define CB_SCENE_PATH "scenes"
@@ -24,6 +25,7 @@ class Scene {
     std::string scene_path;
     float map_scale = 1.0f;
     SceneState state = CBE_NEW;
+    SpriteManager sprites;
 
     Scene(){};
     ~Scene();

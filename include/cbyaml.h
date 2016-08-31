@@ -3,21 +3,26 @@
 #define CBYAML_H
 
 #include <functional>
+#include <list>
 #include <map>
 #include <string>
 
 namespace Critterbits {
-typedef enum { CBE_YAML_KEY_TOKEN, CBE_YAML_VAL_TOKEN, CBE_YAML_OTHER_TOKEN } YamlTokenType;
-typedef std::function<void(void *, const char *, const size_t)> YamlValueParser;
-typedef std::map<std::string, YamlValueParser> YamlParserCollection;
+typedef std::function<void(void *, std::string value)> YamlValueParser;
+typedef std::function<void(void *, std::list<std::string> &)> YamlSequenceParser;
+typedef std::map<std::string, YamlValueParser> YamlValueParserCollection;
+typedef std::map<std::string, YamlSequenceParser> YamlSequenceParserCollection;
 
 class YamlParser {
   public:
+    YamlSequenceParserCollection sequence_parsers;
+    YamlValueParserCollection value_parsers;
+
     YamlParser(){};
-    void Parse(void *, const YamlParserCollection &, const std::string &) const;
-    static bool ToBool(const char *);
-    static float ToFloat(const char *);
-    static int ToInt(const char *);
+    void Parse(void *, const std::string &) const;
+    static bool ToBool(const std::string &);
+    static float ToFloat(const std::string &);
+    static int ToInt(const std::string &);
 };
 }
 #endif
