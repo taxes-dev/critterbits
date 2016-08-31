@@ -19,6 +19,9 @@ void Scene::NotifyLoaded() {
             LOG_ERR("Scene::NotifyLoaded unable to generate textures for tilemap " + this->map_path);
         }
     }
+    if (!this->sprites.LoadQueuedSprites()) {
+        LOG_ERR("Scene::NotifyLoaded unable to load scene sprites for scene " + this->scene_name);
+    }
     this->state = CBE_ACTIVE;
 }
 

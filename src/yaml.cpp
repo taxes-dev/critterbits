@@ -49,26 +49,26 @@ void YamlParser::Parse(void * context, const std::string & yaml_content) const {
         switch (token.type) {
             /* Token types (read before actual token) */
             case YAML_KEY_TOKEN:
-                LOG_INFO("YamlParser::Parse key token");
+                // LOG_INFO("YamlParser::Parse key token");
                 last_token = CBE_YAML_KEY_TOKEN;
                 break;
             case YAML_VALUE_TOKEN:
-                LOG_INFO("YamlParser::Parse value token");
+                // LOG_INFO("YamlParser::Parse value token");
                 last_token = CBE_YAML_VAL_TOKEN;
                 break;
             /* Block delimeters */
             case YAML_BLOCK_SEQUENCE_START_TOKEN:
-                LOG_INFO("Start Block (Sequence)");
+                // LOG_INFO("YamlParser::Parse Start Block (Sequence)");
                 seq_values.clear();
                 block_stack.push_back(CBE_YAML_BLOCK_SEQUENCE);
                 break;
             case YAML_BLOCK_ENTRY_TOKEN:
-                LOG_INFO("Start Block (Entry)");
+                // LOG_INFO("YamlParser::Parse Start Block (Entry)");
                 block_stack.push_back(CBE_YAML_BLOCK_ENTRY);
                 last_token = CBE_YAML_VAL_TOKEN; // slight hack, YAML_SCALAR_TOKEN currently resets after each entry
                 break;
             case YAML_BLOCK_END_TOKEN:
-                LOG_INFO("End block");
+                // LOG_INFO("YamlParser::Parse End block");
                 if (block_stack.back() == CBE_YAML_BLOCK_SEQUENCE) {
                     if (current_seq_parser != nullptr) {
                         (*current_seq_parser)(context, seq_values);
@@ -81,12 +81,12 @@ void YamlParser::Parse(void * context, const std::string & yaml_content) const {
                 break;
             /* Data */
             case YAML_BLOCK_MAPPING_START_TOKEN:
-                LOG_INFO("[Block mapping]");
+                // LOG_INFO("YamlParser::Parse [Block mapping]");
                 block_stack.push_back(CBE_YAML_BLOCK_MAPPING);
                 break;
             case YAML_SCALAR_TOKEN:
                 scalar = std::string((char *)token.data.scalar.value, token.data.scalar.length);
-                LOG_INFO("YamlParser::Parse scalar " + std::string(scalar));
+                // LOG_INFO("YamlParser::Parse scalar " + std::string(scalar));
                 if (last_token == CBE_YAML_KEY_TOKEN) {
                     // look in both parser collections for the key name
                     auto search = this->value_parsers.find(scalar);
@@ -116,7 +116,7 @@ void YamlParser::Parse(void * context, const std::string & yaml_content) const {
                 last_token = CBE_YAML_OTHER_TOKEN;
                 break;
             default:
-                LOG_INFO("(other token) " + std::to_string(token.type));
+                // LOG_INFO("(other token) " + std::to_string(token.type));
                 last_token = CBE_YAML_OTHER_TOKEN;
                 break;
         }

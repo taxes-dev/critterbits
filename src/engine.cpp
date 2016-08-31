@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <list>
 #include <sstream>
@@ -37,6 +38,9 @@ int Engine::Run() {
     // initialize TMX library
     Tilemap::Tilemap_Init(this->config.draw_map_regions);
 
+    // set sprite debug
+    cb_draw_debug_sprite_rects = this->config.draw_debug_sprite_rects;
+
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
     CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
@@ -70,10 +74,23 @@ int Engine::Run() {
     // entities to iterate
     std::list<Entity *> entities;
 
+    // timer
+    unsigned int ticks;
+    unsigned int last_tick;
+    unsigned int frame_count = 0;
+
+    // HACK
+    std::shared_ptr<Sprite> player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
+    CB_Point center_view =
+        CB_Point::CenterInside(this->viewport.dim.w, this->viewport.dim.h, player_sprite->dim.w, player_sprite->dim.h);
+
     // start main loop
     SDL_Event e;
     bool quit = false;
     while (!quit) {
+        last_tick = ticks;
+        frame_count++;
+
         while (SDL_PollEvent(&e)) {
             // If user closes the window
             if (e.type == SDL_QUIT) {
@@ -83,20 +100,30 @@ int Engine::Run() {
             if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
                 switch (e.key.keysym.sym) {
                     case SDLK_LEFT:
-                        this->viewport.dim.x -= 10;
+                        player_sprite->dim.x -= 6;
+                        player_sprite->SetFrame(0);
+                        player_sprite->flip_x = false;
                         break;
                     case SDLK_RIGHT:
-                        this->viewport.dim.x += 10;
+                        player_sprite->dim.x += 6;
+                        player_sprite->SetFrame(0);
+                        player_sprite->flip_x = true;
                         break;
                     case SDLK_UP:
-                        this->viewport.dim.y -= 10;
+                        player_sprite->dim.y -= 6;
+                        player_sprite->SetFrame(6);
                         break;
                     case SDLK_DOWN:
-                        this->viewport.dim.y += 10;
+                        player_sprite->dim.y += 6;
+                        player_sprite->SetFrame(3);
                         break;
                 }
             }
         }
+
+        // Re-center viewport on player sprite
+        this->viewport.dim.x = player_sprite->dim.x - center_view.x;
+        this->viewport.dim.y = player_sprite->dim.y - center_view.y;
 
         // Cull entities not in viewport
         entities.clear();
@@ -104,6 +131,11 @@ int Engine::Run() {
             Entity * tilemap = this->scenes.current_scene->GetTilemap();
             if (tilemap != nullptr && tilemap->dim.intersects(this->viewport.dim)) {
                 entities.push_back(tilemap);
+            }
+        }
+        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+            if (sprite->dim.intersects(this->viewport.dim)) {
+                entities.push_back(sprite.get());
             }
         }
 
@@ -119,6 +151,11 @@ int Engine::Run() {
         }
 
         SDL_RenderPresent(cb_main_renderer);
+
+        ticks = SDL_GetTicks();
+        if (frame_count % 10 == 0) {
+            this->fps = 1000. / (float)(ticks - last_tick);
+        }
     }
 
     LOG_INFO("Exiting Engine::Run()");
@@ -129,11 +166,12 @@ void Engine::RenderDebugPane(SDL_Renderer * renderer, int entity_count, int enti
     std::stringbuf info;
     std::ostream os(&info);
 
-    os << "view(" << this->viewport.dim.x << "," << this->viewport.dim.y << ")";
+    os << "view" << this->viewport.dim.xy().to_string();
     os << " ent(" << entities_in_view << "/" << entity_count << ")";
+    os << " fps " << std::fixed << std::setprecision(1) << this->fps;
 
-    roundedBoxRGBA(renderer, -6, this->viewport.dim.h - 12, this->viewport.dim.w / 2, this->viewport.dim.h + 6, 6, 0, 0,
-                   0, 127);
+    roundedBoxRGBA(renderer, -6, this->viewport.dim.h - 12, info.str().length() * 8 + 10, this->viewport.dim.h + 6, 6,
+                   0, 0, 0, 127);
     stringRGBA(renderer, 2, this->viewport.dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
 }
 }

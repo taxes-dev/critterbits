@@ -11,6 +11,10 @@ static void draw_debug_pane_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->draw_debug_pane = YamlParser::ToBool(value);
 }
 
+static void draw_debug_sprite_rects_parser(void * context, const std::string & value) {
+    static_cast<EngineConfiguration *>(context)->draw_debug_sprite_rects = YamlParser::ToBool(value);
+}
+
 static void draw_map_regions_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->draw_map_regions = YamlParser::ToBool(value);
 }
@@ -28,7 +32,8 @@ static void window_title_parser(void * context, const std::string & value) {
 }
 
 static YamlValueParserCollection config_parsers = {{"draw_debug_pane", draw_debug_pane_parser},
-                                                   {"draw_map_regions", draw_map_regions_parser},
+                                                   {"draw_debug_sprite_rects", draw_debug_sprite_rects_parser},
+                                                   {"draw_debug_map_regions", draw_map_regions_parser},
                                                    {"window_height", window_height_parser},
                                                    {"window_title", window_title_parser},
                                                    {"window_width", window_width_parser}};

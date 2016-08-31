@@ -2,6 +2,9 @@
 #ifndef CBCOORD_H
 #define CBCOORD_H
 
+#include <iostream>
+#include <string>
+
 namespace Critterbits {
 
 inline int Clamp(int value, int min, int max) {
@@ -15,6 +18,11 @@ inline int Clamp(int value, int min, int max) {
 typedef struct CB_Point {
     int x;
     int y;
+
+    CB_Point() : x(0), y(0){};
+    CB_Point(int x, int y) : x(x), y(y){};
+
+    inline std::string to_string() const { return "(" + std::to_string(x) + "," + std::to_string(y) + ")"; }
 
     static inline CB_Point CenterInside(int outer_w, int outer_h, int inner_w, int inner_h) {
         CB_Point point;
@@ -31,13 +39,22 @@ typedef struct CB_Rect {
     int w;
     int h;
 
-    inline int bottom() { return y + h; };
-    inline int right() { return x + w; };
-    inline bool intersects(CB_Rect & rect) {
+    CB_Rect() : x(0), y(0), w(0), h(0){};
+    CB_Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h){};
+
+    inline int bottom() const { return y + h; };
+    inline int right() const { return x + w; };
+    inline bool intersects(const CB_Rect & rect) const {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
+    inline CB_Point xy() const { return CB_Point(x, y); };
+    inline std::string to_string() const {
+        return "[" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(w) + "," + std::to_string(h) +
+               "]";
+    }
 } CB_Rect;
 
 typedef struct CB_ViewClippingInfo { CB_Rect source, dest; } CB_ViewClippingInfo;
 }
+
 #endif

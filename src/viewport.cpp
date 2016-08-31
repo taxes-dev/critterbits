@@ -26,17 +26,19 @@ CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim) const {
         view_clip.source.h = entity_dim.h;
     }
 
-    // determine if clipping is necessary (right, bottom)
-    if (view_clip.dest.right() > this->dim.w) {
-        view_clip.source.w -= view_clip.dest.right() - this->dim.w;
-    }
-    if (view_clip.dest.bottom() > this->dim.h) {
-        view_clip.source.h -= view_clip.dest.bottom() - this->dim.h;
-    }
-
     // set destination size to same as source
     view_clip.dest.w = view_clip.source.w;
     view_clip.dest.h = view_clip.source.h;
+
+    // determine if clipping is necessary (right, bottom)
+    if (view_clip.dest.right() > this->dim.w) {
+        view_clip.source.w -= view_clip.dest.right() - this->dim.w;
+        view_clip.dest.w = view_clip.source.w;
+    }
+    if (view_clip.dest.bottom() > this->dim.h) {
+        view_clip.source.h -= view_clip.dest.bottom() - this->dim.h;
+        view_clip.dest.h = view_clip.source.h;
+    }
 
     return view_clip;
 }

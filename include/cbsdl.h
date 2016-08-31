@@ -11,7 +11,8 @@ namespace Critterbits {
 namespace SDLx {
 
 void SDL_RenderTexture(SDL_Renderer *, SDL_Texture *, int, int);
-void SDL_RenderTextureClipped(SDL_Renderer *, SDL_Texture *, const CB_Rect &, const CB_Rect &);
+void SDL_RenderTextureClipped(SDL_Renderer *, SDL_Texture *, const CB_Rect &, const CB_Rect &, bool = false,
+                              bool = false);
 
 // Cleanup functions
 // Source: http://www.willusher.io/sdl2%20tutorials/2014/08/01/postscript-1-easy-cleanup

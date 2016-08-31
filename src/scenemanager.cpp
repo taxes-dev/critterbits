@@ -23,7 +23,9 @@ static void persistent_parser(void * context, const std::string & value) {
 }
 
 static void sprites_parser(void * context, std::list<std::string> & values) {
-    LOG_INFO("Got collection with " + std::to_string(values.size()) + " items");
+    for (auto & sprite_name : values) {
+        static_cast<Scene *>(context)->sprites.QueueSprite(sprite_name);
+    }
 }
 
 static YamlSequenceParserCollection scene_seq_parsers = {{"sprites", sprites_parser}};
@@ -58,6 +60,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         std::shared_ptr<Scene> new_scene(new Scene());
         new_scene->scene_name = scene_name;
         new_scene->scene_path = this->scene_path;
+        new_scene->sprites.SetAssetPath(this->asset_path);
 
         std::string * scene_content = nullptr;
         if (!ReadTextFile(this->scene_path + scene_name + CB_SCENE_EXT, &scene_content)) {
@@ -83,6 +86,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
 }
 
 void SceneManager::SetAssetPath(const std::string & asset_path) {
+    this->asset_path = asset_path;
     this->scene_path = asset_path + CB_SCENE_PATH + PATH_SEP;
 }
 

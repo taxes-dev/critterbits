@@ -22,6 +22,7 @@ class EngineConfiguration {
   public:
     std::string asset_path;
     bool draw_debug_pane = false;
+    bool draw_debug_sprite_rects = false;
     bool draw_map_regions = false;
     int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
@@ -42,6 +43,7 @@ class Engine {
     SDL_Rect display_bounds;
     SceneManager scenes;
     Viewport viewport;
+    float fps;
 
     Engine(EngineConfiguration & engine_config) : config(engine_config){};
     ~Engine();

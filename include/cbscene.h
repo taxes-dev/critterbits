@@ -46,6 +46,7 @@ class SceneManager {
     void SetAssetPath(const std::string &);
 
   private:
+    std::string asset_path; // FIXME:reduce copies of this
     std::string scene_path;
     std::list<std::shared_ptr<Scene>> loaded_scenes;
 
