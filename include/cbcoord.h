@@ -7,6 +7,17 @@
 
 namespace Critterbits {
 
+template <typename T>
+inline bool TestBitMask(T value, T mask) {
+    return (value & mask) == mask;
+}
+
+template <int>
+inline bool TestBitMask(int, int);
+
+template <unsigned int>
+inline bool TestBitMask(unsigned int, unsigned int);
+
 inline int Clamp(int value, int min, int max) {
     if (value < min)
         return min;

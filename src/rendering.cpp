@@ -1,5 +1,6 @@
 #include <SDL.h>
 
+#include <cbcoord.h>
 #include <cbsdl.h>
 
 namespace Critterbits {

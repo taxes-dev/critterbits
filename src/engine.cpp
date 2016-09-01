@@ -30,7 +30,7 @@ int Engine::Run() {
         LOG_SDL_ERR("Engine::Run SDL_Init");
         return 1;
     }
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG) {
+    if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
         LOG_SDL_ERR("Engine::Run IMG_Init");
         return 1;
     }

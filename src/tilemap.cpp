@@ -153,9 +153,7 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     // loop through tiles in map
     for (unsigned long i = 0; i < this->map->height; i++) {
         for (unsigned long j = 0; j < this->map->width; j++) {
-            unsigned int gid = (layer->content.gids[(i * this->map->width) + j]) & TMX_FLIP_BITS_REMOVAL;
-
-            this->DrawTileOnMap(renderer, gid, i, j, alpha_mod);
+            this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, alpha_mod);
         }
     }
 
@@ -177,9 +175,10 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
     while (current_obj) {
         if (current_obj->visible) {
             if (current_obj->shape == S_TILE) {
-                this->DrawTileOnMap(renderer, current_obj->gid & TMX_FLIP_BITS_REMOVAL, current_obj->x * -1,
-                                    current_obj->y * -1, SDL_ALPHA_OPAQUE);
+                this->DrawTileOnMap(renderer, current_obj->gid, current_obj->x * -1, current_obj->y * -1,
+                                    SDL_ALPHA_OPAQUE);
             } else if (cb_force_draw_map_regions) {
+                // region objects are normally hidden and used as event triggers
                 switch (current_obj->shape) {
                     case S_SQUARE:
                         rect.x = current_obj->x;
@@ -213,20 +212,32 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
 }
 
 void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int alpha_mod) {
-    SDL_Rect srcrect, dstrect;
+    CB_Rect srcrect, dstrect;
     SDL_Texture * tile;
     tmx_tileset * ts;
     tmx_image * im;
 
+    unsigned int tile_gid = gid & TMX_FLIP_BITS_REMOVAL;
+    bool flip_x = false;
+    bool flip_y = false;
+    if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_DIAGONALLY)) {
+        flip_x = true;
+        flip_y = true;
+    } else if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_HORIZONTALLY)) {
+        flip_x = true;
+    } else if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_VERTICALLY)) {
+        flip_y = true;
+    }
+
     // if we have a tile at this position, draw it
-    if (this->map->tiles[gid] != NULL) {
+    if (this->map->tiles[tile_gid] != NULL) {
         // source tileset and image
-        ts = this->map->tiles[gid]->tileset;
-        im = this->map->tiles[gid]->image;
+        ts = this->map->tiles[tile_gid]->tileset;
+        im = this->map->tiles[tile_gid]->image;
 
         // source dimensions and position
-        srcrect.x = this->map->tiles[gid]->ul_x;
-        srcrect.y = this->map->tiles[gid]->ul_y;
+        srcrect.x = this->map->tiles[tile_gid]->ul_x;
+        srcrect.y = this->map->tiles[tile_gid]->ul_y;
         srcrect.w = ts->tile_width;
         srcrect.h = ts->tile_height;
 
@@ -242,7 +253,6 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
             dstrect.y = row * ts->tile_height;
         }
 
-        /* TODO Flips */
         // select source tile or image
         if (im) {
             tile = static_cast<SDL_Texture *>(im->resource_image);
@@ -256,7 +266,7 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         }
 
         // render tile
-        SDL_RenderCopy(renderer, tile, &srcrect, &dstrect);
+        SDLx::SDL_RenderTextureClipped(renderer, tile, srcrect, dstrect, flip_x, flip_y);
 
         // reset alpha modulation
         if (alpha_mod < SDL_ALPHA_OPAQUE) {
