@@ -44,6 +44,8 @@ int Engine::Run() {
 
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
+    LOG_INFO("Window size " + std::to_string(this->config->window_width) + "x" +
+             std::to_string(this->config->window_height));
     CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
                                                     this->config->window_width, this->config->window_height);
 
