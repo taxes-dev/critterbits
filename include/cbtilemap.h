@@ -32,7 +32,7 @@ class Tilemap : public Entity {
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int);
+    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int);
 };
 }
 #endif

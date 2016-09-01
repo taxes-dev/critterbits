@@ -153,7 +153,8 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     // loop through tiles in map
     for (unsigned long i = 0; i < this->map->height; i++) {
         for (unsigned long j = 0; j < this->map->width; j++) {
-            this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, alpha_mod);
+            this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, layer->offsetx,
+                                layer->offsety, alpha_mod);
         }
     }
 
@@ -176,13 +177,13 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
         if (current_obj->visible) {
             if (current_obj->shape == S_TILE) {
                 this->DrawTileOnMap(renderer, current_obj->gid, current_obj->x * -1, current_obj->y * -1,
-                                    SDL_ALPHA_OPAQUE);
+                                    layer->offsetx, layer->offsety, SDL_ALPHA_OPAQUE);
             } else if (cb_force_draw_map_regions) {
                 // region objects are normally hidden and used as event triggers
                 switch (current_obj->shape) {
                     case S_SQUARE:
-                        rect.x = current_obj->x;
-                        rect.y = current_obj->y;
+                        rect.x = current_obj->x + layer->offsetx;
+                        rect.y = current_obj->y + layer->offsety;
                         rect.w = current_obj->width;
                         rect.h = current_obj->height;
                         SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
@@ -190,17 +191,18 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
                         break;
                     case S_POLYGON:
                         SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polygon(renderer, current_obj->points, current_obj->x, current_obj->y,
-                                            current_obj->points_len);
+                        draw_object_polygon(renderer, current_obj->points, current_obj->x + layer->offsetx,
+                                            current_obj->y + layer->offsety, current_obj->points_len);
                         break;
                     case S_POLYLINE:
                         SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polyline(renderer, current_obj->points, current_obj->x, current_obj->y,
-                                             current_obj->points_len);
+                        draw_object_polyline(renderer, current_obj->points, current_obj->x + layer->offsetx,
+                                             current_obj->y + layer->offsety, current_obj->points_len);
                         break;
                     case S_ELLIPSE:
                         int radius_x = current_obj->width / 2, radius_y = current_obj->height / 2;
-                        int center_x = current_obj->x + radius_x, center_y = current_obj->y + radius_y;
+                        int center_x = current_obj->x + layer->offsetx + radius_x,
+                            center_y = current_obj->y + layer->offsety + radius_y;
                         ellipseRGBA(renderer, center_x, center_y, radius_x, radius_y, obj_color.r, obj_color.g,
                                     obj_color.b, obj_color.a);
                         break;
@@ -211,7 +213,8 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
     }
 }
 
-void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int alpha_mod) {
+void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int offsetx, int offsety,
+                            int alpha_mod) {
     CB_Rect srcrect, dstrect;
     SDL_Texture * tile;
     tmx_tileset * ts;
@@ -246,11 +249,11 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         dstrect.h = ts->tile_height;
         // FIXME: this is a hack hack hack
         if (row < 0) {
-            dstrect.x = row * -1;
-            dstrect.y = col * -1;
+            dstrect.x = row * -1 + offsetx;
+            dstrect.y = col * -1 + offsety;
         } else {
-            dstrect.x = col * ts->tile_width;
-            dstrect.y = row * ts->tile_height;
+            dstrect.x = col * ts->tile_width + offsetx;
+            dstrect.y = row * ts->tile_height + offsety;
         }
 
         // select source tile or image
