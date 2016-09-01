@@ -2,17 +2,19 @@
 
 #include <critterbits.h>
 
+using namespace Critterbits;
+
 int main(int argc, char ** argv) {
     // determine asset path and load configuration
     std::string asset_path = CB_DEFAULT_ASSET_PATH;
     if (argc > 1) {
         asset_path = std::string(argv[1]);
     }
-    Critterbits::EngineConfiguration config(asset_path);
+    std::shared_ptr<EngineConfiguration> config(new EngineConfiguration(asset_path));
 
-    // create engine
-    Critterbits::Engine engine(config);
+    // assign configuration to engine
+    Engine::GetInstance().SetConfiguration(config);
 
     // run (blocks until window closed)
-    return engine.Run();
+    return Engine::GetInstance().Run();
 }

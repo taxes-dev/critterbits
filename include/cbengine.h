@@ -3,6 +3,7 @@
 #define CBENGINE_H
 
 #include <SDL.h>
+#include <memory>
 #include <string>
 
 #include "cbscene.h"
@@ -15,15 +16,14 @@
 
 namespace Critterbits {
 
-// messy, but some things need direct access to the renderer
-extern SDL_Renderer * cb_main_renderer;
-
 class EngineConfiguration {
   public:
     std::string asset_path;
-    bool draw_debug_pane = false;
-    bool draw_debug_sprite_rects = false;
-    bool draw_map_regions = false;
+    struct {
+        bool draw_info_pane = false;
+        bool draw_map_regions = false;
+        bool draw_sprite_rects = false;
+    } debug;
     int window_width = CB_DEFAULT_WINDOW_W;
     int window_height = CB_DEFAULT_WINDOW_H;
     std::string window_title;
@@ -39,22 +39,27 @@ class EngineConfiguration {
 
 class Engine {
   public:
-    EngineConfiguration config;
+    std::shared_ptr<EngineConfiguration> config;
     SDL_Rect display_bounds;
     SceneManager scenes;
     Viewport viewport;
     float fps;
 
-    Engine(EngineConfiguration & engine_config) : config(engine_config){};
     ~Engine();
+    static Engine & GetInstance();
+    SDL_Renderer * GetRenderer() const { return this->renderer; }
     int Run();
+    void SetConfiguration(std::shared_ptr<EngineConfiguration>);
 
   private:
     SDL_Window * window = nullptr;
+    SDL_Renderer * renderer = nullptr;
 
+    Engine(){};
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
-    void RenderDebugPane(SDL_Renderer * renderer, int, int);
+    void operator=(Engine const &) = delete;
+    void RenderDebugPane(int, int);
 };
 }
 #endif

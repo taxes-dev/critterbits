@@ -3,7 +3,8 @@
 #include <critterbits.h>
 
 namespace Critterbits {
-bool cb_draw_debug_sprite_rects = false;
+
+Sprite::Sprite() { this->draw_debug = Engine::GetInstance().config->debug.draw_sprite_rects; }
 
 Sprite::~Sprite() {
     if (this->sprite_sheet != nullptr) {
@@ -33,7 +34,7 @@ void Sprite::NotifyLoaded() {
         LOG_SDL_ERR("Sprite::NotifyLoaded unable to load sprite sheet");
         return;
     }
-    this->sprite_sheet = SDL_CreateTextureFromSurface(cb_main_renderer, sheet_surface);
+    this->sprite_sheet = SDL_CreateTextureFromSurface(Engine::GetInstance().GetRenderer(), sheet_surface);
     SDLx::SDL_CleanUp(sheet_surface);
     if (this->sprite_sheet == nullptr) {
         LOG_SDL_ERR("Sprite::NotifyLoaded unable to convert sprite sheet to texture");
@@ -53,7 +54,7 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
         SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), clip_rect.dest, this->flip_x,
                                        this->flip_y);
     }
-    if (cb_draw_debug_sprite_rects) {
+    if (this->draw_debug) {
         rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
                       255, 0, 0, 127);
         boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,

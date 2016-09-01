@@ -4,9 +4,6 @@
 
 namespace Critterbits {
 
-// if set to true, object layer shapes in TMX maps will be drawn
-bool cb_force_draw_map_regions = false;
-
 /*
  * Support functions for Tilemap::RenderMap()
  */
@@ -40,6 +37,10 @@ static SDL_Color tmx_to_sdl_color(int tmx_color) {
  * End support functions
  */
 
+Tilemap::Tilemap(std::string & map_path) : tmx_path(map_path) {
+    this->draw_debug = Engine::GetInstance().config->debug.draw_map_regions;
+}
+
 Tilemap::~Tilemap() {
     if (this->map != nullptr) {
         tmx_map_free(this->map);
@@ -65,7 +66,7 @@ bool Tilemap::CreateTextures(float scale) {
     this->dim.x = 0;
     this->dim.y = 0;
 
-    this->map_texture = this->RenderMap(cb_main_renderer, scale);
+    this->map_texture = this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 
     return this->map_texture != nullptr;
 }
@@ -178,7 +179,7 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
             if (current_obj->shape == S_TILE) {
                 this->DrawTileOnMap(renderer, current_obj->gid, current_obj->x * -1, current_obj->y * -1,
                                     layer->offsetx, layer->offsety, SDL_ALPHA_OPAQUE);
-            } else if (cb_force_draw_map_regions) {
+            } else if (this->draw_debug) {
                 // region objects are normally hidden and used as event triggers
                 switch (current_obj->shape) {
                     case S_SQUARE:
@@ -278,11 +279,12 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
     }
 }
 
-static void * sdl_img_loader(const char * path) { return IMG_LoadTexture(cb_main_renderer, path); }
+static void * sdl_img_loader(const char * path) { return IMG_LoadTexture(Engine::GetInstance().GetRenderer(), path); }
 
-void Tilemap::Tilemap_Init(bool draw_map_regions) {
-    cb_force_draw_map_regions = draw_map_regions;
+void Tilemap::Tilemap_Init() {
     tmx_img_load_func = (void * (*)(const char *))sdl_img_loader;
     tmx_img_free_func = (void (*)(void *))SDL_DestroyTexture;
 }
+
+void Tilemap::Tilemap_Quit() {}
 }

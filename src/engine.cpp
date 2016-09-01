@@ -8,19 +8,23 @@
 #include <critterbits.h>
 
 namespace Critterbits {
-SDL_Renderer * cb_main_renderer = nullptr;
-
 Engine::~Engine() {
-    SDLx::SDL_CleanUp(cb_main_renderer, this->window);
+    SDLx::SDL_CleanUp(this->renderer, this->window);
+    Tilemap::Tilemap_Quit();
     IMG_Quit();
     SDL_Quit();
+}
+
+Engine & Engine::GetInstance() {
+    static Engine instance;
+    return instance;
 }
 
 int Engine::Run() {
     LOG_INFO("Entering Engine::Run()");
 
     // check that we have valid configuration
-    if (!this->config.IsValid()) {
+    if (!this->config->IsValid()) {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
@@ -36,36 +40,32 @@ int Engine::Run() {
     }
 
     // initialize TMX library
-    Tilemap::Tilemap_Init(this->config.draw_map_regions);
-
-    // set sprite debug
-    cb_draw_debug_sprite_rects = this->config.draw_debug_sprite_rects;
+    Tilemap::Tilemap_Init();
 
     // discover center of screen for window display
     SDL_GetDisplayBounds(0, &this->display_bounds);
     CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
-                                                    this->config.window_width, this->config.window_height);
+                                                    this->config->window_width, this->config->window_height);
 
     // create display window
-    this->window = SDL_CreateWindow(this->config.window_title.c_str(), window_origin.x, window_origin.y,
-                                    this->config.window_width, this->config.window_height, SDL_WINDOW_SHOWN);
+    this->window = SDL_CreateWindow(this->config->window_title.c_str(), window_origin.x, window_origin.y,
+                                    this->config->window_width, this->config->window_height, SDL_WINDOW_SHOWN);
     if (this->window == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateWindow");
         return 1;
     }
 
     // configure viewport
-    this->viewport.dim = {0, 0, this->config.window_width, this->config.window_height};
+    this->viewport.dim = {0, 0, this->config->window_width, this->config->window_height};
 
     // create renderer
-    cb_main_renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (cb_main_renderer == nullptr) {
+    this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (this->renderer == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateRenderer");
         return 1;
     }
 
-    // configure scene manager and load first scene
-    this->scenes.SetAssetPath(this->config.asset_path);
+    // load first scene
     if (!this->scenes.LoadScene(CB_FIRST_SCENE)) {
         LOG_ERR("Engine::Run cannot load startup scene");
         return 1;
@@ -140,17 +140,17 @@ int Engine::Run() {
         }
 
         // Render pass
-        SDL_SetRenderDrawColor(cb_main_renderer, 0, 0, 0, 0);
-        SDL_RenderClear(cb_main_renderer);
+        SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
+        SDL_RenderClear(this->renderer);
         for (auto & entity : entities) {
-            entity->Render(cb_main_renderer, this->viewport.GetViewableRect(entity->dim));
+            entity->Render(this->renderer, this->viewport.GetViewableRect(entity->dim));
         }
 
-        if (this->config.draw_debug_pane) {
-            this->RenderDebugPane(cb_main_renderer, entities.size(), entities.size());
+        if (this->config->debug.draw_info_pane) {
+            this->RenderDebugPane(entities.size(), entities.size());
         }
 
-        SDL_RenderPresent(cb_main_renderer);
+        SDL_RenderPresent(this->renderer);
 
         ticks = SDL_GetTicks();
         if (frame_count % 10 == 0) {
@@ -162,7 +162,7 @@ int Engine::Run() {
     return 0;
 }
 
-void Engine::RenderDebugPane(SDL_Renderer * renderer, int entity_count, int entities_in_view) {
+void Engine::RenderDebugPane(int entity_count, int entities_in_view) {
     std::stringbuf info;
     std::ostream os(&info);
 
@@ -170,8 +170,10 @@ void Engine::RenderDebugPane(SDL_Renderer * renderer, int entity_count, int enti
     os << " ent(" << entities_in_view << "/" << entity_count << ")";
     os << " fps " << std::fixed << std::setprecision(1) << this->fps;
 
-    roundedBoxRGBA(renderer, -6, this->viewport.dim.h - 12, info.str().length() * 8 + 10, this->viewport.dim.h + 6, 6,
-                   0, 0, 0, 127);
-    stringRGBA(renderer, 2, this->viewport.dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
+    roundedBoxRGBA(this->renderer, -6, this->viewport.dim.h - 12, info.str().length() * 8 + 10,
+                   this->viewport.dim.h + 6, 6, 0, 0, 0, 127);
+    stringRGBA(this->renderer, 2, this->viewport.dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
 }
+
+void Engine::SetConfiguration(std::shared_ptr<EngineConfiguration> config) { this->config = std::move(config); }
 }

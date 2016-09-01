@@ -41,16 +41,22 @@ static YamlValueParserCollection sprite_val_parsers = {{"sprite_sheet", sprite_s
 * End support functions
 */
 
+std::string SpriteManager::GetSpritePath(std::string & asset_name) {
+    return Engine::GetInstance().config->asset_path + CB_SPRITE_PATH + PATH_SEP + asset_name;
+}
+
 bool SpriteManager::LoadQueuedSprites() {
     bool success = true;
     std::string sprite_path_current;
     std::string * sprite_content = nullptr;
+    std::string sprite_name;
 
     YamlParser parser;
     parser.value_parsers = sprite_val_parsers;
 
     for (auto it = this->queued_sprites.begin(); it != this->queued_sprites.end();) {
-        sprite_path_current = this->sprite_path + *it + CB_SPRITE_EXT;
+        sprite_name = *it + CB_SPRITE_EXT;
+        sprite_path_current = SpriteManager::GetSpritePath(sprite_name);
         LOG_INFO("SpriteManager::LoadQueuedSprites attempting to load " + sprite_path_current);
 
         std::shared_ptr<Sprite> new_sprite(new Sprite());
@@ -62,7 +68,7 @@ bool SpriteManager::LoadQueuedSprites() {
 
             // prepend the asset path to the sprite sheet path if one was set
             if (!new_sprite->sprite_sheet_path.empty()) {
-                new_sprite->sprite_sheet_path = this->sprite_path + new_sprite->sprite_sheet_path;
+                new_sprite->sprite_sheet_path = SpriteManager::GetSpritePath(new_sprite->sprite_sheet_path);
             }
 
             this->sprites.push_back(new_sprite);
@@ -81,8 +87,4 @@ bool SpriteManager::LoadQueuedSprites() {
 }
 
 void SpriteManager::QueueSprite(std::string & sprite_name) { this->queued_sprites.push_back(sprite_name); }
-
-void SpriteManager::SetAssetPath(std::string & asset_path) {
-    this->sprite_path = asset_path + CB_SPRITE_PATH + PATH_SEP;
-}
 }

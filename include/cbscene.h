@@ -22,7 +22,6 @@ class Scene {
     bool persistent = false;
     std::string scene_name;
     std::string map_path;
-    std::string scene_path;
     float map_scale = 1.0f;
     SceneState state = CBE_NEW;
     SpriteManager sprites;
@@ -43,7 +42,7 @@ class SceneManager {
 
     SceneManager(){};
     bool LoadScene(const std::string &);
-    void SetAssetPath(const std::string &);
+    static std::string GetScenePath(const std::string &);
 
   private:
     std::string asset_path; // FIXME:reduce copies of this

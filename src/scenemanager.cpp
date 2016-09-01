@@ -11,7 +11,7 @@ namespace Critterbits {
  */
 static void map_parser(void * context, const std::string & value) {
     Scene * scene = static_cast<Scene *>(context);
-    scene->map_path = scene->scene_path + value;
+    scene->map_path = SceneManager::GetScenePath(value);
 }
 
 static void map_scale_parser(void * context, const std::string & value) {
@@ -36,6 +36,10 @@ static YamlValueParserCollection scene_val_parsers = {
  * End support functions
  */
 
+std::string SceneManager::GetScenePath(const std::string & asset_name) {
+    return Engine::GetInstance().config->asset_path + CB_SCENE_PATH + PATH_SEP + asset_name;
+}
+
 bool SceneManager::LoadScene(const std::string & scene_name) {
     // nothing to do if trying to load the same scene that's loaded
     if (this->current_scene != nullptr && this->current_scene->scene_name == scene_name) {
@@ -59,13 +63,11 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     if (this->current_scene == nullptr) {
         std::shared_ptr<Scene> new_scene(new Scene());
         new_scene->scene_name = scene_name;
-        new_scene->scene_path = this->scene_path;
-        new_scene->sprites.SetAssetPath(this->asset_path);
 
         std::string * scene_content = nullptr;
-        if (!ReadTextFile(this->scene_path + scene_name + CB_SCENE_EXT, &scene_content)) {
-            LOG_ERR("SceneManager::LoadScene unable to load scene from " + this->scene_path + scene_name +
-                    CB_SCENE_EXT);
+        std::string scene_path = SceneManager::GetScenePath(scene_name + CB_SCENE_EXT);
+        if (!ReadTextFile(scene_path, &scene_content)) {
+            LOG_ERR("SceneManager::LoadScene unable to load scene from " + scene_path);
             return false;
         }
 
@@ -83,11 +85,6 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     this->current_scene->NotifyLoaded();
 
     return true;
-}
-
-void SceneManager::SetAssetPath(const std::string & asset_path) {
-    this->asset_path = asset_path;
-    this->scene_path = asset_path + CB_SCENE_PATH + PATH_SEP;
 }
 
 void SceneManager::UnloadCurrentScene() {
