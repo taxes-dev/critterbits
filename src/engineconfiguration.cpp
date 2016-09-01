@@ -20,21 +20,26 @@ void debug_draw_map_regions_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->debug.draw_map_regions = YamlParser::ToBool(value);
 }
 
+void window_full_screen_parser(void * context, const std::string & value) {
+    static_cast<EngineConfiguration *>(context)->window.full_screen = YamlParser::ToBool(value);
+}
+
 void window_height_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window_height = YamlParser::ToInt(value);
+    static_cast<EngineConfiguration *>(context)->window.height = YamlParser::ToInt(value);
 }
 
 void window_width_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window_width = YamlParser::ToInt(value);
+    static_cast<EngineConfiguration *>(context)->window.width = YamlParser::ToInt(value);
 }
 
 void window_title_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window_title = value;
+    static_cast<EngineConfiguration *>(context)->window.title = value;
 }
 
 YamlValueParserCollection config_parsers = {{"debug.draw_info_pane", debug_draw_info_pane_parser},
                                             {"debug.draw_map_regions", debug_draw_map_regions_parser},
                                             {"debug.draw_sprite_rects", debug_draw_sprite_rects_parser},
+                                            {"window.full_screen", window_full_screen_parser},
                                             {"window.height", window_height_parser},
                                             {"window.title", window_title_parser},
                                             {"window.width", window_width_parser}};
@@ -79,9 +84,22 @@ bool EngineConfiguration::ReloadConfiguration() {
         parser.Parse(this, *config_content);
 
         delete config_content;
-        this->valid = true;
+        return this->Validate();
     }
 
     return this->valid;
+}
+
+bool EngineConfiguration::Validate() {
+    bool b_valid = true;
+
+    if (this->window.width < 100 || this->window.height < 100) {
+        b_valid = false;
+    }
+
+    // TODO: validate more settings ...
+
+    this->valid = b_valid;
+    return b_valid;
 }
 }

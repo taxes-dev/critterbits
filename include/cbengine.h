@@ -13,6 +13,7 @@
 #define CB_DEFAULT_WINDOW_H 768
 #define CB_CONFIG_YAML "cbconfig.yml"
 #define CB_DEFAULT_ASSET_PATH "./assets"
+#define CB_DEFAULT_FPS 60
 
 namespace Critterbits {
 
@@ -24,14 +25,18 @@ class EngineConfiguration {
         bool draw_map_regions = false;
         bool draw_sprite_rects = false;
     } debug;
-    int window_width = CB_DEFAULT_WINDOW_W;
-    int window_height = CB_DEFAULT_WINDOW_H;
-    std::string window_title;
+    struct {
+        bool full_screen = false;
+        int width = CB_DEFAULT_WINDOW_W;
+        int height = CB_DEFAULT_WINDOW_H;
+        std::string title;
+    } window;
 
     EngineConfiguration(){};
     EngineConfiguration(const std::string &);
     inline bool IsValid() const { return this->valid; };
     bool ReloadConfiguration();
+    bool Validate();
 
   private:
     bool valid = false;

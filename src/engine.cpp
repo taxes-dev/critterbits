@@ -30,7 +30,7 @@ int Engine::Run() {
     }
 
     // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
         LOG_SDL_ERR("Engine::Run SDL_Init");
         return 1;
     }
@@ -42,23 +42,33 @@ int Engine::Run() {
     // initialize TMX library
     Tilemap::Tilemap_Init();
 
-    // discover center of screen for window display
+    // discover display bounds
     SDL_GetDisplayBounds(0, &this->display_bounds);
-    LOG_INFO("Window size " + std::to_string(this->config->window_width) + "x" +
-             std::to_string(this->config->window_height));
-    CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
-                                                    this->config->window_width, this->config->window_height);
+    LOG_INFO("Engine::Run current display size " + std::to_string(this->display_bounds.w) + "x" +
+             std::to_string(this->display_bounds.h));
+    if (this->config->window.full_screen) {
+        // create full screen window
+        this->window = SDL_CreateWindow(this->config->window.title.c_str(), 0, 0, this->display_bounds.w,
+                                        this->display_bounds.h, SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
+        this->config->window.width = this->display_bounds.w;
+        this->config->window.height = this->display_bounds.h;
+    } else {
+        // create window of desired size in center of screen
+        LOG_INFO("Engine::Run desired window size " + std::to_string(this->config->window.width) + "x" +
+                 std::to_string(this->config->window.height));
+        CB_Point window_origin = CB_Point::CenterInside(this->display_bounds.w, this->display_bounds.h,
+                                                        this->config->window.width, this->config->window.height);
 
-    // create display window
-    this->window = SDL_CreateWindow(this->config->window_title.c_str(), window_origin.x, window_origin.y,
-                                    this->config->window_width, this->config->window_height, SDL_WINDOW_SHOWN);
+        this->window = SDL_CreateWindow(this->config->window.title.c_str(), window_origin.x, window_origin.y,
+                                        this->config->window.width, this->config->window.height, SDL_WINDOW_SHOWN);
+    }
     if (this->window == nullptr) {
         LOG_SDL_ERR("Engine::Run SDL_CreateWindow");
         return 1;
     }
 
     // configure viewport
-    this->viewport.dim = {0, 0, this->config->window_width, this->config->window_height};
+    this->viewport.dim = {0, 0, this->config->window.width, this->config->window.height};
 
     // create renderer
     this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -78,8 +88,9 @@ int Engine::Run() {
 
     // timer
     unsigned int ticks;
-    unsigned int last_tick;
+    unsigned int frame_time;
     unsigned int frame_count = 0;
+    float delta_time = 0.;
 
     // HACK
     std::shared_ptr<Sprite> player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
@@ -90,7 +101,7 @@ int Engine::Run() {
     SDL_Event e;
     bool quit = false;
     while (!quit) {
-        last_tick = ticks;
+        ticks = SDL_GetTicks();
         frame_count++;
 
         while (SDL_PollEvent(&e)) {
@@ -100,23 +111,24 @@ int Engine::Run() {
             }
 
             if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
+                const int player_velocity = 400;
                 switch (e.key.keysym.sym) {
                     case SDLK_LEFT:
-                        player_sprite->dim.x -= 6;
+                        player_sprite->dim.x -= delta_time * player_velocity;
                         player_sprite->SetFrame(0);
                         player_sprite->flip_x = false;
                         break;
                     case SDLK_RIGHT:
-                        player_sprite->dim.x += 6;
+                        player_sprite->dim.x += delta_time * player_velocity;
                         player_sprite->SetFrame(0);
                         player_sprite->flip_x = true;
                         break;
                     case SDLK_UP:
-                        player_sprite->dim.y -= 6;
+                        player_sprite->dim.y -= delta_time * player_velocity;
                         player_sprite->SetFrame(6);
                         break;
                     case SDLK_DOWN:
-                        player_sprite->dim.y += 6;
+                        player_sprite->dim.y += delta_time * player_velocity;
                         player_sprite->SetFrame(3);
                         break;
                 }
@@ -154,9 +166,10 @@ int Engine::Run() {
 
         SDL_RenderPresent(this->renderer);
 
-        ticks = SDL_GetTicks();
+        frame_time = SDL_GetTicks() - ticks;
+        delta_time = (float)frame_time / 1000.;
         if (frame_count % 10 == 0) {
-            this->fps = 1000. / (float)(ticks - last_tick);
+            this->fps = 1000. / (float)frame_time;
         }
     }
 
