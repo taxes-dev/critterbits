@@ -9,29 +9,31 @@ namespace Critterbits {
 /*
  * Support functions for SceneManager::ReloadConfiguraLoadScenetion()
  */
-static void map_parser(void * context, const std::string & value) {
+namespace {
+void map_parser(void * context, const std::string & value) {
     Scene * scene = static_cast<Scene *>(context);
     scene->map_path = SceneManager::GetScenePath(value);
 }
 
-static void map_scale_parser(void * context, const std::string & value) {
+void map_scale_parser(void * context, const std::string & value) {
     static_cast<Scene *>(context)->map_scale = YamlParser::ToFloat(value);
 }
 
-static void persistent_parser(void * context, const std::string & value) {
+void persistent_parser(void * context, const std::string & value) {
     static_cast<Scene *>(context)->persistent = YamlParser::ToBool(value);
 }
 
-static void sprites_parser(void * context, std::list<std::string> & values) {
+void sprites_parser(void * context, std::list<std::string> & values) {
     for (auto & sprite_name : values) {
         static_cast<Scene *>(context)->sprites.QueueSprite(sprite_name);
     }
 }
 
-static YamlSequenceParserCollection scene_seq_parsers = {{"sprites", sprites_parser}};
+YamlSequenceParserCollection scene_seq_parsers = {{"sprites", sprites_parser}};
 
-static YamlValueParserCollection scene_val_parsers = {
+YamlValueParserCollection scene_val_parsers = {
     {"map", map_parser}, {"map_scale", map_scale_parser}, {"persistent", persistent_parser}};
+}
 /*
  * End support functions
  */

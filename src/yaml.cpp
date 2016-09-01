@@ -17,16 +17,18 @@
 
 namespace Critterbits {
 
+namespace {
 typedef enum { CBE_YAML_KEY_TOKEN, CBE_YAML_VAL_TOKEN, CBE_YAML_OTHER_TOKEN } YamlTokenType;
 typedef enum { CBE_YAML_BLOCK_ENTRY, CBE_YAML_BLOCK_SEQUENCE, CBE_YAML_BLOCK_MAPPING } YamlBlockType;
 
-static std::string implode_map_names(std::list<std::string> & map_names, std::string & tail_name) {
+std::string implode_map_names(std::list<std::string> & map_names, std::string & tail_name) {
     if (map_names.size() == 0) {
         return tail_name;
     }
     std::stringstream s;
     std::copy(map_names.begin(), map_names.end(), std::ostream_iterator<std::string>(s, "."));
     return s.str() + tail_name;
+}
 }
 
 void YamlParser::Parse(void * context, const std::string & yaml_content) const {

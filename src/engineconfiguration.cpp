@@ -3,40 +3,42 @@
 #include <critterbits.h>
 
 namespace Critterbits {
-
 /*
  * Support functions for EngineConfiguration::ReloadConfiguration()
  */
-static void debug_draw_info_pane_parser(void * context, const std::string & value) {
+namespace {
+
+void debug_draw_info_pane_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->debug.draw_info_pane = YamlParser::ToBool(value);
 }
 
-static void debug_draw_sprite_rects_parser(void * context, const std::string & value) {
+void debug_draw_sprite_rects_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->debug.draw_sprite_rects = YamlParser::ToBool(value);
 }
 
-static void debug_draw_map_regions_parser(void * context, const std::string & value) {
+void debug_draw_map_regions_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->debug.draw_map_regions = YamlParser::ToBool(value);
 }
 
-static void window_height_parser(void * context, const std::string & value) {
+void window_height_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->window_height = YamlParser::ToInt(value);
 }
 
-static void window_width_parser(void * context, const std::string & value) {
+void window_width_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->window_width = YamlParser::ToInt(value);
 }
 
-static void window_title_parser(void * context, const std::string & value) {
+void window_title_parser(void * context, const std::string & value) {
     static_cast<EngineConfiguration *>(context)->window_title = value;
 }
 
-static YamlValueParserCollection config_parsers = {{"debug.draw_info_pane", debug_draw_info_pane_parser},
-                                                   {"debug.draw_map_regions", debug_draw_map_regions_parser},
-                                                   {"debug.draw_sprite_rects", debug_draw_sprite_rects_parser},
-                                                   {"window.height", window_height_parser},
-                                                   {"window.title", window_title_parser},
-                                                   {"window.width", window_width_parser}};
+YamlValueParserCollection config_parsers = {{"debug.draw_info_pane", debug_draw_info_pane_parser},
+                                            {"debug.draw_map_regions", debug_draw_map_regions_parser},
+                                            {"debug.draw_sprite_rects", debug_draw_sprite_rects_parser},
+                                            {"window.height", window_height_parser},
+                                            {"window.title", window_title_parser},
+                                            {"window.width", window_width_parser}};
+}
 /*
  * End support functions
  */

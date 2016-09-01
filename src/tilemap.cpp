@@ -7,14 +7,15 @@ namespace Critterbits {
 /*
  * Support functions for Tilemap::RenderMap()
  */
-static void draw_object_polyline(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
+namespace {
+void draw_object_polyline(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
     int i;
     for (i = 1; i < pointsc; i++) {
         SDL_RenderDrawLine(renderer, x + points[i - 1][0], y + points[i - 1][1], x + points[i][0], y + points[i][1]);
     }
 }
 
-static void draw_object_polygon(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
+void draw_object_polygon(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
     draw_object_polyline(renderer, points, x, y, pointsc);
     if (pointsc > 2) {
         SDL_RenderDrawLine(renderer, x + points[0][0], y + points[0][1], x + points[pointsc - 1][0],
@@ -22,7 +23,7 @@ static void draw_object_polygon(SDL_Renderer * renderer, double ** points, doubl
     }
 }
 
-static SDL_Color tmx_to_sdl_color(int tmx_color) {
+SDL_Color tmx_to_sdl_color(int tmx_color) {
     SDL_Color color;
 
     color.r = (tmx_color >> 16) & 0xFF;
@@ -33,6 +34,12 @@ static SDL_Color tmx_to_sdl_color(int tmx_color) {
     return color;
 }
 
+/*
+ * Support functions for Tilemap::Tilemap_Init()
+ */
+
+void * sdl_img_loader(const char * path) { return IMG_LoadTexture(Engine::GetInstance().GetRenderer(), path); }
+}
 /*
  * End support functions
  */
@@ -278,8 +285,6 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         }
     }
 }
-
-static void * sdl_img_loader(const char * path) { return IMG_LoadTexture(Engine::GetInstance().GetRenderer(), path); }
 
 void Tilemap::Tilemap_Init() {
     tmx_img_load_func = (void * (*)(const char *))sdl_img_loader;
