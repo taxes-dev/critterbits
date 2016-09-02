@@ -29,15 +29,9 @@ void Sprite::NotifyLoaded() {
     this->dim.h = this->tile_height * this->sprite_scale;
 
     LOG_INFO("Sprite::NotifyLoaded attempting to load sprite sheet " + this->sprite_sheet_path);
-    SDL_Surface * sheet_surface = IMG_Load(this->sprite_sheet_path.c_str());
-    if (sheet_surface == nullptr) {
-        LOG_SDL_ERR("Sprite::NotifyLoaded unable to load sprite sheet");
-        return;
-    }
-    this->sprite_sheet = SDL_CreateTextureFromSurface(Engine::GetInstance().GetRenderer(), sheet_surface);
-    SDLx::SDL_CleanUp(sheet_surface);
+    this->sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), this->sprite_sheet_path.c_str());
     if (this->sprite_sheet == nullptr) {
-        LOG_SDL_ERR("Sprite::NotifyLoaded unable to convert sprite sheet to texture");
+        LOG_SDL_ERR("Sprite::NotifyLoaded unable to load sprite sheet to texture");
         return;
     }
 

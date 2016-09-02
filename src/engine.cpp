@@ -30,7 +30,7 @@ int Engine::Run() {
     }
 
     // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_TIMER*/) != 0) {
         LOG_SDL_ERR("Engine::Run SDL_Init");
         return 1;
     }
@@ -76,6 +76,24 @@ int Engine::Run() {
         LOG_SDL_ERR("Engine::Run SDL_CreateRenderer");
         return 1;
     }
+
+    // get some information on the renderer we just created
+    SDL_RendererInfo r_info;
+    if (SDL_GetRendererInfo(this->renderer, &r_info) != 0) {
+        LOG_SDL_ERR("Engine::Run SDL_GetRendererInfo");
+        return 1;
+    }
+
+    LOG_INFO("Engine::Run renderer name " + std::string(r_info.name));
+    if (TestBitMask(r_info.flags, (unsigned int)SDL_RENDERER_SOFTWARE)) {
+        LOG_ERR("Engine::Run no hardware renderer available");
+        return 1;
+    }
+
+    this->max_texture_height = r_info.max_texture_height;
+    this->max_texture_width = r_info.max_texture_width;
+    LOG_INFO("Engine::Run renderer max_texture_width " + std::to_string(r_info.max_texture_width));
+    LOG_INFO("Engine::Run renderer max_texture_height " + std::to_string(r_info.max_texture_height));
 
     // load first scene
     if (!this->scenes.LoadScene(CB_FIRST_SCENE)) {
@@ -163,7 +181,6 @@ int Engine::Run() {
         if (this->config->debug.draw_info_pane) {
             this->RenderDebugPane(entities.size(), entities.size());
         }
-
         SDL_RenderPresent(this->renderer);
 
         frame_time = SDL_GetTicks() - ticks;

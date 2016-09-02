@@ -52,13 +52,17 @@ class Engine {
 
     ~Engine();
     static Engine & GetInstance();
-    SDL_Renderer * GetRenderer() const { return this->renderer; }
+    int GetMaxTextureHeight() const { return this->max_texture_height; };
+    int GetMaxTextureWidth() const { return this->max_texture_width; };
+    SDL_Renderer * GetRenderer() const { return this->renderer; };
     int Run();
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);
 
   private:
     SDL_Window * window = nullptr;
     SDL_Renderer * renderer = nullptr;
+    int max_texture_height = 0;
+    int max_texture_width = 0;
 
     Engine(){};
     Engine(const Engine &) = delete;

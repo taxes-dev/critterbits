@@ -86,11 +86,19 @@ void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) 
 
 SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // create texture to hold the map
+    int max_w = Engine::GetInstance().GetMaxTextureWidth();
+    int max_h = Engine::GetInstance().GetMaxTextureHeight();
+    if (max_w < this->dim.w || max_h < this->dim.h) {
+        LOG_ERR("Tilemap::RenderMap map size would result in over-sized texture (" + std::to_string(this->dim.w) + "x" +
+                std::to_string(this->dim.h) + ")");
+        return nullptr;
+    }
+
     SDL_Texture * texture =
         SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
 
     if (texture == nullptr) {
-        LOG_SDL_ERR("Tilemap::Rendermap unable to create texture for map");
+        LOG_SDL_ERR("Tilemap::RenderMap unable to create texture for map");
         return nullptr;
     }
 

@@ -19,8 +19,6 @@ void SDL_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, int x, in
 
 void SDL_RenderTextureClipped(SDL_Renderer * renderer, SDL_Texture * texture, const CB_Rect & source,
                               const CB_Rect & dest, bool flip_x, bool flip_y) {
-    int w, h;
-    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
     SDL_Rect src;
     src.x = source.x;
     src.y = source.y;
