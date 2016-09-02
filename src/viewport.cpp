@@ -42,4 +42,19 @@ CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim) const {
 
     return view_clip;
 }
+
+void Viewport::SetEntityToFollow(const std::shared_ptr<Entity> & entity) {
+    if (entity != nullptr) {
+        this->entity_to_follow = entity;
+        this->entity_center_view = CB_Point::CenterInside(this->dim.w, this->dim.h, entity->dim.w, entity->dim.h);
+    }
+}
+
+void Viewport::Update(float delta_time) {
+    if (auto entity = this->entity_to_follow.lock()) {
+        // Re-center viewport on followed entity
+        this->dim.x = entity->dim.x - this->entity_center_view.x;
+        this->dim.y = entity->dim.y - this->entity_center_view.y;
+    }
+}
 }

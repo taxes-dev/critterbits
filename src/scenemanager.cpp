@@ -38,6 +38,13 @@ YamlValueParserCollection scene_val_parsers = {
  * End support functions
  */
 
+SceneManager::~SceneManager() {
+    this->current_scene = nullptr;
+    for (auto & scene : this->loaded_scenes) {
+        scene->NotifyUnloaded(true);
+    }
+}
+
 std::string SceneManager::GetScenePath(const std::string & asset_name) {
     return Engine::GetInstance().config->asset_path + CB_SCENE_PATH + PATH_SEP + asset_name;
 }
@@ -55,7 +62,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
     // requested scene
     for (auto & scene : this->loaded_scenes) {
         if (scene->scene_name == scene_name) {
-            scene->state = CBE_ACTIVE;
+            scene->NotifyLoaded();
             this->current_scene = scene;
             break;
         }
@@ -92,13 +99,10 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
 void SceneManager::UnloadCurrentScene() {
     if (this->current_scene != nullptr) {
         // notify the current scene that it's being unloaded
-        this->current_scene->NotifyUnloaded();
+        this->current_scene->NotifyUnloaded(!this->current_scene->persistent);
 
         // remove scene from loaded scenes if it's not marked persistent
-        if (this->current_scene->persistent) {
-            this->current_scene->state = CBE_INACTIVE;
-        } else {
-            this->current_scene->state = CBE_UNLOADED;
+        if (!this->current_scene->persistent) {
             for (auto it = this->loaded_scenes.begin(); it != this->loaded_scenes.end(); it++) {
                 if (*it == this->current_scene) {
                     this->loaded_scenes.erase(it);

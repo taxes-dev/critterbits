@@ -1,5 +1,5 @@
 add_executable(critterbits
-    main.cpp engine.cpp engineconfiguration.cpp files.cpp
+    main.cpp engine.cpp engineconfiguration.cpp engineeventqueue.cpp files.cpp
     rendering.cpp scene.cpp scenemanager.cpp sprite.cpp
     spritemanager.cpp tilemap.cpp viewport.cpp yaml.cpp)
 target_link_libraries(critterbits

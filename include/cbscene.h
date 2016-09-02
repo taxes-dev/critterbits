@@ -15,7 +15,7 @@
 
 namespace Critterbits {
 
-typedef enum { CBE_NEW, CBE_ACTIVE, CBE_INACTIVE, CBE_UNLOADED } SceneState;
+typedef enum { CBE_SCENE_NEW, CBE_SCENE_ACTIVE, CBE_SCENE_INACTIVE, CBE_SCENE_UNLOADED } SceneState;
 
 class Scene {
   public:
@@ -23,14 +23,14 @@ class Scene {
     std::string scene_name;
     std::string map_path;
     float map_scale = 1.0f;
-    SceneState state = CBE_NEW;
+    SceneState state = CBE_SCENE_NEW;
     SpriteManager sprites;
 
     Scene(){};
     ~Scene();
     Tilemap * GetTilemap() { return this->tilemap; };
     void NotifyLoaded();
-    void NotifyUnloaded();
+    void NotifyUnloaded(bool);
 
   private:
     Tilemap * tilemap = nullptr;
@@ -41,6 +41,7 @@ class SceneManager {
     std::shared_ptr<Scene> current_scene;
 
     SceneManager(){};
+    ~SceneManager();
     bool LoadScene(const std::string &);
     static std::string GetScenePath(const std::string &);
 

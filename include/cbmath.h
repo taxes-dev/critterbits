@@ -22,6 +22,5 @@ inline int Clamp(int value, int min, int max) {
         return max;
     return value;
 }
-
 }
 #endif

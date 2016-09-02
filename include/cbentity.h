@@ -12,6 +12,7 @@ class Entity {
     std::string tag = "";
 
     virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
+    virtual void Update(float){};
     virtual ~Entity(){};
 
   protected:

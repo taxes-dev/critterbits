@@ -3,6 +3,8 @@
 #define CBENGINE_H
 
 #include <SDL.h>
+#include <functional>
+#include <list>
 #include <memory>
 #include <string>
 
@@ -69,6 +71,28 @@ class Engine {
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;
     void RenderDebugPane(int, int);
+};
+
+typedef std::function<void()> PreUpdateEvent;
+
+class EngineEventQueue {
+    friend Engine;
+
+  public:
+    ~EngineEventQueue(){};
+    static EngineEventQueue & GetInstance();
+    void QueuePreUpdate(const PreUpdateEvent & event);
+
+  protected:
+    void ExecutePreUpdate();
+
+  private:
+    std::list<PreUpdateEvent> pre_update;
+
+    EngineEventQueue(){};
+    EngineEventQueue(const EngineEventQueue &) = delete;
+    EngineEventQueue(EngineEventQueue &&) = delete;
+    void operator=(EngineEventQueue const &) = delete;
 };
 }
 #endif

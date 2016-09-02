@@ -111,9 +111,8 @@ int Engine::Run() {
     float delta_time = 0.;
 
     // HACK
-    std::shared_ptr<Sprite> player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
-    CB_Point center_view =
-        CB_Point::CenterInside(this->viewport.dim.w, this->viewport.dim.h, player_sprite->dim.w, player_sprite->dim.h);
+    std::shared_ptr<Sprite> player_sprite;
+    CB_Point center_view{0, 0};
 
     // start main loop
     SDL_Event e;
@@ -128,7 +127,7 @@ int Engine::Run() {
                 quit = true;
             }
 
-            if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
+            if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED && player_sprite != nullptr) {
                 const int player_velocity = 400;
                 switch (e.key.keysym.sym) {
                     case SDLK_LEFT:
@@ -153,21 +152,39 @@ int Engine::Run() {
             }
         }
 
-        // Re-center viewport on player sprite
-        this->viewport.dim.x = player_sprite->dim.x - center_view.x;
-        this->viewport.dim.y = player_sprite->dim.y - center_view.y;
+        // Execute pre-update events
+        EngineEventQueue::GetInstance().ExecutePreUpdate();
 
-        // Cull entities not in viewport
+        // HACK
+        if (player_sprite == nullptr) {
+            player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
+            this->viewport.SetEntityToFollow(std::dynamic_pointer_cast<Entity>(player_sprite));
+        }
+
+        // Set list of entities to iterate
         entities.clear();
-        if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_ACTIVE) {
+        if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
             Entity * tilemap = this->scenes.current_scene->GetTilemap();
-            if (tilemap != nullptr && tilemap->dim.intersects(this->viewport.dim)) {
+            if (tilemap != nullptr) {
                 entities.push_back(tilemap);
             }
-        }
-        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
-            if (sprite->dim.intersects(this->viewport.dim)) {
+            for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
                 entities.push_back(sprite.get());
+            }
+        }
+        entities.push_back(&this->viewport);
+
+        // Update cycle
+        for (auto & entity : entities) {
+            entity->Update(delta_time);
+        }
+
+        // Cull entities not in viewport prior to render
+        for (auto it = entities.begin(); it != entities.end();) {
+            if ((*it)->dim.intersects(this->viewport.dim)) {
+                it++;
+            } else {
+                it = entities.erase(it);
             }
         }
 
