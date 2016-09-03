@@ -109,6 +109,7 @@ int Engine::Run() {
     unsigned int frame_time;
     unsigned int frame_count = 0;
     float delta_time = 0.;
+    int render_count = 0;
 
     // HACK
     std::shared_ptr<Sprite> player_sprite;
@@ -179,24 +180,19 @@ int Engine::Run() {
             entity->Update(delta_time);
         }
 
-        // Cull entities not in viewport prior to render
-        for (auto it = entities.begin(); it != entities.end();) {
-            if ((*it)->dim.intersects(this->viewport.dim)) {
-                it++;
-            } else {
-                it = entities.erase(it);
-            }
-        }
-
         // Render pass
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         SDL_RenderClear(this->renderer);
+        render_count = 0;
         for (auto & entity : entities) {
-            entity->Render(this->renderer, this->viewport.GetViewableRect(entity->dim));
+            if (entity->dim.intersects(this->viewport.dim)) {
+                entity->Render(this->renderer, this->viewport.GetViewableRect(entity->dim));
+                render_count++;
+            }
         }
 
         if (this->config->debug.draw_info_pane) {
-            this->RenderDebugPane(entities.size(), entities.size());
+            this->RenderDebugPane(entities.size(), render_count);
         }
         SDL_RenderPresent(this->renderer);
 
