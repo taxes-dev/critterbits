@@ -15,7 +15,7 @@
 #define CB_DEFAULT_WINDOW_H 768
 #define CB_CONFIG_YAML "cbconfig.yml"
 #define CB_DEFAULT_ASSET_PATH "./assets"
-#define CB_DEFAULT_FPS 60
+#define CB_DESIRED_UPS 60.0f
 
 namespace Critterbits {
 
@@ -50,7 +50,7 @@ class Engine {
     SDL_Rect display_bounds;
     SceneManager scenes;
     Viewport viewport;
-    float fps;
+    float fps = 0.;
 
     ~Engine();
     static Engine & GetInstance();

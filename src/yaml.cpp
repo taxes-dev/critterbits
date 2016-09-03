@@ -181,7 +181,7 @@ float YamlParser::ToFloat(const std::string & value) {
         return std::stof(value);
     } catch (std::exception &) {
         LOG_ERR("YamlParser::ToFloat invalid value");
-        return 0.;
+        return 0.0f;
     }
 }
 

@@ -105,10 +105,11 @@ int Engine::Run() {
     std::list<Entity *> entities;
 
     // timer
-    unsigned int ticks;
-    unsigned int frame_time;
+    unsigned int ticks = 0;
+    unsigned int last_ticks = 0;
+    unsigned int frame_time = 0;
     unsigned int frame_count = 0;
-    float delta_time = 0.;
+    float delta_time = 1.0f / CB_DESIRED_UPS;
     int render_count = 0;
 
     // HACK
@@ -119,9 +120,16 @@ int Engine::Run() {
     SDL_Event e;
     bool quit = false;
     while (!quit) {
+        // timing update
         ticks = SDL_GetTicks();
+        frame_time = ticks - last_ticks;
+        last_ticks = ticks;
         frame_count++;
+        if (frame_count % 10 == 0) {
+            this->fps = (this->fps + 1000.0f / frame_time) / 2.0f;
+        }
 
+        // check for waiting SDL events
         while (SDL_PollEvent(&e)) {
             // If user closes the window
             if (e.type == SDL_QUIT) {
@@ -153,31 +161,39 @@ int Engine::Run() {
             }
         }
 
-        // Execute pre-update events
-        EngineEventQueue::GetInstance().ExecutePreUpdate();
+        // begin simulation loop
+        while (frame_time > 0) {
+            float dt = std::min(delta_time, frame_time / 1000.0f);
 
-        // HACK
-        if (player_sprite == nullptr) {
-            player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
-            this->viewport.SetEntityToFollow(std::dynamic_pointer_cast<Entity>(player_sprite));
-        }
+            // Execute pre-update events
+            EngineEventQueue::GetInstance().ExecutePreUpdate();
 
-        // Set list of entities to iterate
-        entities.clear();
-        if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
-            Entity * tilemap = this->scenes.current_scene->GetTilemap();
-            if (tilemap != nullptr) {
-                entities.push_back(tilemap);
+            // HACK
+            if (player_sprite == nullptr) {
+                player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
+                this->viewport.SetEntityToFollow(std::dynamic_pointer_cast<Entity>(player_sprite));
             }
-            for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
-                entities.push_back(sprite.get());
-            }
-        }
-        entities.push_back(&this->viewport);
 
-        // Update cycle
-        for (auto & entity : entities) {
-            entity->Update(delta_time);
+            // Set list of entities to iterate
+            entities.clear();
+            if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
+                Entity * tilemap = this->scenes.current_scene->GetTilemap();
+                if (tilemap != nullptr) {
+                    entities.push_back(tilemap);
+                }
+                for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+                    entities.push_back(sprite.get());
+                }
+            }
+            entities.push_back(&this->viewport);
+
+            // Update cycle
+            for (auto & entity : entities) {
+                entity->Update(dt);
+            }
+
+            // timing update
+            frame_time -= delta_time * 1000;
         }
 
         // Render pass
@@ -195,12 +211,6 @@ int Engine::Run() {
             this->RenderDebugPane(entities.size(), render_count);
         }
         SDL_RenderPresent(this->renderer);
-
-        frame_time = SDL_GetTicks() - ticks;
-        delta_time = (float)frame_time / 1000.;
-        if (frame_count % 10 == 0) {
-            this->fps = 1000. / (float)frame_time;
-        }
     }
 
     LOG_INFO("Exiting Engine::Run()");
