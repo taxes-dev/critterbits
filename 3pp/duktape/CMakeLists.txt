@@ -1,0 +1,1 @@
+add_library(duktape OBJECT duktape.c)

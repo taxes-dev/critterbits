@@ -53,3 +53,4 @@ add_custom_target(clangformat ALL COMMAND /usr/bin/clang-format -style=file -i $
 
 # Look in the subdirectories to find additional CMakeLists.txt so we can build executables
 add_subdirectory(src)
+add_subdirectory(3pp/duktape)

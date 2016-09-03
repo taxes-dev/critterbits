@@ -101,6 +101,10 @@ int Engine::Run() {
         return 1;
     }
 
+    // test scripting
+    scripts.LoadScript("player");
+    return 0;
+
     // entities to iterate
     std::list<Entity *> entities;
 

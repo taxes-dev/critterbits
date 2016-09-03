@@ -9,6 +9,7 @@
 #include <string>
 
 #include "cbscene.h"
+#include "cbscripting.h"
 #include "cbviewport.h"
 
 #define CB_DEFAULT_WINDOW_W 1024
@@ -48,6 +49,7 @@ class Engine {
   public:
     std::shared_ptr<EngineConfiguration> config;
     SDL_Rect display_bounds;
+    ScriptEngine scripts;
     SceneManager scenes;
     Viewport viewport;
     float fps = 0.;
