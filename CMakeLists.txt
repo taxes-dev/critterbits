@@ -40,16 +40,9 @@ find_library(LIBTMX_LIBRARY NAMES libtmx tmx PATHS 3pp/tmx NO_DEFAULT_PATH)
 
 include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR} ${LIBYAML_INCLUDE_DIR} 3pp include)
 
+# clang-format target
 file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
-
-# clang-format the files on build
-#foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
-#    string(FIND ${SOURCE_FILE} ${PROJECT_TRDPARTY_DIR} PROJECT_TRDPARTY_DIR_FOUND)
-#    if (NOT ${PROJECT_TRDPARTY_DIR_FOUND} EQUAL -1)
-#        list(REMOVE_ITEM ALL_SOURCE_FILES ${SOURCE_FILE})
-#    endif()
-#endforeach()
-add_custom_target(clangformat ALL COMMAND /usr/bin/clang-format -style=file -i ${ALL_SOURCE_FILES} )
+add_custom_target(clangformat COMMAND /usr/bin/clang-format -style=file -i ${ALL_SOURCE_FILES} )
 
 # Look in the subdirectories to find additional CMakeLists.txt so we can build executables
 add_subdirectory(src)

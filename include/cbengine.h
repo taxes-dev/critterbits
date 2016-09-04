@@ -67,8 +67,9 @@ class Engine {
     SDL_Renderer * renderer = nullptr;
     int max_texture_height = 0;
     int max_texture_width = 0;
+    bool initialized = false;
 
-    Engine(){};
+    Engine();
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;

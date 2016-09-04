@@ -8,6 +8,22 @@
 #include <critterbits.h>
 
 namespace Critterbits {
+Engine::Engine() {
+    // initialize SDL
+    if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_TIMER*/) != 0) {
+        LOG_SDL_ERR("Engine::Run SDL_Init");
+        return;
+    }
+    if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
+        LOG_SDL_ERR("Engine::Run IMG_Init");
+        return;
+    }
+
+    // initialize TMX library
+    Tilemap::Tilemap_Init();
+    this->initialized = true;
+}
+
 Engine::~Engine() {
     SDLx::SDL_CleanUp(this->renderer, this->window);
     Tilemap::Tilemap_Quit();
@@ -23,24 +39,16 @@ Engine & Engine::GetInstance() {
 int Engine::Run() {
     LOG_INFO("Entering Engine::Run()");
 
+    if (!this->initialized) {
+        LOG_ERR("Engine::Run engine initialization was unsuccessful");
+        return 1;
+    }
+
     // check that we have valid configuration
     if (!this->config->IsValid()) {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
-
-    // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_TIMER*/) != 0) {
-        LOG_SDL_ERR("Engine::Run SDL_Init");
-        return 1;
-    }
-    if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
-        LOG_SDL_ERR("Engine::Run IMG_Init");
-        return 1;
-    }
-
-    // initialize TMX library
-    Tilemap::Tilemap_Init();
 
     // discover display bounds
     SDL_GetDisplayBounds(0, &this->display_bounds);
@@ -103,7 +111,7 @@ int Engine::Run() {
 
     // test scripting
     scripts.LoadScript("player");
-    return 0;
+    // return 0;
 
     // entities to iterate
     std::list<Entity *> entities;

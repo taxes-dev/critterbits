@@ -1138,7 +1138,7 @@ DUK_EXTERNAL_DECL void duk_debugger_pause(duk_context * ctx);
 #define DUK_DATE_FLAG_TOSTRING_LOCALE (1 << 8) /* use locale specific formatting if available */
 #define DUK_DATE_FLAG_TIMESETTER                                                                                       \
     (1 << 9) /* setter: call is a time setter (affects hour, min, sec, ms); otherwise date setter (affects year,       \
-                        month, day-in-month) */
+                               month, day-in-month) */
 #define DUK_DATE_FLAG_YEAR_FIXUP (1 << 10) /* setter: perform 2-digit year fixup (00...99 -> 1900...1999) */
 #define DUK_DATE_FLAG_SEP_T (1 << 11)      /* string conversion: use 'T' instead of ' ' as a separator */
 #define DUK_DATE_FLAG_VALUE_SHIFT 12       /* additional values begin at bit 12 */
