@@ -22,6 +22,13 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 	endif()
 endif()
 
+if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE} -Os -fomit-frame-pointer")
+elseif (${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
+endif()
+
 # Look up SDL2 and add the include directory to our include path
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)

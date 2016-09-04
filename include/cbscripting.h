@@ -2,6 +2,8 @@
 #ifndef CBSCRIPTING_H
 #define CBSCRIPTING_H
 
+#include <memory>
+#include <string>
 #include <vector>
 
 #include <duktape/duktape.h>
@@ -18,19 +20,27 @@ class Script {
     std::string script_path;
     std::string script_name;
 
+    void CallUpdate(std::shared_ptr<Entity>, float);
+
   private:
     duk_context * context = nullptr;
+    bool global_update = false;
+
+    void CreateEntityInContext(std::shared_ptr<Entity>, const char *);
+    void DiscoverGlobals();
+    void RetrieveEntityFromContext(std::shared_ptr<Entity>, const char *);
 };
 
 class ScriptEngine {
   public:
     ScriptEngine();
     ~ScriptEngine();
+    std::shared_ptr<Script> GetScriptHandle(const std::string &);
     bool LoadScript(const std::string &);
 
   private:
     duk_context * context = nullptr;
-    std::vector<Script> loaded_scripts;
+    std::vector<std::shared_ptr<Script>> loaded_scripts;
 
     ScriptEngine(const ScriptEngine &) = delete;
     ScriptEngine(ScriptEngine &&) = delete;

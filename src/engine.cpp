@@ -110,8 +110,14 @@ int Engine::Run() {
     }
 
     // test scripting
+    std::shared_ptr<Entity> a_sprite(new Sprite());
+    a_sprite->dim.x = 12;
+    a_sprite->dim.y = 205;
+    a_sprite->tag = "helloworld";
     scripts.LoadScript("player");
-    // return 0;
+    scripts.GetScriptHandle("player")->CallUpdate(a_sprite, 0.017f);
+    LOG_INFO("After script call: helloworld.dim.x = " + std::to_string(a_sprite->dim.x));
+    return 0;
 
     // entities to iterate
     std::list<Entity *> entities;
