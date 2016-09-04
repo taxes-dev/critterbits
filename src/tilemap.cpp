@@ -68,8 +68,8 @@ bool Tilemap::CreateTextures(float scale) {
 
     this->tile_height = this->map->tile_height * scale;
     this->tile_width = this->map->tile_width * scale;
-    this->dim.w = this->map->width * this->tile_height;
-    this->dim.h = this->map->height * this->tile_width;
+    this->dim.w = NextPowerOf2(this->map->width * this->tile_height);
+    this->dim.h = NextPowerOf2(this->map->height * this->tile_width);
     this->dim.x = 0;
     this->dim.y = 0;
 
