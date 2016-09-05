@@ -109,18 +109,8 @@ int Engine::Run() {
         return 1;
     }
 
-    // test scripting
-    /*std::shared_ptr<Entity> a_sprite(new Sprite());
-    a_sprite->dim.x = 12;
-    a_sprite->dim.y = 205;
-    a_sprite->tag = "helloworld";
-    scripts.LoadScript("player");
-    scripts.GetScriptHandle("player")->CallUpdate(a_sprite, 0.017f);
-    LOG_INFO("After script call: helloworld.dim.x = " + std::to_string(a_sprite->dim.x));
-    return 0;*/
-
     // entities to iterate
-    std::vector<Entity *> entities;
+    std::vector<std::shared_ptr<Entity>> entities;
 
     // timer
     unsigned int ticks = 0;
@@ -196,16 +186,23 @@ int Engine::Run() {
             entities.clear();
             if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
                 if (this->scenes.current_scene->GetTilemap() != nullptr) {
-                    entities.push_back(this->scenes.current_scene->GetTilemap().get());
+                    entities.push_back(this->scenes.current_scene->GetTilemap());
                 }
                 for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
-                    entities.push_back(sprite.get());
+                    entities.push_back(sprite);
                 }
             }
-            entities.push_back(&this->viewport);
+            entities.push_back(std::make_shared<Entity>(this->viewport));
 
             // Update cycle
             for (auto & entity : entities) {
+                std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+                if (sprite != nullptr) {
+                    std::shared_ptr<Script> script = scripts.GetScriptHandle(sprite->sprite_name);
+                    if (script != nullptr) {
+                        script->CallUpdate(entity, dt);
+                    }
+                }
                 entity->Update(dt);
             }
 

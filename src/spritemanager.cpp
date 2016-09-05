@@ -60,6 +60,7 @@ bool SpriteManager::LoadQueuedSprites() {
         LOG_INFO("SpriteManager::LoadQueuedSprites attempting to load " + sprite_path_current);
 
         std::shared_ptr<Sprite> new_sprite(new Sprite());
+        new_sprite->sprite_name = *it;
         new_sprite->sprite_path = sprite_path_current;
 
         if (ReadTextFile(sprite_path_current, &sprite_content)) {

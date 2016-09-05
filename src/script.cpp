@@ -13,6 +13,20 @@ namespace Critterbits {
 * Support functions for modifying the duktape context
 */
 namespace {
+inline int get_bool_property(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    duk_bool_t value = duk_get_boolean(context, -1);
+    duk_pop(context);
+    return value != 0;
+}
+
+inline int get_float_property(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    float value = (float)duk_get_number(context, -1);
+    duk_pop(context);
+    return value;
+}
+
 inline int get_int_property(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     int value = duk_get_int(context, -1);
@@ -20,16 +34,37 @@ inline int get_int_property(duk_context * context, const char * property_name, i
     return value;
 }
 
+inline std::string get_string_property(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    const char * value = duk_get_string(context, -1);
+    duk_pop(context);
+    if (value == nullptr) {
+        return "";
+    }
+    return std::string(value);
+}
+
+inline void push_property_bool(duk_context * context, const char * property_name, bool value) {
+    duk_push_boolean(context, value ? 1 : 0);
+    // -2 skips over scalar just pushed and assumes target object is right behind it
+    duk_put_prop_string(context, -2, property_name);
+}
+
+inline void push_property_float(duk_context * context, const char * property_name, float value) {
+    duk_push_number(context, value);
+    duk_put_prop_string(context, -2, property_name);
+}
+
 inline void push_property_int(duk_context * context, const char * property_name, int value) {
     duk_push_int(context, value);
     duk_put_prop_string(context, -2,
-                        property_name); // -2 skips over int just pushed and assumes target object is right behind it
+                        property_name); 
 }
 
-inline void push_property_string(duk_context * context, const char * property_name, std::string & value) {
+inline void push_property_string(duk_context * context, const char * property_name, const std::string & value) {
     duk_push_string(context, value.c_str());
     duk_put_prop_string(context, -2,
-                        property_name); // -2 skips over string just pushed and assumes target object is right behind it
+                        property_name);
 }
 }
 /*
@@ -81,6 +116,11 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
 
     push_property_string(this->context, "tag", entity->tag);
 
+    std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+    if (sprite != nullptr) {
+        this->ExtendEntityWithSprite(std::move(sprite));
+    }
+
     // save to the stash so we can grab it after method call
     duk_put_prop_string(this->context, -2, stash_name);
 
@@ -88,6 +128,21 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
     duk_get_prop_string(this->context, -1, stash_name);
     duk_swap_top(this->context, -2);
     duk_pop(this->context);
+}
+
+void Script::ExtendEntityWithSprite(std::shared_ptr<Sprite> sprite) {
+    push_property_string(this->context, "entity_type", "sprite");
+    push_property_float(this->context, "sprite_scale", sprite->sprite_scale);
+    push_property_int(this->context, "tile_height", sprite->tile_height);
+    push_property_int(this->context, "tile_width", sprite->tile_width);
+    push_property_int(this->context, "tile_offset_x", sprite->tile_offset_x);
+    push_property_int(this->context, "tile_offset_y", sprite->tile_offset_y);
+    push_property_bool(this->context, "flip_x", sprite->flip_x);
+    push_property_bool(this->context, "flip_y", sprite->flip_y);
+    duk_push_object(this->context); // frame
+    push_property_int(this->context, "current", sprite->GetFrame());
+    push_property_int(this->context, "count", sprite->GetFrameCount());
+    duk_put_prop_string(this->context, -2, "frame");
 }
 
 void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const char * stash_name) {
@@ -100,11 +155,31 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
         entity->dim.w = get_int_property(this->context, "w");
         entity->dim.h = get_int_property(this->context, "h");
         duk_pop(this->context); // dim
+
+        std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+        if (sprite != nullptr) {
+            this->RetrieveSpriteFromContext(std::move(sprite));
+        }
+
         duk_pop(this->context); // "stash_name"
     } else {
         LOG_ERR("Script::RetrieveEntityFromContext unable to retrieve entity from stash");
     }
     duk_pop(this->context); // stash
+}
+
+void Script::RetrieveSpriteFromContext(std::shared_ptr<Sprite> sprite) {
+    sprite->sprite_scale = get_float_property(this->context, "sprite_scale");
+    sprite->tile_height = get_int_property(this->context, "tile_height");
+    sprite->tile_width = get_int_property(this->context, "tile_width");
+    sprite->tile_offset_x = get_int_property(this->context, "tile_offset_x");
+    sprite->tile_offset_y = get_int_property(this->context, "tile_offset_y");
+    sprite->flip_x = get_bool_property(this->context, "flip_x");
+    sprite->flip_y = get_bool_property(this->context, "flip_y");
+    duk_get_prop_string(this->context, -1, "frame");
+    int current_frame = get_int_property(this->context, "current");
+    sprite->SetFrame(current_frame);
+    duk_pop(this->context); // frame
 }
 
 void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {

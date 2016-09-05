@@ -28,17 +28,25 @@ void Sprite::NotifyLoaded() {
     this->dim.w = this->tile_width * this->sprite_scale;
     this->dim.h = this->tile_height * this->sprite_scale;
 
-    LOG_INFO("Sprite::NotifyLoaded attempting to load sprite sheet " + this->sprite_sheet_path);
-    this->sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), this->sprite_sheet_path.c_str());
-    if (this->sprite_sheet == nullptr) {
-        LOG_SDL_ERR("Sprite::NotifyLoaded unable to load sprite sheet to texture");
-        return;
-    }
+    EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
+        LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
+        this->sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), this->sprite_sheet_path.c_str());
+        if (this->sprite_sheet == nullptr) {
+            LOG_SDL_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet to texture");
+            return;
+        }
 
-    int w, h;
-    SDL_QueryTexture(this->sprite_sheet, NULL, NULL, &w, &h);
-    this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
-    this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
+        int w, h;
+        SDL_QueryTexture(this->sprite_sheet, NULL, NULL, &w, &h);
+        this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
+        this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
+    });
+
+    EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
+        LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite script " + this->sprite_name);
+
+        Engine::GetInstance().scripts.LoadScript(this->sprite_name);
+    });
 }
 
 void Sprite::NotifyUnloaded() { LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->tag); }

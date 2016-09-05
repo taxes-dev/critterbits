@@ -15,7 +15,7 @@ class Tilemap : public Entity {
     int tile_width;
     int tile_height;
 
-    Tilemap(std::string &);
+    Tilemap(const std::string &);
     ~Tilemap();
     bool CreateTextures(float scale);
     SDL_Texture * GetMapTexture() const { return this->map_texture; };

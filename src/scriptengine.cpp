@@ -40,6 +40,10 @@ bool ScriptEngine::LoadScript(const std::string & script_name) {
     std::string script_path =
         Engine::GetInstance().config->asset_path + CB_SCRIPT_PATH + PATH_SEP + script_name + CB_SCRIPT_EXT;
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
+    if (!FileExists(script_path)) {
+        LOG_INFO("ScriptEngine::Loadscript script not found");
+        return false;
+    }
 
     std::shared_ptr<Script> new_script(new Script());
     new_script->script_name = script_name;

@@ -15,6 +15,7 @@
 namespace Critterbits {
 class Sprite : public Entity {
   public:
+    std::string sprite_name;
     std::string sprite_path;
     std::string sprite_sheet_path = "";
     float sprite_scale = 1.0f;

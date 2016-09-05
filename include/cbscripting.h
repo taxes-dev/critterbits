@@ -27,8 +27,10 @@ class Script {
     bool global_update = false;
 
     void CreateEntityInContext(std::shared_ptr<Entity>, const char *);
+    void ExtendEntityWithSprite(std::shared_ptr<Sprite>);
     void DiscoverGlobals();
     void RetrieveEntityFromContext(std::shared_ptr<Entity>, const char *);
+    void RetrieveSpriteFromContext(std::shared_ptr<Sprite>);
 };
 
 class ScriptEngine {

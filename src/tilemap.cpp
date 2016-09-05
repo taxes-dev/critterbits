@@ -44,7 +44,7 @@ void * sdl_img_loader(const char * path) { return IMG_LoadTexture(Engine::GetIns
  * End support functions
  */
 
-Tilemap::Tilemap(std::string & map_path) : tmx_path(map_path) {
+Tilemap::Tilemap(const std::string & map_path) : tmx_path(map_path) {
     this->draw_debug = Engine::GetInstance().config->debug.draw_map_regions;
 }
 
