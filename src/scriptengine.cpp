@@ -32,17 +32,17 @@ std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script
     return nullptr;
 }
 
-bool ScriptEngine::LoadScript(const std::string & script_name) {
+std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name) {
     if (this->context == nullptr) {
         LOG_ERR("ScriptEngine::LoadScript no scripting runtime");
-        return false;
+        return nullptr;
     }
     std::string script_path =
         Engine::GetInstance().config->asset_path + CB_SCRIPT_PATH + PATH_SEP + script_name + CB_SCRIPT_EXT;
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
     if (!FileExists(script_path)) {
         LOG_INFO("ScriptEngine::Loadscript script not found");
-        return false;
+        return nullptr;
     }
 
     std::shared_ptr<Script> new_script(new Script());
@@ -52,7 +52,7 @@ bool ScriptEngine::LoadScript(const std::string & script_name) {
     new_script->context = duk_get_context(this->context, 0);
     if (new_script->context == nullptr) {
         LOG_ERR("ScriptEngine::LoadScript unable to create new script context");
-        return false;
+        return nullptr;
     }
     if (duk_peval_file(new_script->context, script_path.c_str()) != 0) {
         const char * error = duk_safe_to_string(new_script->context, 0);
@@ -64,7 +64,7 @@ bool ScriptEngine::LoadScript(const std::string & script_name) {
     // prepare the script object
     new_script->DiscoverGlobals();
 
-    this->loaded_scripts.push_back(std::move(new_script));
-    return true;
+    this->loaded_scripts.push_back(new_script);
+    return new_script;
 }
 }

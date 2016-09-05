@@ -38,7 +38,7 @@ class ScriptEngine {
     ScriptEngine();
     ~ScriptEngine();
     std::shared_ptr<Script> GetScriptHandle(const std::string &);
-    bool LoadScript(const std::string &);
+    std::shared_ptr<Script> LoadScript(const std::string &);
 
   private:
     duk_context * context = nullptr;

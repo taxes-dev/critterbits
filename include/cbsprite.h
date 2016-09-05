@@ -2,9 +2,9 @@
 #ifndef CBSPRITE_H
 #define CBSPRITE_H
 
-#include <list>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "cbentity.h"
 #include <SDL.h>
@@ -47,7 +47,7 @@ class Sprite : public Entity {
 
 class SpriteManager {
   public:
-    std::list<std::shared_ptr<Sprite>> sprites;
+    std::vector<std::shared_ptr<Sprite>> sprites;
 
     SpriteManager(){};
     static std::string GetSpritePath(std::string &);
@@ -55,7 +55,7 @@ class SpriteManager {
     void QueueSprite(std::string &);
 
   private:
-    std::list<std::string> queued_sprites;
+    std::vector<std::string> queued_sprites;
 
     SpriteManager(const SpriteManager &) = delete;
     SpriteManager(SpriteManager &&) = delete;

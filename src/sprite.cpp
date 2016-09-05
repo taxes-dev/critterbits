@@ -45,7 +45,7 @@ void Sprite::NotifyLoaded() {
     EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
         LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite script " + this->sprite_name);
 
-        Engine::GetInstance().scripts.LoadScript(this->sprite_name);
+        this->script = Engine::GetInstance().scripts.LoadScript(this->sprite_name);
     });
 }
 

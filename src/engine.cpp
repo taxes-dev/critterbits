@@ -111,6 +111,7 @@ int Engine::Run() {
 
     // entities to iterate
     std::vector<std::shared_ptr<Entity>> entities;
+    std::shared_ptr<Viewport> viewport_ptr(&this->viewport, [](Viewport *) {});
 
     // timer
     unsigned int ticks = 0;
@@ -184,24 +185,20 @@ int Engine::Run() {
 
             // Set list of entities to iterate
             entities.clear();
-            if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
-                if (this->scenes.current_scene->GetTilemap() != nullptr) {
+            if (this->scenes.IsCurrentSceneActive()) {
+                if (this->scenes.current_scene->HasTilemap()) {
                     entities.push_back(this->scenes.current_scene->GetTilemap());
                 }
                 for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
                     entities.push_back(sprite);
                 }
             }
-            entities.push_back(std::make_shared<Entity>(this->viewport));
+            entities.push_back(viewport_ptr);
 
             // Update cycle
             for (auto & entity : entities) {
-                std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-                if (sprite != nullptr) {
-                    std::shared_ptr<Script> script = scripts.GetScriptHandle(sprite->sprite_name);
-                    if (script != nullptr) {
-                        script->CallUpdate(entity, dt);
-                    }
+                if (entity->HasScript()) {
+                    entity->script->CallUpdate(entity, dt);
                 }
                 entity->Update(dt);
             }
