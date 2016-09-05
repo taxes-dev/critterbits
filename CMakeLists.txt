@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${critterbits_SOURCE_DIR}/cmake")
 
 # Set an output directory for our binaries
 set(BIN_DIR ${critterbits_SOURCE_DIR}/bin)
+set(PROJECT_TRDPARTY_DIR ${critterbits_SOURCE_DIR}/3pp)
 
 # Bump up warning levels appropriately for clang, gcc & msvc
 # Also set debug/optimization flags depending on the build type. IDE users choose this when
@@ -49,6 +50,12 @@ include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INC
 
 # clang-format target
 file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
+foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
+    string(FIND ${SOURCE_FILE} ${PROJECT_TRDPARTY_DIR} PROJECT_TRDPARTY_DIR_FOUND)
+    if (NOT ${PROJECT_TRDPARTY_DIR_FOUND} EQUAL -1)
+        list(REMOVE_ITEM ALL_SOURCE_FILES ${SOURCE_FILE})
+    endif()
+endforeach()
 add_custom_target(clangformat COMMAND /usr/bin/clang-format -style=file -i ${ALL_SOURCE_FILES} )
 
 # Look in the subdirectories to find additional CMakeLists.txt so we can build executables

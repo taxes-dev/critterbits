@@ -60,7 +60,6 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_put_prop_string(context, -2, "is_key_pressed");
     duk_put_prop_string(context, -2, "input");
 
-    duk_dump_context_stdout(context);
     duk_pop(context); // global
 }
 
