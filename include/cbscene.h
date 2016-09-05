@@ -28,12 +28,12 @@ class Scene {
 
     Scene(){};
     ~Scene();
-    Tilemap * GetTilemap() { return this->tilemap; };
+    std::shared_ptr<Tilemap> GetTilemap() { return this->tilemap; };
     void NotifyLoaded();
     void NotifyUnloaded(bool);
 
   private:
-    Tilemap * tilemap = nullptr;
+    std::shared_ptr<Tilemap> tilemap = nullptr;
 };
 
 class SceneManager {
@@ -46,7 +46,6 @@ class SceneManager {
     static std::string GetScenePath(const std::string &);
 
   private:
-    std::string asset_path; // FIXME:reduce copies of this
     std::string scene_path;
     std::list<std::shared_ptr<Scene>> loaded_scenes;
 

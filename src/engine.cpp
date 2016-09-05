@@ -120,7 +120,7 @@ int Engine::Run() {
     return 0;*/
 
     // entities to iterate
-    std::list<Entity *> entities;
+    std::vector<Entity *> entities;
 
     // timer
     unsigned int ticks = 0;
@@ -195,9 +195,8 @@ int Engine::Run() {
             // Set list of entities to iterate
             entities.clear();
             if (this->scenes.current_scene != nullptr && this->scenes.current_scene->state == CBE_SCENE_ACTIVE) {
-                Entity * tilemap = this->scenes.current_scene->GetTilemap();
-                if (tilemap != nullptr) {
-                    entities.push_back(tilemap);
+                if (this->scenes.current_scene->GetTilemap() != nullptr) {
+                    entities.push_back(this->scenes.current_scene->GetTilemap().get());
                 }
                 for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
                     entities.push_back(sprite.get());
