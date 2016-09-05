@@ -57,14 +57,12 @@ inline void push_property_float(duk_context * context, const char * property_nam
 
 inline void push_property_int(duk_context * context, const char * property_name, int value) {
     duk_push_int(context, value);
-    duk_put_prop_string(context, -2,
-                        property_name); 
+    duk_put_prop_string(context, -2, property_name);
 }
 
 inline void push_property_string(duk_context * context, const char * property_name, const std::string & value) {
     duk_push_string(context, value.c_str());
-    duk_put_prop_string(context, -2,
-                        property_name);
+    duk_put_prop_string(context, -2, property_name);
 }
 }
 /*

@@ -123,7 +123,6 @@ int Engine::Run() {
 
     // HACK
     std::shared_ptr<Sprite> player_sprite;
-    CB_Point center_view{0, 0};
 
     // start main loop
     SDL_Event e;
@@ -145,29 +144,8 @@ int Engine::Run() {
                 quit = true;
             }
 
-            if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED && player_sprite != nullptr) {
-                const int player_velocity = 400;
-                switch (e.key.keysym.sym) {
-                    case SDLK_LEFT:
-                        player_sprite->dim.x -= delta_time * player_velocity;
-                        player_sprite->SetFrame(0);
-                        player_sprite->flip_x = false;
-                        break;
-                    case SDLK_RIGHT:
-                        player_sprite->dim.x += delta_time * player_velocity;
-                        player_sprite->SetFrame(0);
-                        player_sprite->flip_x = true;
-                        break;
-                    case SDLK_UP:
-                        player_sprite->dim.y -= delta_time * player_velocity;
-                        player_sprite->SetFrame(6);
-                        break;
-                    case SDLK_DOWN:
-                        player_sprite->dim.y += delta_time * player_velocity;
-                        player_sprite->SetFrame(3);
-                        break;
-                }
-            }
+            // InputManager will process the event if it's input-related
+            this->input.AddSdlEvent(e);
         }
 
         // begin simulation loop
@@ -206,6 +184,9 @@ int Engine::Run() {
             // timing update
             frame_time -= delta_time * 1000;
         }
+
+        // Clear remaining input events
+        this->input.ClearInputEvents();
 
         // Render pass
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);

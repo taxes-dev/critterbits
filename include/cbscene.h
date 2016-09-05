@@ -43,7 +43,9 @@ class SceneManager {
 
     SceneManager(){};
     ~SceneManager();
-    bool IsCurrentSceneActive() { return this->current_scene != nullptr && this->current_scene->state == CBE_SCENE_ACTIVE; };
+    bool IsCurrentSceneActive() {
+        return this->current_scene != nullptr && this->current_scene->state == CBE_SCENE_ACTIVE;
+    };
     bool LoadScene(const std::string &);
     static std::string GetScenePath(const std::string &);
 

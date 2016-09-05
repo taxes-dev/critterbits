@@ -11,9 +11,9 @@ const char PATH_SEP = '/';
 #endif
 
 namespace Critterbits {
-inline bool FileExists(const std::string& file_path) {
-  struct stat buffer;   
-  return (stat(file_path.c_str(), &buffer) == 0); 
+inline bool FileExists(const std::string & file_path) {
+    struct stat buffer;
+    return (stat(file_path.c_str(), &buffer) == 0);
 }
 
 bool ReadTextFile(const std::string & file_name, std::string ** file_contents);

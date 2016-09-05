@@ -22,7 +22,7 @@ CB_Rect Sprite::GetFrameRect() const {
 }
 
 void Sprite::NotifyLoaded() {
-    LOG_INFO("Sprite::NotifyLoaded sprite was loaded " + this->tag);
+    LOG_INFO("Sprite::NotifyLoaded sprite was loaded " + this->sprite_name);
     this->dim.x = 0;
     this->dim.y = 0;
     this->dim.w = this->tile_width * this->sprite_scale;
@@ -49,7 +49,7 @@ void Sprite::NotifyLoaded() {
     });
 }
 
-void Sprite::NotifyUnloaded() { LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->tag); }
+void Sprite::NotifyUnloaded() { LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name); }
 
 void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
     if (this->sprite_sheet != nullptr) {
@@ -74,9 +74,5 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
     }
 }
 
-void Sprite::SetFrame(int frame) {
-    if (frame >= 0 && frame < this->GetFrameCount()) {
-        this->current_frame = frame;
-    }
-}
+void Sprite::SetFrame(int frame) { this->current_frame = Clamp(frame, 0, this->GetFrameCount()); }
 }

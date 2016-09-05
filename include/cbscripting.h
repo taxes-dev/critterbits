@@ -44,6 +44,8 @@ class ScriptEngine {
     duk_context * context = nullptr;
     std::vector<std::shared_ptr<Script>> loaded_scripts;
 
+    void AddCommonScriptingFunctions(duk_context *);
+
     ScriptEngine(const ScriptEngine &) = delete;
     ScriptEngine(ScriptEngine &&) = delete;
     void operator=(ScriptEngine const &) = delete;

@@ -2,8 +2,7 @@
 
 namespace Critterbits {
 
-Scene::~Scene() {
-}
+Scene::~Scene() {}
 
 void Scene::NotifyLoaded() {
     LOG_INFO("Scene::NotifyLoaded scene was loaded: " + this->scene_name);

@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include "cbinput.h"
 #include "cbscene.h"
 #include "cbscripting.h"
 #include "cbviewport.h"
@@ -49,6 +50,7 @@ class Engine {
   public:
     std::shared_ptr<EngineConfiguration> config;
     SDL_Rect display_bounds;
+    InputManager input;
     ScriptEngine scripts;
     SceneManager scenes;
     Viewport viewport;
@@ -90,6 +92,7 @@ class EngineEventQueue {
     void ExecutePreUpdate();
 
   private:
+    // FIXME: I need to figure out why changing this to std::vector results in a random malloc segfault
     std::list<PreUpdateEvent> pre_update;
 
     EngineEventQueue(){};
