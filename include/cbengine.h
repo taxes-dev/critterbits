@@ -46,15 +46,41 @@ class EngineConfiguration {
     bool valid = false;
 };
 
+class EngineCounters {
+  public:
+    EngineCounters() {};
+
+    float GetAverageFps() { return this->fps; };
+    float GetDeltaFromRemainingFrameTime();
+    float GetDeltaTime() { return this->delta_time; };
+    unsigned int GetRemainingFrameTime() { return this->frame_time; };
+    unsigned int GetRenderedEntitiesCount() { return this->render_count; };
+    void NewFrame();
+    void RenderedEntity();
+    void Reset();
+    void Updated();
+
+  private:
+    const float delta_time = 1.0f / CB_DESIRED_UPS;
+
+    float fps = 0.;
+    unsigned int ticks = 0;
+    unsigned int last_ticks = 0;
+    unsigned int frame_time = 0;
+    unsigned int frame_count = 0;
+    unsigned int render_count = 0;
+    unsigned int update_count = 0;
+};
+
 class Engine {
   public:
     std::shared_ptr<EngineConfiguration> config;
     SDL_Rect display_bounds;
+    EngineCounters counters;
     InputManager input;
     ScriptEngine scripts;
     SceneManager scenes;
     Viewport viewport;
-    float fps = 0.;
 
     ~Engine();
     static Engine & GetInstance();
@@ -75,7 +101,7 @@ class Engine {
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;
-    void RenderDebugPane(int, int);
+    void RenderDebugPane(int);
 };
 
 typedef std::function<void()> PreUpdateEvent;

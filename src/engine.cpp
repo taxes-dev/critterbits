@@ -112,15 +112,7 @@ int Engine::Run() {
     // entities to iterate
     std::vector<std::shared_ptr<Entity>> entities;
     std::shared_ptr<Viewport> viewport_ptr(&this->viewport, [](Viewport *) {});
-
-    // timer
-    unsigned int ticks = 0;
-    unsigned int last_ticks = 0;
-    unsigned int frame_time = 0;
-    unsigned int frame_count = 0;
-    float delta_time = 1.0f / CB_DESIRED_UPS;
-    int render_count = 0;
-
+ 
     // HACK
     std::shared_ptr<Sprite> player_sprite;
 
@@ -129,13 +121,7 @@ int Engine::Run() {
     bool quit = false;
     while (!quit) {
         // timing update
-        ticks = SDL_GetTicks();
-        frame_time = ticks - last_ticks;
-        last_ticks = ticks;
-        frame_count++;
-        if (frame_count % 10 == 0) {
-            this->fps = (this->fps + 1000.0f / frame_time) / 2.0f;
-        }
+        this->counters.NewFrame();
 
         // check for waiting SDL events
         while (SDL_PollEvent(&e)) {
@@ -149,8 +135,8 @@ int Engine::Run() {
         }
 
         // begin simulation loop
-        while (frame_time > 0) {
-            float dt = std::min(delta_time, frame_time / 1000.0f);
+        while (this->counters.GetRemainingFrameTime() > 0) {
+            float dt = this->counters.GetDeltaFromRemainingFrameTime();
 
             // Execute pre-update events
             EngineEventQueue::GetInstance().ExecutePreUpdate();
@@ -182,7 +168,7 @@ int Engine::Run() {
             }
 
             // timing update
-            frame_time -= delta_time * 1000;
+            this->counters.Updated();
         }
 
         // Clear remaining input events
@@ -191,16 +177,15 @@ int Engine::Run() {
         // Render pass
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         SDL_RenderClear(this->renderer);
-        render_count = 0;
         for (auto & entity : entities) {
             if (entity->dim.intersects(this->viewport.dim)) {
                 entity->Render(this->renderer, this->viewport.GetViewableRect(entity->dim));
-                render_count++;
+                this->counters.RenderedEntity();
             }
         }
 
         if (this->config->debug.draw_info_pane) {
-            this->RenderDebugPane(entities.size(), render_count);
+            this->RenderDebugPane(entities.size());
         }
         SDL_RenderPresent(this->renderer);
     }
@@ -209,13 +194,13 @@ int Engine::Run() {
     return 0;
 }
 
-void Engine::RenderDebugPane(int entity_count, int entities_in_view) {
+void Engine::RenderDebugPane(int entity_count) {
     std::stringbuf info;
     std::ostream os(&info);
 
     os << "view" << this->viewport.dim.xy().to_string();
-    os << " ent(" << entities_in_view << "/" << entity_count << ")";
-    os << " fps " << std::fixed << std::setprecision(1) << this->fps;
+    os << " ent(" << this->counters.GetRenderedEntitiesCount() << "/" << entity_count << ")";
+    os << " fps " << std::fixed << std::setprecision(1) << this->counters.GetAverageFps();
 
     roundedBoxRGBA(this->renderer, -6, this->viewport.dim.h - 12, info.str().length() * 8 + 10,
                    this->viewport.dim.h + 6, 6, 0, 0, 0, 127);
