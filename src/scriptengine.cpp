@@ -38,7 +38,7 @@ duk_ret_t viewport_follow(duk_context * context) {
         duk_pop(context);
     }
     duk_push_boolean(context, success);
-    return 1; 
+    return 1;
 }
 
 /*
@@ -59,7 +59,9 @@ ScriptEngine::~ScriptEngine() {
     }
 }
 
-#define CB_PUT_KEYCODE(k) duk_push_int(context, SDLK_ ## k); duk_put_prop_string(context, -2, #k);
+#define CB_PUT_KEYCODE(k)                                                                                              \
+    duk_push_int(context, SDLK_##k);                                                                                   \
+    duk_put_prop_string(context, -2, #k);
 
 void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_push_global_object(context);

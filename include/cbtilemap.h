@@ -26,9 +26,9 @@ class Tilemap : public Entity {
 
   private:
     std::string tmx_path;
-    tmx_map * map = nullptr;
-    SDL_Texture * map_texture = nullptr;
-    bool draw_debug = false;
+    tmx_map * map{nullptr};
+    SDL_Texture * map_texture{nullptr};
+    bool draw_debug{false};
 
     SDL_Texture * RenderMap(SDL_Renderer *, float);
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);

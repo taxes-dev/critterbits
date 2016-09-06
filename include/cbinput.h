@@ -11,7 +11,7 @@ typedef enum { CBE_INPUT_KEYBOARD } InputEventType;
 
 struct InputEvent {
     InputEventType type;
-    int key_code = 0;
+    int key_code;
 
     InputEvent(InputEventType type) : type(type){};
 };

@@ -64,19 +64,20 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
             dst_rect.w = this->dim.w;
             dst_rect.h = this->dim.h;
             SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), dst_rect, this->flip_x,
-                                        this->flip_y);
+                                           this->flip_y);
         }
         if (this->draw_debug) {
             rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
-                        255, 0, 0, 127);
+                          255, 0, 0, 127);
             boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
                     clip_rect.dest.bottom() + 10, 255, 0, 0, 127);
-            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255, 255);
+            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255,
+                       255);
             std::string coords = this->dim.xy().to_string();
             boxRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 2, clip_rect.dest.y - 10,
                     clip_rect.dest.right() - 1, clip_rect.dest.y - 1, 255, 0, 0, 127);
             stringRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 1, clip_rect.dest.y - 9, coords.c_str(),
-                    255, 255, 255, 255);
+                       255, 255, 255, 255);
             std::string f = std::to_string(this->current_frame);
             boxRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, clip_rect.dest.x + f.length() * 8 + 2,
                     clip_rect.dest.y + 10, 255, 0, 0, 127);

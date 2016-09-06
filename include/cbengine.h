@@ -25,14 +25,14 @@ class EngineConfiguration {
   public:
     std::string asset_path;
     struct {
-        bool draw_info_pane = false;
-        bool draw_map_regions = false;
-        bool draw_sprite_rects = false;
+        bool draw_info_pane{false};
+        bool draw_map_regions{false};
+        bool draw_sprite_rects{false};
     } debug;
     struct {
-        bool full_screen = false;
-        int width = CB_DEFAULT_WINDOW_W;
-        int height = CB_DEFAULT_WINDOW_H;
+        bool full_screen{false};
+        int width{CB_DEFAULT_WINDOW_W};
+        int height{CB_DEFAULT_WINDOW_H};
         std::string title;
     } window;
 
@@ -43,12 +43,12 @@ class EngineConfiguration {
     bool Validate();
 
   private:
-    bool valid = false;
+    bool valid{false};
 };
 
 class EngineCounters {
   public:
-    EngineCounters() {};
+    EngineCounters() { this->Reset(); };
 
     float GetAverageFps() { return this->fps; };
     float GetDeltaFromRemainingFrameTime();
@@ -61,15 +61,15 @@ class EngineCounters {
     void Updated();
 
   private:
-    const float delta_time = 1.0f / CB_DESIRED_UPS;
+    const float delta_time{1.0f / CB_DESIRED_UPS};
 
-    float fps = 0.;
-    unsigned int ticks = 0;
-    unsigned int last_ticks = 0;
-    unsigned int frame_time = 0;
-    unsigned int frame_count = 0;
-    unsigned int render_count = 0;
-    unsigned int update_count = 0;
+    float fps;
+    unsigned int ticks;
+    unsigned int last_ticks;
+    unsigned int frame_time;
+    unsigned int frame_count;
+    unsigned int render_count;
+    unsigned int update_count;
 };
 
 class Engine {
@@ -80,7 +80,7 @@ class Engine {
     InputManager input;
     ScriptEngine scripts;
     SceneManager scenes;
-    std::shared_ptr<Viewport> viewport{new Viewport()};
+    std::shared_ptr<Viewport> viewport{std::make_shared<Viewport>()};
 
     ~Engine();
     std::shared_ptr<Entity> FindEntityById(entity_id_t);
@@ -92,11 +92,11 @@ class Engine {
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);
 
   private:
-    SDL_Window * window = nullptr;
-    SDL_Renderer * renderer = nullptr;
-    int max_texture_height = 0;
-    int max_texture_width = 0;
-    bool initialized = false;
+    SDL_Window * window{nullptr};
+    SDL_Renderer * renderer{nullptr};
+    int max_texture_height{0};
+    int max_texture_width{0};
+    bool initialized{false};
 
     Engine();
     Engine(const Engine &) = delete;

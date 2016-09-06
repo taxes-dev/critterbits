@@ -5,15 +5,15 @@
 namespace Critterbits {
 
 template <typename T>
-inline bool TestBitMask(T value, T mask) {
+inline bool TestBitMask(const T value, const T mask) {
     return (value & mask) == mask;
 }
 
 template <int>
-inline bool TestBitMask(int, int);
+inline bool TestBitMask(const int, const int);
 
 template <unsigned int>
-inline bool TestBitMask(unsigned int, unsigned int);
+inline bool TestBitMask(const unsigned int, const unsigned int);
 
 inline int Clamp(int value, int min, int max) {
     if (value < min)

@@ -19,7 +19,7 @@ class Viewport : public Entity {
 
   private:
     std::weak_ptr<Entity> entity_to_follow;
-    CB_Point entity_center_view;
+    CB_Point entity_center_view{0, 0};
 };
 }
 

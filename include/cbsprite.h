@@ -17,17 +17,17 @@ typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteSta
 
 class Sprite : public Entity {
   public:
-    SpriteState state = CBE_SPRITE_NEW;
+    SpriteState state{CBE_SPRITE_NEW};
     std::string sprite_name;
     std::string sprite_path;
     std::string sprite_sheet_path;
-    float sprite_scale = 1.0f;
-    int tile_height = 0;
-    int tile_width = 0;
-    int tile_offset_x = 0;
-    int tile_offset_y = 0;
-    bool flip_x = false;
-    bool flip_y = false;
+    float sprite_scale{1.0f};
+    int tile_height{0};
+    int tile_width{0};
+    int tile_offset_x{0};
+    int tile_offset_y{0};
+    bool flip_x{false};
+    bool flip_y{false};
 
     Sprite();
     ~Sprite();
@@ -41,13 +41,13 @@ class Sprite : public Entity {
     void Start();
 
   private:
-    int current_frame = 0;
-    int sprite_sheet_rows = 0;
-    int sprite_sheet_cols = 0;
-    bool draw_debug = false;
-    SDL_Texture * sprite_sheet = nullptr; // TODO: centrally manage sprite sheets so they can be shared between sprites
-    bool sprite_sheet_loaded = false;
-    bool script_loaded = false;
+    int current_frame{0};
+    int sprite_sheet_rows{0};
+    int sprite_sheet_cols{0};
+    bool draw_debug{false};
+    SDL_Texture * sprite_sheet{nullptr}; // TODO: centrally manage sprite sheets so they can be shared between sprites
+    bool sprite_sheet_loaded{false};
+    bool script_loaded{false};
 
     CB_Rect GetFrameRect() const;
 };

@@ -99,5 +99,4 @@ void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
     }
     sprite->NotifyUnloaded();
 }
-
 }

@@ -16,8 +16,12 @@
 
 #define CB_SCRIPT_ENTITY_THIS "entity_this"
 
-#define CB_SCRIPT_HIDDEN_DESTROYED "\xff" "destroyed"
-#define CB_SCRIPT_HIDDEN_ENTITYID "\xff" "entity_id"
+#define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
+    "\xff"                                                                                                             \
+    "destroyed"
+#define CB_SCRIPT_HIDDEN_ENTITYID                                                                                      \
+    "\xff"                                                                                                             \
+    "entity_id"
 
 namespace Critterbits {
 
@@ -32,9 +36,9 @@ class Script {
     void CallUpdate(std::shared_ptr<Entity>, float);
 
   private:
-    duk_context * context = nullptr;
-    bool global_start = false;
-    bool global_update = false;
+    duk_context * context{nullptr};
+    bool global_start{false};
+    bool global_update{false};
 
     void CreateEntityInContext(std::shared_ptr<Entity>, const char *);
     void ExtendEntityWithSprite(std::shared_ptr<Sprite>);
@@ -51,7 +55,7 @@ class ScriptEngine {
     std::shared_ptr<Script> LoadScript(const std::string &);
 
   private:
-    duk_context * context = nullptr;
+    duk_context * context{nullptr};
     std::vector<std::shared_ptr<Script>> loaded_scripts;
 
     void AddCommonScriptingFunctions(duk_context *);

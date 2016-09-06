@@ -74,7 +74,6 @@ duk_ret_t mark_entity_destroyed(duk_context * context) {
     duk_pop(context);
     return 0;
 }
-
 }
 /*
  * End support functions

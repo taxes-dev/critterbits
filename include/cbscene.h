@@ -19,11 +19,11 @@ typedef enum { CBE_SCENE_NEW, CBE_SCENE_ACTIVE, CBE_SCENE_INACTIVE, CBE_SCENE_UN
 
 class Scene {
   public:
-    bool persistent = false;
+    bool persistent{false};
     std::string scene_name;
     std::string map_path;
-    float map_scale = 1.0f;
-    SceneState state = CBE_SCENE_NEW;
+    float map_scale{1.0f};
+    SceneState state{CBE_SCENE_NEW};
     SpriteManager sprites;
 
     Scene(){};
@@ -34,7 +34,7 @@ class Scene {
     void NotifyUnloaded(bool);
 
   private:
-    std::shared_ptr<Tilemap> tilemap = nullptr;
+    std::shared_ptr<Tilemap> tilemap;
 };
 
 class SceneManager {

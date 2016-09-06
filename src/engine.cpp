@@ -41,7 +41,7 @@ void Engine::DestroyMarkedEntities() {
         entities.push_back(entity);
         return false;
     });
-    
+
     for (auto & entity : entities) {
         if (entity->destroyed) {
             switch (entity->GetEntityType()) {
@@ -57,7 +57,8 @@ void Engine::DestroyMarkedEntities() {
                     entity->destroyed = false;
                     break;
                 default:
-                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " + std::to_string(entity->GetEntityType()));
+                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " +
+                            std::to_string(entity->GetEntityType()));
                     entity->destroyed = false;
                     break;
             }
@@ -67,7 +68,7 @@ void Engine::DestroyMarkedEntities() {
 
 std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
     std::shared_ptr<Entity> ret = nullptr;
-    this->IterateActiveEntities([&](std::shared_ptr<Entity> entity){
+    this->IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
         if (entity->entity_id == entity_id) {
             ret = entity;
             return true;
@@ -76,7 +77,6 @@ std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
     });
     return ret;
 }
-
 
 Engine & Engine::GetInstance() {
     static Engine instance;
