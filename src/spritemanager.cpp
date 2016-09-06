@@ -59,7 +59,7 @@ bool SpriteManager::LoadQueuedSprites() {
         sprite_path_current = SpriteManager::GetSpritePath(sprite_name);
         LOG_INFO("SpriteManager::LoadQueuedSprites attempting to load " + sprite_path_current);
 
-        std::shared_ptr<Sprite> new_sprite(new Sprite());
+        std::shared_ptr<Sprite> new_sprite = std::make_shared<Sprite>();
         new_sprite->sprite_name = *it;
         new_sprite->sprite_path = sprite_path_current;
 
@@ -72,10 +72,10 @@ bool SpriteManager::LoadQueuedSprites() {
                 new_sprite->sprite_sheet_path = SpriteManager::GetSpritePath(new_sprite->sprite_sheet_path);
             }
 
-            this->sprites.push_back(new_sprite);
-
             // notify new sprite that it's been loaded
             new_sprite->NotifyLoaded();
+
+            this->sprites.push_back(std::move(new_sprite));
 
             it = this->queued_sprites.erase(it);
         } else {
@@ -91,7 +91,7 @@ void SpriteManager::QueueSprite(const std::string & sprite_name) { this->queued_
 
 void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
     for (auto it = this->sprites.begin(); it != this->sprites.end();) {
-        if (sprite == *it) {
+        if (sprite->entity_id == (*it)->entity_id) {
             this->sprites.erase(it);
             break;
         }

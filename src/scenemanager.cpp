@@ -70,7 +70,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
 
     // if we didn't have it loaded, fetch from disk
     if (this->current_scene == nullptr) {
-        std::shared_ptr<Scene> new_scene(new Scene());
+        std::shared_ptr<Scene> new_scene = std::make_shared<Scene>();
         new_scene->scene_name = scene_name;
 
         std::string * scene_content = nullptr;
@@ -86,8 +86,8 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         parser.Parse(new_scene.get(), *scene_content);
         delete scene_content;
 
-        this->loaded_scenes.push_back(new_scene);
         this->current_scene = new_scene;
+        this->loaded_scenes.push_back(std::move(new_scene));
     }
 
     // notify the newly loaded scene that it is active

@@ -34,58 +34,71 @@ Engine::~Engine() {
     SDL_Quit();
 }
 
-void Engine::DestroyMarkedEntities(std::vector<std::shared_ptr<Entity>> & entities) {
-    for (auto it = entities.begin(); it != entities.end();) {
-        if ((*it).get()->destroyed) {
-            switch ((*it).get()->GetEntityType()) {
+void Engine::DestroyMarkedEntities() {
+    // copy all the entities to a vector first, as destruction will alter underlying collections
+    std::vector<std::shared_ptr<Entity>> entities;
+    this->IterateActiveEntities([&entities](std::shared_ptr<Entity> entity) {
+        entities.push_back(entity);
+        return false;
+    });
+    
+    for (auto & entity : entities) {
+        if (entity->destroyed) {
+            switch (entity->GetEntityType()) {
                 case CBE_SPRITE:
                     if (this->scenes.current_scene != nullptr) {
-                        this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(*it));
+                        this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
                     }
-                    it = entities.erase(it);
                     break;
                 case CBE_TILEMAP:
                 case CBE_VIEWPORT:
                     // tilemaps and viewports should not be destroyed like this
                     LOG_ERR("Engine::DestroyMarkedEntities something marked a tilemap or viewport for destruction");
-                    (*it).get()->destroyed = false;
-                    it++;
+                    entity->destroyed = false;
                     break;
                 default:
-                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " + std::to_string((*it).get()->GetEntityType()));
-                    (*it).get()->destroyed = false;
-                    it++;
+                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " + std::to_string(entity->GetEntityType()));
+                    entity->destroyed = false;
                     break;
             }
-        } else {
-            it++;
         }
     }
 }
 
 std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
-    if (this->viewport->entity_id == entity_id) {
-        return this->viewport;
-    }
-    if (this->scenes.IsCurrentSceneActive()) {
-        if (this->scenes.current_scene->HasTilemap()) {
-            if (this->scenes.current_scene->GetTilemap()->entity_id == entity_id) {
-                return this->scenes.current_scene->GetTilemap();
-            }
+    std::shared_ptr<Entity> ret = nullptr;
+    this->IterateActiveEntities([&](std::shared_ptr<Entity> entity){
+        if (entity->entity_id == entity_id) {
+            ret = entity;
+            return true;
         }
-        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
-            if (sprite->entity_id == entity_id) {
-                return sprite;
-            }
-        }
-    }
-    return nullptr;
+        return false;
+    });
+    return ret;
 }
 
 
 Engine & Engine::GetInstance() {
     static Engine instance;
     return instance;
+}
+
+void Engine::IterateActiveEntities(std::function<bool(std::shared_ptr<Entity>)> func) {
+    if (this->scenes.IsCurrentSceneActive()) {
+        if (this->scenes.current_scene->HasTilemap()) {
+            if (func(this->scenes.current_scene->GetTilemap())) {
+                return;
+            }
+        }
+        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+            if (func(sprite)) {
+                return;
+            }
+        }
+    }
+    if (func(this->viewport)) {
+        return;
+    }
 }
 
 int Engine::Run() {
@@ -161,9 +174,6 @@ int Engine::Run() {
         return 1;
     }
 
-    // entities to iterate
-    std::vector<std::shared_ptr<Entity>> entities;
- 
     // start main loop
     SDL_Event e;
     bool quit = false;
@@ -183,27 +193,14 @@ int Engine::Run() {
         }
 
         // begin simulation loop
-        entities.clear();
         while (this->counters.GetRemainingFrameTime() > 0) {
             float dt = this->counters.GetDeltaFromRemainingFrameTime();
 
             // Execute pre-update events
             EngineEventQueue::GetInstance().ExecutePreUpdate();
 
-            // Set list of entities to iterate
-            entities.clear();
-            if (this->scenes.IsCurrentSceneActive()) {
-                if (this->scenes.current_scene->HasTilemap()) {
-                    entities.push_back(this->scenes.current_scene->GetTilemap());
-                }
-                for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
-                    entities.push_back(sprite);
-                }
-            }
-            entities.push_back(this->viewport);
-
             // Update cycle
-            for (auto & entity : entities) {
+            this->IterateActiveEntities([dt](std::shared_ptr<Entity> entity) {
                 // start entity if it hasn't already
                 if (!entity->started) {
                     entity->Start();
@@ -217,7 +214,9 @@ int Engine::Run() {
                     entity->script->CallUpdate(entity, dt * entity->time_scale);
                 }
                 entity->Update(dt * entity->time_scale);
-            }
+
+                return false;
+            });
 
             // timing update
             this->counters.Updated();
@@ -229,20 +228,21 @@ int Engine::Run() {
         // Render pass
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         SDL_RenderClear(this->renderer);
-        for (auto & entity : entities) {
+        this->IterateActiveEntities([this](std::shared_ptr<Entity> entity) {
             if (entity->dim.intersects(this->viewport->dim)) {
                 entity->Render(this->renderer, this->viewport->GetViewableRect(entity->dim));
                 this->counters.RenderedEntity();
             }
-        }
+            return false;
+        });
 
         if (this->config->debug.draw_info_pane) {
-            this->RenderDebugPane(entities.size());
+            this->RenderDebugPane(0 /*entities.size()*/); // FIXME: lost ability to count entities directly
         }
         SDL_RenderPresent(this->renderer);
 
         // Clean up entities that were marked for deletion
-        this->DestroyMarkedEntities(entities);
+        this->DestroyMarkedEntities();
     }
 
     LOG_INFO("Exiting Engine::Run()");
