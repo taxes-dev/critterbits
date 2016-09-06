@@ -31,6 +31,36 @@ Engine::~Engine() {
     SDL_Quit();
 }
 
+void Engine::DestroyMarkedEntities(std::vector<std::shared_ptr<Entity>> & entities) {
+    for (auto it = entities.begin(); it != entities.end();) {
+        if ((*it).get()->destroyed) {
+            switch ((*it).get()->GetEntityType()) {
+                case CBE_SPRITE:
+                    if (this->scenes.current_scene != nullptr) {
+                        this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(*it));
+                    }
+                    it = entities.erase(it);
+                    break;
+                case CBE_TILEMAP:
+                case CBE_VIEWPORT:
+                    // tilemaps and viewports should not be destroyed like this
+                    LOG_ERR("Engine::DestroyMarkedEntities something marked a tilemap or viewport for destruction");
+                    (*it).get()->destroyed = false;
+                    it++;
+                    break;
+                default:
+                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " + std::to_string((*it).get()->GetEntityType()));
+                    (*it).get()->destroyed = false;
+                    it++;
+                    break;
+            }
+        } else {
+            it++;
+        }
+    }
+}
+
+
 Engine & Engine::GetInstance() {
     static Engine instance;
     return instance;
@@ -135,6 +165,7 @@ int Engine::Run() {
         }
 
         // begin simulation loop
+        entities.clear();
         while (this->counters.GetRemainingFrameTime() > 0) {
             float dt = this->counters.GetDeltaFromRemainingFrameTime();
 
@@ -188,6 +219,9 @@ int Engine::Run() {
             this->RenderDebugPane(entities.size());
         }
         SDL_RenderPresent(this->renderer);
+
+        // Clean up entities that were marked for deletion
+        this->DestroyMarkedEntities(entities);
     }
 
     LOG_INFO("Exiting Engine::Run()");

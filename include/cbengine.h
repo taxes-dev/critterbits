@@ -101,6 +101,7 @@ class Engine {
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;
+    void DestroyMarkedEntities(std::vector<std::shared_ptr<Entity>> &);
     void RenderDebugPane(int);
 };
 

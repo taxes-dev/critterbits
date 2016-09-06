@@ -8,6 +8,8 @@
 
 #define CB_SCRIPT_ENTITY_THIS "entity_this"
 
+#define CB_SCRIPT_HIDDEN_DESTROYED "\xff" "destroyed"
+
 namespace Critterbits {
 /*
 * Support functions for modifying the duktape context
@@ -64,6 +66,17 @@ inline void push_property_string(duk_context * context, const char * property_na
     duk_push_string(context, value.c_str());
     duk_put_prop_string(context, -2, property_name);
 }
+
+/*
+* Functions callable from JavaScript code
+*/
+duk_ret_t mark_entity_destroyed(duk_context * context) {
+    duk_push_this(context);
+    push_property_bool(context, CB_SCRIPT_HIDDEN_DESTROYED, true);
+    duk_pop(context);
+    return 0;
+}
+
 }
 /*
  * End support functions
@@ -114,9 +127,11 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
 
     push_property_string(this->context, "tag", entity->tag);
 
-    std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-    if (sprite != nullptr) {
-        this->ExtendEntityWithSprite(std::move(sprite));
+    duk_push_c_function(this->context, mark_entity_destroyed, 0);
+    duk_put_prop_string(this->context, -2, "destroy");
+
+    if (entity->GetEntityType() == CBE_SPRITE) {
+        this->ExtendEntityWithSprite(std::dynamic_pointer_cast<Sprite>(entity));
     }
 
     // save to the stash so we can grab it after method call
@@ -154,9 +169,14 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
         entity->dim.h = get_int_property(this->context, "h");
         duk_pop(this->context); // dim
 
-        std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-        if (sprite != nullptr) {
-            this->RetrieveSpriteFromContext(std::move(sprite));
+        // special case: "destroyed flag"
+        bool destroyed = get_bool_property(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
+        if (destroyed) {
+            entity->MarkDestroy();
+        }
+
+        if (entity->GetEntityType() == CBE_SPRITE) {
+            this->RetrieveSpriteFromContext(std::dynamic_pointer_cast<Sprite>(entity));
         }
 
         duk_pop(this->context); // "stash_name"

@@ -12,6 +12,7 @@ namespace Critterbits {
 class Viewport : public Entity {
   public:
     Viewport(){};
+    EntityType GetEntityType() { return CBE_VIEWPORT; };
     CB_ViewClippingInfo GetViewableRect(CB_Rect &) const;
     void SetEntityToFollow(std::shared_ptr<Entity>);
     void Update(float);

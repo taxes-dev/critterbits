@@ -28,6 +28,7 @@ class Sprite : public Entity {
 
     Sprite();
     ~Sprite();
+    EntityType GetEntityType() { return CBE_SPRITE; };
     inline int GetFrame() const { return this->current_frame; };
     inline int GetFrameCount() const { return this->sprite_sheet_rows * this->sprite_sheet_cols; }
     void NotifyLoaded();
@@ -53,6 +54,7 @@ class SpriteManager {
     static std::string GetSpritePath(std::string &);
     bool LoadQueuedSprites();
     void QueueSprite(std::string &);
+    void UnloadSprite(std::shared_ptr<Sprite>);
 
   private:
     std::vector<std::string> queued_sprites;

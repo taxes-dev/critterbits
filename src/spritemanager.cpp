@@ -88,4 +88,16 @@ bool SpriteManager::LoadQueuedSprites() {
 }
 
 void SpriteManager::QueueSprite(std::string & sprite_name) { this->queued_sprites.push_back(sprite_name); }
+
+void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
+    for (auto it = this->sprites.begin(); it != this->sprites.end();) {
+        if (sprite == *it) {
+            this->sprites.erase(it);
+            break;
+        }
+        it++;
+    }
+    sprite->NotifyUnloaded();
+}
+
 }
