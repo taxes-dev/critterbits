@@ -3,10 +3,12 @@
 namespace Critterbits {
 
 void EngineEventQueue::ExecutePreUpdate() {
-    for (auto & event : this->pre_update) {
+    // take a copy of the pre_update queue in case the events modify it
+    std::vector<PreUpdateEvent> events = this->pre_update;
+    this->pre_update.clear();
+    for (auto event : events) {
         event();
     }
-    this->pre_update.clear();
 }
 
 EngineEventQueue & EngineEventQueue::GetInstance() {
@@ -14,5 +16,5 @@ EngineEventQueue & EngineEventQueue::GetInstance() {
     return instance;
 }
 
-void EngineEventQueue::QueuePreUpdate(const PreUpdateEvent & event) { this->pre_update.push_back(event); }
+void EngineEventQueue::QueuePreUpdate(const PreUpdateEvent event) { this->pre_update.push_back(event); }
 }

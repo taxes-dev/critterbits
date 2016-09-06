@@ -60,6 +60,8 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
         unexpanded_path = source_path;
     }
 
+    SDL_free(base_path);
+
     LOG_INFO("EngineConfiguration unexpanded source path: " + unexpanded_path);
 
     char * expanded_path = realpath(unexpanded_path.c_str(), NULL);

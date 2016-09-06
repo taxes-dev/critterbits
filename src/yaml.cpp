@@ -168,7 +168,7 @@ void YamlParser::Parse(void * context, const std::string & yaml_content) const {
     }
 
     yaml_parser_delete(&parser);
-    delete yaml_content_u;
+    delete[] yaml_content_u;
 }
 
 bool YamlParser::ToBool(const std::string & value) {

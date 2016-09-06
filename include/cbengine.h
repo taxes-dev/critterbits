@@ -113,14 +113,13 @@ class EngineEventQueue {
   public:
     ~EngineEventQueue(){};
     static EngineEventQueue & GetInstance();
-    void QueuePreUpdate(const PreUpdateEvent & event);
+    void QueuePreUpdate(const PreUpdateEvent event);
 
   protected:
     void ExecutePreUpdate();
 
   private:
-    // FIXME: I need to figure out why changing this to std::vector results in a random malloc segfault
-    std::list<PreUpdateEvent> pre_update;
+    std::vector<PreUpdateEvent> pre_update;
 
     EngineEventQueue(){};
     EngineEventQueue(const EngineEventQueue &) = delete;
