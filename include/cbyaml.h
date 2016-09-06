@@ -7,6 +7,16 @@
 #include <map>
 #include <string>
 
+// define this to get really noisy logging from the YAML parser
+//#define CB_YAML_LOGGING
+
+#include "cblogging.h"
+#ifdef CB_YAML_LOGGING
+#define LOG_YAML(m) LOG_INFO(m)
+#else
+#define LOG_YAML(m)
+#endif
+
 namespace Critterbits {
 typedef std::function<void(void *, std::string value)> YamlValueParser;
 typedef std::function<void(void *, std::list<std::string> &)> YamlSequenceParser;

@@ -41,7 +41,7 @@ static YamlValueParserCollection sprite_val_parsers = {{"sprite_sheet", sprite_s
 * End support functions
 */
 
-std::string SpriteManager::GetSpritePath(std::string & asset_name) {
+std::string SpriteManager::GetSpritePath(const std::string & asset_name) {
     return Engine::GetInstance().config->asset_path + CB_SPRITE_PATH + PATH_SEP + asset_name;
 }
 
@@ -87,7 +87,7 @@ bool SpriteManager::LoadQueuedSprites() {
     return success;
 }
 
-void SpriteManager::QueueSprite(std::string & sprite_name) { this->queued_sprites.push_back(sprite_name); }
+void SpriteManager::QueueSprite(const std::string & sprite_name) { this->queued_sprites.push_back(sprite_name); }
 
 void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
     for (auto it = this->sprites.begin(); it != this->sprites.end();) {

@@ -48,16 +48,16 @@ class Sprite : public Entity {
 
 class SpriteManager {
   public:
-    std::vector<std::shared_ptr<Sprite>> sprites;
+    std::list<std::shared_ptr<Sprite>> sprites;
 
     SpriteManager(){};
-    static std::string GetSpritePath(std::string &);
+    static std::string GetSpritePath(const std::string &);
     bool LoadQueuedSprites();
-    void QueueSprite(std::string &);
+    void QueueSprite(const std::string &);
     void UnloadSprite(std::shared_ptr<Sprite>);
 
   private:
-    std::vector<std::string> queued_sprites;
+    std::list<std::string> queued_sprites;
 
     SpriteManager(const SpriteManager &) = delete;
     SpriteManager(SpriteManager &&) = delete;
