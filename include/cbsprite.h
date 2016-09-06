@@ -13,11 +13,14 @@
 #define CB_SPRITE_EXT ".yml"
 
 namespace Critterbits {
+typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteState;
+
 class Sprite : public Entity {
   public:
+    SpriteState state = CBE_SPRITE_NEW;
     std::string sprite_name;
     std::string sprite_path;
-    std::string sprite_sheet_path = "";
+    std::string sprite_sheet_path;
     float sprite_scale = 1.0f;
     int tile_height = 0;
     int tile_width = 0;
@@ -35,6 +38,7 @@ class Sprite : public Entity {
     void NotifyUnloaded();
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     void SetFrame(int);
+    void Start();
 
   private:
     int current_frame = 0;
@@ -42,6 +46,8 @@ class Sprite : public Entity {
     int sprite_sheet_cols = 0;
     bool draw_debug = false;
     SDL_Texture * sprite_sheet = nullptr; // TODO: centrally manage sprite sheets so they can be shared between sprites
+    bool sprite_sheet_loaded = false;
+    bool script_loaded = false;
 
     CB_Rect GetFrameRect() const;
 };

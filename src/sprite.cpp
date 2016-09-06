@@ -33,46 +33,64 @@ void Sprite::NotifyLoaded() {
         this->sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), this->sprite_sheet_path.c_str());
         if (this->sprite_sheet == nullptr) {
             LOG_SDL_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet to texture");
-            return;
+        } else {
+            int w, h;
+            SDL_QueryTexture(this->sprite_sheet, NULL, NULL, &w, &h);
+            this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
+            this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
         }
-
-        int w, h;
-        SDL_QueryTexture(this->sprite_sheet, NULL, NULL, &w, &h);
-        this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
-        this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
+        this->sprite_sheet_loaded = true;
     });
 
     EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
         LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite script " + this->sprite_name);
 
         this->script = Engine::GetInstance().scripts.LoadScript(this->sprite_name);
+        this->script_loaded = true;
     });
 }
 
-void Sprite::NotifyUnloaded() { LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name); }
+void Sprite::NotifyUnloaded() {
+    LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name);
+    this->state = CBE_SPRITE_UNLOADED;
+}
 
 void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
-    if (this->sprite_sheet != nullptr) {
-        SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), clip_rect.dest, this->flip_x,
-                                       this->flip_y);
-    }
-    if (this->draw_debug) {
-        rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
-                      255, 0, 0, 127);
-        boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
-                clip_rect.dest.bottom() + 10, 255, 0, 0, 127);
-        stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255, 255);
-        std::string coords = this->dim.xy().to_string();
-        boxRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 2, clip_rect.dest.y - 10,
-                clip_rect.dest.right() - 1, clip_rect.dest.y - 1, 255, 0, 0, 127);
-        stringRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 1, clip_rect.dest.y - 9, coords.c_str(),
-                   255, 255, 255, 255);
-        std::string f = std::to_string(this->current_frame);
-        boxRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, clip_rect.dest.x + f.length() * 8 + 2,
-                clip_rect.dest.y + 10, 255, 0, 0, 127);
-        stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, f.c_str(), 255, 255, 255, 255);
+    Entity::Render(renderer, clip_rect);
+    if (this->state == CBE_SPRITE_READY) {
+        if (this->sprite_sheet != nullptr) {
+            // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
+            CB_Rect dst_rect = clip_rect.dest;
+            dst_rect.w = this->dim.w;
+            dst_rect.h = this->dim.h;
+            SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), dst_rect, this->flip_x,
+                                        this->flip_y);
+        }
+        if (this->draw_debug) {
+            rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
+                        255, 0, 0, 127);
+            boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
+                    clip_rect.dest.bottom() + 10, 255, 0, 0, 127);
+            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255, 255);
+            std::string coords = this->dim.xy().to_string();
+            boxRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 2, clip_rect.dest.y - 10,
+                    clip_rect.dest.right() - 1, clip_rect.dest.y - 1, 255, 0, 0, 127);
+            stringRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 1, clip_rect.dest.y - 9, coords.c_str(),
+                    255, 255, 255, 255);
+            std::string f = std::to_string(this->current_frame);
+            boxRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, clip_rect.dest.x + f.length() * 8 + 2,
+                    clip_rect.dest.y + 10, 255, 0, 0, 127);
+            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, f.c_str(), 255, 255, 255, 255);
+        }
     }
 }
 
 void Sprite::SetFrame(int frame) { this->current_frame = Clamp(frame, 0, this->GetFrameCount()); }
+
+void Sprite::Start() {
+    if (this->sprite_sheet_loaded && this->script_loaded) {
+        this->state = CBE_SPRITE_READY;
+        Entity::Start();
+    }
+}
 }

@@ -4,12 +4,6 @@
 
 #include <duktape/duktape.h>
 
-#define CB_SCRIPT_GLOBAL_UPDATE "update"
-
-#define CB_SCRIPT_ENTITY_THIS "entity_this"
-
-#define CB_SCRIPT_HIDDEN_DESTROYED "\xff" "destroyed"
-
 namespace Critterbits {
 /*
 * Support functions for modifying the duktape context
@@ -67,6 +61,10 @@ inline void push_property_string(duk_context * context, const char * property_na
     duk_put_prop_string(context, -2, property_name);
 }
 
+inline void push_property_entity_id(duk_context * context, entity_id_t value) {
+    duk_push_uint(context, value);
+    duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
+}
 /*
 * Functions callable from JavaScript code
 */
@@ -103,6 +101,8 @@ void Script::DiscoverGlobals() {
             const char * prop_name = duk_safe_to_string(this->context, -1);
             if (strcmp(prop_name, CB_SCRIPT_GLOBAL_UPDATE) == 0) {
                 this->global_update = true;
+            } else if (strcmp(prop_name, CB_SCRIPT_GLOBAL_START) == 0) {
+                this->global_start = true;
             }
         } else {
             LOG_ERR("Script::DiscoverGlobals error retrieving property at index " + std::to_string(i));
@@ -125,6 +125,7 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
     push_property_int(this->context, "h", entity->dim.h);
     duk_put_prop_string(this->context, -2, "dim");
 
+    push_property_entity_id(this->context, entity->entity_id);
     push_property_string(this->context, "tag", entity->tag);
     push_property_float(this->context, "time_scale", entity->time_scale);
 
@@ -153,6 +154,7 @@ void Script::ExtendEntityWithSprite(std::shared_ptr<Sprite> sprite) {
     push_property_int(this->context, "tile_offset_y", sprite->tile_offset_y);
     push_property_bool(this->context, "flip_x", sprite->flip_x);
     push_property_bool(this->context, "flip_y", sprite->flip_y);
+
     duk_push_object(this->context); // frame
     push_property_int(this->context, "current", sprite->GetFrame());
     push_property_int(this->context, "count", sprite->GetFrameCount());
@@ -200,6 +202,20 @@ void Script::RetrieveSpriteFromContext(std::shared_ptr<Sprite> sprite) {
     int current_frame = get_int_property(this->context, "current");
     sprite->SetFrame(current_frame);
     duk_pop(this->context); // frame
+}
+
+void Script::CallStart(std::shared_ptr<Entity> entity) {
+    if (this->global_start) {
+        // setup call to global start script
+        duk_push_global_object(this->context);
+        duk_get_prop_string(this->context, -1, CB_SCRIPT_GLOBAL_START);
+        CreateEntityInContext(entity, CB_SCRIPT_ENTITY_THIS);
+        duk_call_method(this->context, 0);
+
+        // clean up and pull any changes to the entity
+        duk_pop_2(this->context);
+        RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+    }
 }
 
 void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {

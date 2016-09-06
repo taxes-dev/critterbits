@@ -8,6 +8,9 @@
 #include <critterbits.h>
 
 namespace Critterbits {
+
+entity_id_t next_entity_id = 0;
+
 Engine::Engine() {
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_TIMER*/) != 0) {
@@ -60,6 +63,25 @@ void Engine::DestroyMarkedEntities(std::vector<std::shared_ptr<Entity>> & entiti
     }
 }
 
+std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
+    if (this->viewport->entity_id == entity_id) {
+        return this->viewport;
+    }
+    if (this->scenes.IsCurrentSceneActive()) {
+        if (this->scenes.current_scene->HasTilemap()) {
+            if (this->scenes.current_scene->GetTilemap()->entity_id == entity_id) {
+                return this->scenes.current_scene->GetTilemap();
+            }
+        }
+        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+            if (sprite->entity_id == entity_id) {
+                return sprite;
+            }
+        }
+    }
+    return nullptr;
+}
+
 
 Engine & Engine::GetInstance() {
     static Engine instance;
@@ -106,7 +128,7 @@ int Engine::Run() {
     }
 
     // configure viewport
-    this->viewport.dim = {0, 0, this->config->window.width, this->config->window.height};
+    this->viewport->dim = {0, 0, this->config->window.width, this->config->window.height};
 
     // create renderer
     this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -141,11 +163,7 @@ int Engine::Run() {
 
     // entities to iterate
     std::vector<std::shared_ptr<Entity>> entities;
-    std::shared_ptr<Viewport> viewport_ptr(&this->viewport, [](Viewport *) {});
  
-    // HACK
-    std::shared_ptr<Sprite> player_sprite;
-
     // start main loop
     SDL_Event e;
     bool quit = false;
@@ -172,12 +190,6 @@ int Engine::Run() {
             // Execute pre-update events
             EngineEventQueue::GetInstance().ExecutePreUpdate();
 
-            // HACK
-            if (player_sprite == nullptr) {
-                player_sprite = *this->scenes.current_scene->sprites.sprites.begin();
-                this->viewport.SetEntityToFollow(std::dynamic_pointer_cast<Entity>(player_sprite));
-            }
-
             // Set list of entities to iterate
             entities.clear();
             if (this->scenes.IsCurrentSceneActive()) {
@@ -188,10 +200,19 @@ int Engine::Run() {
                     entities.push_back(sprite);
                 }
             }
-            entities.push_back(viewport_ptr);
+            entities.push_back(this->viewport);
 
             // Update cycle
             for (auto & entity : entities) {
+                // start entity if it hasn't already
+                if (!entity->started) {
+                    entity->Start();
+                    if (entity->HasScript()) {
+                        entity->script->CallStart(entity);
+                    }
+                }
+
+                // call frame update methods
                 if (entity->HasScript()) {
                     entity->script->CallUpdate(entity, dt * entity->time_scale);
                 }
@@ -209,8 +230,8 @@ int Engine::Run() {
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         SDL_RenderClear(this->renderer);
         for (auto & entity : entities) {
-            if (entity->dim.intersects(this->viewport.dim)) {
-                entity->Render(this->renderer, this->viewport.GetViewableRect(entity->dim));
+            if (entity->dim.intersects(this->viewport->dim)) {
+                entity->Render(this->renderer, this->viewport->GetViewableRect(entity->dim));
                 this->counters.RenderedEntity();
             }
         }
@@ -232,13 +253,13 @@ void Engine::RenderDebugPane(int entity_count) {
     std::stringbuf info;
     std::ostream os(&info);
 
-    os << "view" << this->viewport.dim.xy().to_string();
+    os << "view" << this->viewport->dim.xy().to_string();
     os << " ent(" << this->counters.GetRenderedEntitiesCount() << "/" << entity_count << ")";
     os << " fps " << std::fixed << std::setprecision(1) << this->counters.GetAverageFps();
 
-    roundedBoxRGBA(this->renderer, -6, this->viewport.dim.h - 12, info.str().length() * 8 + 10,
-                   this->viewport.dim.h + 6, 6, 0, 0, 0, 127);
-    stringRGBA(this->renderer, 2, this->viewport.dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
+    roundedBoxRGBA(this->renderer, -6, this->viewport->dim.h - 12, info.str().length() * 8 + 10,
+                   this->viewport->dim.h + 6, 6, 0, 0, 0, 127);
+    stringRGBA(this->renderer, 2, this->viewport->dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
 }
 
 void Engine::SetConfiguration(std::shared_ptr<EngineConfiguration> config) { this->config = std::move(config); }

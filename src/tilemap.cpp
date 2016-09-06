@@ -79,6 +79,7 @@ bool Tilemap::CreateTextures(float scale) {
 }
 
 void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
+    Entity::Render(renderer, clip);
     if (this->map_texture != nullptr) {
         SDLx::SDL_RenderTextureClipped(renderer, this->map_texture, clip.source, clip.dest);
     }

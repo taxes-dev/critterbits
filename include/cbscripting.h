@@ -11,6 +11,14 @@
 #define CB_SCRIPT_PATH "scripts"
 #define CB_SCRIPT_EXT ".js"
 
+#define CB_SCRIPT_GLOBAL_START "start"
+#define CB_SCRIPT_GLOBAL_UPDATE "update"
+
+#define CB_SCRIPT_ENTITY_THIS "entity_this"
+
+#define CB_SCRIPT_HIDDEN_DESTROYED "\xff" "destroyed"
+#define CB_SCRIPT_HIDDEN_ENTITYID "\xff" "entity_id"
+
 namespace Critterbits {
 
 class Script {
@@ -20,10 +28,12 @@ class Script {
     std::string script_path;
     std::string script_name;
 
+    void CallStart(std::shared_ptr<Entity>);
     void CallUpdate(std::shared_ptr<Entity>, float);
 
   private:
     duk_context * context = nullptr;
+    bool global_start = false;
     bool global_update = false;
 
     void CreateEntityInContext(std::shared_ptr<Entity>, const char *);

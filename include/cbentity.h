@@ -10,6 +10,9 @@
 namespace Critterbits {
 
 typedef enum { CBE_SPRITE, CBE_TILEMAP, CBE_VIEWPORT } EntityType;
+typedef unsigned long entity_id_t;
+
+extern entity_id_t next_entity_id;
 
 class Script;
 
@@ -17,6 +20,7 @@ class Entity {
   friend class Engine;
 
   public:
+    const entity_id_t entity_id = next_entity_id++;
     CB_Rect dim = {0, 0, 0, 0};
     std::string tag;
     std::shared_ptr<Script> script;
@@ -28,6 +32,7 @@ class Entity {
     bool HasScript() { return this->script != nullptr; };
     void MarkDestroy() { this->destroyed = true; };
     virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
+    virtual void Start() { this->started = true; };
     virtual void Update(float){};
     virtual ~Entity(){};
 
@@ -35,6 +40,7 @@ class Entity {
     Entity(){};
 
   private:
+    bool started = false;
     bool destroyed = false;
 };
 }

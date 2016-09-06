@@ -80,9 +80,10 @@ class Engine {
     InputManager input;
     ScriptEngine scripts;
     SceneManager scenes;
-    Viewport viewport;
+    std::shared_ptr<Viewport> viewport{new Viewport()};
 
     ~Engine();
+    std::shared_ptr<Entity> FindEntityById(entity_id_t);
     static Engine & GetInstance();
     int GetMaxTextureHeight() const { return this->max_texture_height; };
     int GetMaxTextureWidth() const { return this->max_texture_width; };

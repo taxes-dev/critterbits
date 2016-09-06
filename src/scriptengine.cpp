@@ -23,6 +23,24 @@ duk_ret_t is_key_pressed(duk_context * context) {
     return 1;
 }
 
+duk_ret_t viewport_follow(duk_context * context) {
+    bool success = false;
+    if (duk_is_object(context, 0)) {
+        duk_get_prop_string(context, 0, CB_SCRIPT_HIDDEN_ENTITYID);
+        if (duk_is_undefined(context, -1) == 0) {
+            entity_id_t entity_id = duk_get_uint(context, -1);
+            std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+            if (entity != nullptr) {
+                Engine::GetInstance().viewport->SetEntityToFollow(entity);
+                success = true;
+            }
+        }
+        duk_pop(context);
+    }
+    duk_push_boolean(context, success);
+    return 1; 
+}
+
 /*
  * End support functions
  */
@@ -57,6 +75,12 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_push_c_function(context, is_key_pressed, 1);
     duk_put_prop_string(context, -2, "is_key_pressed");
     duk_put_prop_string(context, -2, "input");
+
+    // viewport
+    duk_push_object(context); // viewport
+    duk_push_c_function(context, viewport_follow, 1);
+    duk_put_prop_string(context, -2, "follow");
+    duk_put_prop_string(context, -2, "viewport");
 
     duk_pop(context); // global
 }
