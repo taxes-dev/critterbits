@@ -10,10 +10,10 @@ int main(int argc, char ** argv) {
     if (argc > 1) {
         asset_path = std::string(argv[1]);
     }
-    std::shared_ptr<EngineConfiguration> config(new EngineConfiguration(asset_path));
+    std::shared_ptr<EngineConfiguration> config = std::make_shared<EngineConfiguration>(asset_path);
 
     // assign configuration to engine
-    Engine::GetInstance().SetConfiguration(config);
+    Engine::GetInstance().SetConfiguration(std::move(config));
 
     // run (blocks until window closed)
     return Engine::GetInstance().Run();

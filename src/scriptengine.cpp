@@ -107,7 +107,7 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         return nullptr;
     }
 
-    std::shared_ptr<Script> new_script(new Script());
+    std::shared_ptr<Script> new_script = std::make_shared<Script>();
     new_script->script_name = script_name;
     new_script->script_path = script_path;
     duk_push_thread_new_globalenv(this->context);
