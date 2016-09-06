@@ -20,6 +20,7 @@ class Entity {
     CB_Rect dim = {0, 0, 0, 0};
     std::string tag;
     std::shared_ptr<Script> script;
+    float time_scale = 1.0f;
 
     /* derived classes MUST implement GetEntityType() - not pure virtual due to dynamic casting constraints */
     virtual EntityType GetEntityType() { assert(false); return CBE_SPRITE; };

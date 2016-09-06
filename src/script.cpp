@@ -126,6 +126,7 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
     duk_put_prop_string(this->context, -2, "dim");
 
     push_property_string(this->context, "tag", entity->tag);
+    push_property_float(this->context, "time_scale", entity->time_scale);
 
     duk_push_c_function(this->context, mark_entity_destroyed, 0);
     duk_put_prop_string(this->context, -2, "destroy");
@@ -168,6 +169,7 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
         entity->dim.w = get_int_property(this->context, "w");
         entity->dim.h = get_int_property(this->context, "h");
         duk_pop(this->context); // dim
+        entity->time_scale = get_float_property(this->context, "time_scale");
 
         // special case: "destroyed flag"
         bool destroyed = get_bool_property(this->context, CB_SCRIPT_HIDDEN_DESTROYED);

@@ -193,9 +193,9 @@ int Engine::Run() {
             // Update cycle
             for (auto & entity : entities) {
                 if (entity->HasScript()) {
-                    entity->script->CallUpdate(entity, dt);
+                    entity->script->CallUpdate(entity, dt * entity->time_scale);
                 }
-                entity->Update(dt);
+                entity->Update(dt * entity->time_scale);
             }
 
             // timing update

@@ -41,20 +41,18 @@ ScriptEngine::~ScriptEngine() {
     }
 }
 
+#define CB_PUT_KEYCODE(k) duk_push_int(context, SDLK_ ## k); duk_put_prop_string(context, -2, #k);
+
 void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_push_global_object(context);
 
     // input manager
     duk_push_object(context); // input
     duk_push_object(context); // key_codes
-    duk_push_int(context, SDLK_UP);
-    duk_put_prop_string(context, -2, "UP");
-    duk_push_int(context, SDLK_DOWN);
-    duk_put_prop_string(context, -2, "DOWN");
-    duk_push_int(context, SDLK_LEFT);
-    duk_put_prop_string(context, -2, "LEFT");
-    duk_push_int(context, SDLK_RIGHT);
-    duk_put_prop_string(context, -2, "RIGHT");
+    CB_PUT_KEYCODE(UP);
+    CB_PUT_KEYCODE(DOWN);
+    CB_PUT_KEYCODE(LEFT);
+    CB_PUT_KEYCODE(RIGHT);
     duk_put_prop_string(context, -2, "key_codes");
     duk_push_c_function(context, is_key_pressed, 1);
     duk_put_prop_string(context, -2, "is_key_pressed");
