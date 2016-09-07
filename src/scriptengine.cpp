@@ -10,6 +10,7 @@ namespace {
  */
 void duktape_fatal_error(duk_context * ctx, duk_errcode_t code, const char * msg) {
     LOG_ERR("duktape runtime encountered fatal error " + std::to_string(code) + " " + std::string(msg));
+    abort();
 }
 
 /*

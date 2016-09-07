@@ -217,12 +217,17 @@ void Script::CallOnCollision(std::shared_ptr<Entity> entity, std::shared_ptr<Ent
         duk_get_prop_string(this->context, -1, CB_SCRIPT_GLOBAL_ONCOLLISION);
         CreateEntityInContext(entity, CB_SCRIPT_ENTITY_THIS);
         CreateEntityInContext(other_entity, other_entity_name.c_str());
-        duk_call_method(this->context, 1);
-
-        // clean up and pull any changes to the entities
-        duk_pop_2(this->context);
-        RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
-        RetrieveEntityFromContext(other_entity, other_entity_name.c_str());
+        if (duk_pcall_method(this->context, 1) == DUK_EXEC_SUCCESS) {
+            // clean up and pull any changes to the entities
+            duk_pop_2(this->context);
+            RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+            RetrieveEntityFromContext(other_entity, other_entity_name.c_str());
+        } else {
+            LOG_ERR("Script::CallOnCollision oncollision() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            duk_pop_2(this->context);
+            // turn off the oncollision script so we don't get caught in an infinite loop of errors
+            this->global_oncollision = false;
+        }
     }
 }
 
@@ -232,11 +237,16 @@ void Script::CallStart(std::shared_ptr<Entity> entity) {
         duk_push_global_object(this->context);
         duk_get_prop_string(this->context, -1, CB_SCRIPT_GLOBAL_START);
         CreateEntityInContext(entity, CB_SCRIPT_ENTITY_THIS);
-        duk_call_method(this->context, 0);
-
-        // clean up and pull any changes to the entity
-        duk_pop_2(this->context);
-        RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+        if (duk_pcall_method(this->context, 0) == DUK_EXEC_SUCCESS) {
+            // clean up and pull any changes to the entity
+            duk_pop_2(this->context);
+            RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+        } else {
+            LOG_ERR("Script::CallStart start() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            duk_pop_2(this->context);
+            // turn off the start script so we don't get caught in an infinite loop of errors
+            this->global_start = false;
+        }
     }
 }
 
@@ -247,11 +257,16 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
         duk_get_prop_string(this->context, -1, CB_SCRIPT_GLOBAL_UPDATE);
         CreateEntityInContext(entity, CB_SCRIPT_ENTITY_THIS);
         duk_push_number(this->context, delta_time);
-        duk_call_method(this->context, 1);
-
-        // clean up and pull any changes to the entity
-        duk_pop_2(this->context);
-        RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+        if (duk_pcall_method(this->context, 1) == DUK_EXEC_SUCCESS) {
+            // clean up and pull any changes to the entity
+            duk_pop_2(this->context);
+            RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+        } else {
+            LOG_ERR("Script::CallUpdate update() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            duk_pop_2(this->context);
+            // turn off the update script so we don't get caught in an infinite loop of errors
+            this->global_update = false;
+        }
     }
 }
 }
