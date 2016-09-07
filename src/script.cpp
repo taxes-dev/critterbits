@@ -102,6 +102,8 @@ void Script::DiscoverGlobals() {
                 this->global_update = true;
             } else if (strcmp(prop_name, CB_SCRIPT_GLOBAL_START) == 0) {
                 this->global_start = true;
+            } else if (strcmp(prop_name, CB_SCRIPT_GLOBAL_ONCOLLISION) == 0) {
+                this->global_oncollision = true;
             }
         } else {
             LOG_ERR("Script::DiscoverGlobals error retrieving property at index " + std::to_string(i));
@@ -165,12 +167,15 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
     if (duk_get_prop_string(this->context, -1, stash_name) != 0) {
         // only mutable properties are retrieved
         duk_get_prop_string(this->context, -1, "dim");
-        entity->dim.x = get_int_property(this->context, "x");
-        entity->dim.y = get_int_property(this->context, "y");
+        int new_x = get_int_property(this->context, "x");
+        int new_y = get_int_property(this->context, "y");
         entity->dim.w = get_int_property(this->context, "w");
         entity->dim.h = get_int_property(this->context, "h");
         duk_pop(this->context); // dim
         entity->time_scale = get_float_property(this->context, "time_scale");
+
+        // set position (may result in collisions)
+        entity->SetPosition(new_x, new_y);
 
         // special case: "destroyed flag"
         bool destroyed = get_bool_property(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
@@ -201,6 +206,24 @@ void Script::RetrieveSpriteFromContext(std::shared_ptr<Sprite> sprite) {
     int current_frame = get_int_property(this->context, "current");
     sprite->SetFrame(current_frame);
     duk_pop(this->context); // frame
+}
+
+void Script::CallOnCollision(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> other_entity) {
+    if (this->global_oncollision) {
+        std::string other_entity_name{CB_SCRIPT_ENTITY_NAME(other_entity)};
+
+        // setup call to global oncollision script
+        duk_push_global_object(this->context);
+        duk_get_prop_string(this->context, -1, CB_SCRIPT_GLOBAL_ONCOLLISION);
+        CreateEntityInContext(entity, CB_SCRIPT_ENTITY_THIS);
+        CreateEntityInContext(other_entity, other_entity_name.c_str());
+        duk_call_method(this->context, 1);
+
+        // clean up and pull any changes to the entities
+        duk_pop_2(this->context);
+        RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
+        RetrieveEntityFromContext(other_entity, other_entity_name.c_str());
+    }
 }
 
 void Script::CallStart(std::shared_ptr<Entity> entity) {

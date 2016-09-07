@@ -35,6 +35,7 @@ class Entity {
     bool HasScript() { return this->script != nullptr; };
     void MarkDestroy() { this->destroyed = true; };
     virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
+    virtual void SetPosition(int x,int y) { this->dim.x = x; this->dim.y = y; };
     virtual void Start() { this->started = true; };
     virtual void Update(float){};
     virtual ~Entity(){};

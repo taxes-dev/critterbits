@@ -83,7 +83,7 @@ Engine & Engine::GetInstance() {
     return instance;
 }
 
-void Engine::IterateActiveEntities(std::function<bool(std::shared_ptr<Entity>)> func) {
+void Engine::IterateActiveEntities(EntityIterateFunction func) {
     if (this->scenes.IsCurrentSceneActive()) {
         if (this->scenes.current_scene->HasTilemap()) {
             if (func(this->scenes.current_scene->GetTilemap())) {
@@ -217,6 +217,9 @@ int Engine::Run() {
 
                 return false;
             });
+
+            // resolve collision events
+            EngineEventQueue::GetInstance().ExecuteCollision();
 
             // timing update
             this->counters.Updated();

@@ -1,6 +1,6 @@
+#include <critterbits.h>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
-#include <critterbits.h>
 
 namespace Critterbits {
 
@@ -19,6 +19,42 @@ CB_Rect Sprite::GetFrameRect() const {
     frame_rect.w = this->tile_width;
     frame_rect.h = this->tile_height;
     return frame_rect;
+}
+
+bool Sprite::IsCollidingWith(entity_id_t entity_id) {
+    for (auto & eid : this->is_colliding_with) {
+        if (eid == entity_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
+    if (auto spr = other_sprite.lock()) {
+        if (!this->IsCollidingWith(spr->entity_id)) {
+            // record the collision (this is used for de-dupe)
+            this->is_colliding_with.push_back(spr->entity_id);
+
+            // queue up an event for the collision
+            std::weak_ptr<Sprite> this_sprite = shared_from_this();
+            EngineEventQueue::GetInstance().QueueCollision([other_sprite, this_sprite]() {
+                if (auto tspr = this_sprite.lock()) {
+                    if (auto ospr = other_sprite.lock()) {
+                        // call oncollision script if it exists
+                        if (tspr->HasScript()) {
+                            tspr->script->CallOnCollision(tspr, ospr);
+                        }
+
+                        // full colliders reset after every hit, triggers will collide only once until the colliding object leaves the trigger area
+                        if (tspr->collision == CBE_COLLIDE_COLLIDE && ospr->collision != CBE_COLLIDE_TRIGGER) {
+                            tspr->RemoveCollisionWith(ospr->entity_id);
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
 
 void Sprite::NotifyLoaded() {
@@ -55,6 +91,15 @@ void Sprite::NotifyUnloaded() {
     this->state = CBE_SPRITE_UNLOADED;
 }
 
+void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
+    for (auto it = this->is_colliding_with.begin(); it != this->is_colliding_with.end(); it++) {
+        if (*it == entity_id) {
+            this->is_colliding_with.erase(it);
+            break;
+        }
+    }
+}
+
 void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
     Entity::Render(renderer, clip_rect);
     if (this->state == CBE_SPRITE_READY) {
@@ -87,6 +132,51 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
 }
 
 void Sprite::SetFrame(int frame) { this->current_frame = Clamp(frame, 0, this->GetFrameCount()); }
+
+void Sprite::SetPosition(int new_x, int new_y) {
+    if (new_x == this->dim.x && new_y == this->dim.y) {
+        return;
+    }
+
+    // check collisions at new position if we collide
+    if (this->collision == CBE_COLLIDE_COLLIDE) {
+        CB_Rect new_dim{new_x, new_y, this->dim.w, this->dim.h};
+        Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
+            if (entity->GetEntityType() == CBE_SPRITE && entity->entity_id != this->entity_id) {
+                std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+                if (sprite->collision == CBE_COLLIDE_COLLIDE || sprite->collision == CBE_COLLIDE_TRIGGER) {
+                    // check for collision
+                    if (AabbCollision(new_dim, sprite->dim)) {
+                        // if full collision, adjust new x/y so they're not inside the collided sprite
+                        if (sprite->collision == CBE_COLLIDE_COLLIDE) {
+                            if (new_x > this->dim.x) {
+                                new_x = std::max(this->dim.x, sprite->dim.x - this->dim.w);
+                            } else if (new_x < this->dim.x) {
+                                new_x = std::min(this->dim.x, sprite->dim.right());
+                            }
+                            if (new_y > this->dim.y) {
+                                new_y = std::max(this->dim.y, sprite->dim.y - this->dim.h);
+                            } else if (new_y < this->dim.y) {
+                                new_y = std::min(this->dim.y, sprite->dim.bottom());
+                            }
+                        }
+
+                        // notify both sprites that a collision occurred
+                        this->NotifyCollision(sprite);
+                        sprite->NotifyCollision(shared_from_this());
+                    } else {
+                        this->RemoveCollisionWith(sprite->entity_id);
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
+    // update position if valid
+    this->dim.x = new_x;
+    this->dim.y = new_y;
+}
 
 void Sprite::Start() {
     if (this->sprite_sheet_loaded && this->script_loaded) {

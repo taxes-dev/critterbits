@@ -10,6 +10,7 @@
 #include "cbfiles.h"
 #include "cbinput.h"
 #include "cblogging.h"
+#include "cb2d.h"
 #include "cbmath.h"
 #include "cbscene.h"
 #include "cbscripting.h"

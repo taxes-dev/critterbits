@@ -20,6 +20,7 @@
 #define CB_DESIRED_UPS 60.0f
 
 namespace Critterbits {
+typedef std::function<bool(std::shared_ptr<Entity>)> EntityIterateFunction;
 
 class EngineConfiguration {
   public:
@@ -88,6 +89,7 @@ class Engine {
     int GetMaxTextureHeight() const { return this->max_texture_height; };
     int GetMaxTextureWidth() const { return this->max_texture_width; };
     SDL_Renderer * GetRenderer() const { return this->renderer; };
+    void IterateActiveEntities(EntityIterateFunction);
     int Run();
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);
 
@@ -103,11 +105,13 @@ class Engine {
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;
     void DestroyMarkedEntities();
-    void IterateActiveEntities(std::function<bool(std::shared_ptr<Entity>)>);
     void RenderDebugPane(int);
 };
 
+class Sprite;
+
 typedef std::function<void()> PreUpdateEvent;
+typedef std::function<void()> CollisionEvent;
 
 class EngineEventQueue {
     friend Engine;
@@ -115,12 +119,15 @@ class EngineEventQueue {
   public:
     ~EngineEventQueue(){};
     static EngineEventQueue & GetInstance();
-    void QueuePreUpdate(const PreUpdateEvent event);
+    void QueueCollision(const CollisionEvent);
+    void QueuePreUpdate(const PreUpdateEvent);
 
   protected:
+    void ExecuteCollision();
     void ExecutePreUpdate();
 
   private:
+    std::vector<CollisionEvent> collision;
     std::vector<PreUpdateEvent> pre_update;
 
     EngineEventQueue(){};

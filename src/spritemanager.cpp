@@ -30,13 +30,24 @@ static void tile_width_parser(void * context, const std::string & value) {
     static_cast<Sprite *>(context)->tile_width = YamlParser::ToInt(value);
 }
 
+static void collision_parser(void * context, const std::string & value) {
+    CollisionType collision{CBE_COLLIDE_NONE};
+    if (value == "collide") {
+        collision = CBE_COLLIDE_COLLIDE;
+    } else if (value == "trigger") {
+        collision = CBE_COLLIDE_TRIGGER;
+    }
+    static_cast<Sprite *>(context)->collision = collision;
+}
+
 static YamlValueParserCollection sprite_val_parsers = {{"sprite_sheet", sprite_sheet_parser},
                                                        {"sprite_scale", sprite_scale_parser},
                                                        {"tag", tag_parser},
                                                        {"tile_height", tile_height_parser},
                                                        {"tile_offset_x", tile_offset_x_parser},
                                                        {"tile_offset_y", tile_offset_y_parser},
-                                                       {"tile_width", tile_width_parser}};
+                                                       {"tile_width", tile_width_parser},
+                                                       {"collision", collision_parser}};
 /*
 * End support functions
 */

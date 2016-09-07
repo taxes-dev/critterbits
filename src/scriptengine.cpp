@@ -112,15 +112,21 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
     std::shared_ptr<Script> new_script = std::make_shared<Script>();
     new_script->script_name = script_name;
     new_script->script_path = script_path;
+
+    // create a new context
     duk_push_thread_new_globalenv(this->context);
-    new_script->context = duk_get_context(this->context, 0);
+    new_script->context = duk_get_context(this->context, -1);
     if (new_script->context == nullptr) {
         LOG_ERR("ScriptEngine::LoadScript unable to create new script context");
         return nullptr;
     }
+
+    // add common globals to the new context
     this->AddCommonScriptingFunctions(new_script->context);
+
+    // load associated script file
     if (duk_peval_file(new_script->context, script_path.c_str()) != 0) {
-        const char * error = duk_safe_to_string(new_script->context, 0);
+        const char * error = duk_safe_to_string(new_script->context, -1);
         LOG_ERR("ScriptEngine::LoadScript unable to compile script " + std::string(error));
         return false;
     }

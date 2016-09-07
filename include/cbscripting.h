@@ -11,10 +11,12 @@
 #define CB_SCRIPT_PATH "scripts"
 #define CB_SCRIPT_EXT ".js"
 
+#define CB_SCRIPT_GLOBAL_ONCOLLISION "oncollision"
 #define CB_SCRIPT_GLOBAL_START "start"
 #define CB_SCRIPT_GLOBAL_UPDATE "update"
 
 #define CB_SCRIPT_ENTITY_THIS "entity_this"
+#define CB_SCRIPT_ENTITY_NAME(e) "entity_" + std::to_string(e->entity_id)
 
 #define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
     "\xff"                                                                                                             \
@@ -32,11 +34,13 @@ class Script {
     std::string script_path;
     std::string script_name;
 
+    void CallOnCollision(std::shared_ptr<Entity>, std::shared_ptr<Entity>);
     void CallStart(std::shared_ptr<Entity>);
     void CallUpdate(std::shared_ptr<Entity>, float);
 
   private:
     duk_context * context{nullptr};
+    bool global_oncollision{false};
     bool global_start{false};
     bool global_update{false};
 
