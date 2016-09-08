@@ -18,7 +18,7 @@ void SDL_RenderTexture(SDL_Renderer * renderer, SDL_Texture * texture, int x, in
 }
 
 void SDL_RenderTextureClipped(SDL_Renderer * renderer, SDL_Texture * texture, const CB_Rect & source,
-                              const CB_Rect & dest, bool flip_x, bool flip_y) {
+                              const CB_Rect & dest, bool flip_x, bool flip_y, double angle) {
     SDL_Rect src;
     src.x = source.x;
     src.y = source.y;
@@ -36,7 +36,7 @@ void SDL_RenderTextureClipped(SDL_Renderer * renderer, SDL_Texture * texture, co
     if (flip_y) {
         flip = (SDL_RendererFlip)(flip | SDL_FLIP_VERTICAL);
     }
-    SDL_RenderCopyEx(renderer, texture, &src, &dst, 0., NULL, flip);
+    SDL_RenderCopyEx(renderer, texture, &src, &dst, angle, NULL, flip);
 }
 }
 }

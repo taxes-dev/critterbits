@@ -207,18 +207,10 @@ int Engine::Run() {
             // Update cycle
             this->IterateActiveEntities([dt](std::shared_ptr<Entity> entity) {
                 // start entity if it hasn't already
-                if (!entity->started) {
-                    entity->Start();
-                    if (entity->HasScript()) {
-                        entity->script->CallStart(entity);
-                    }
-                }
+                entity->Start();
 
                 // call frame update methods
-                if (entity->HasScript()) {
-                    entity->script->CallUpdate(entity, dt * entity->time_scale);
-                }
-                entity->Update(dt * entity->time_scale);
+                entity->Update(dt);
 
                 return false;
             });

@@ -5,6 +5,7 @@
 #include <SDL.h>
 
 #include <cassert>
+#include <memory>
 
 #include "cbcoord.h"
 
@@ -19,7 +20,7 @@ namespace Scripting {
 class Script;
 }
 
-class Entity {
+class Entity : public std::enable_shared_from_this<Entity> {
     friend class Engine;
 
   public:
@@ -39,12 +40,14 @@ class Entity {
     void MarkDestroy() { this->destroyed = true; };
     virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
     virtual void SetPosition(int x,int y) { this->dim.x = x; this->dim.y = y; };
-    virtual void Start() { this->started = true; };
-    virtual void Update(float){};
+    void Start();
+    void Update(float);
     virtual ~Entity(){};
 
   protected:
     Entity(){};
+    virtual bool OnStart() { return true; };
+    virtual void OnUpdate(float) {};
 
   private:
     bool started{false};

@@ -50,7 +50,7 @@ void Viewport::SetEntityToFollow(std::shared_ptr<Entity> entity) {
     }
 }
 
-void Viewport::Update(float delta_time) {
+void Viewport::OnUpdate(float delta_time) {
     if (auto entity = this->entity_to_follow.lock()) {
         // Re-center viewport on followed entity
         this->dim.x = entity->dim.x - this->entity_center_view.x;

@@ -22,6 +22,9 @@ public:
 
   void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
   void SetPosition(int new_x, int new_y) {}; // map regions are static
+
+protected:
+  bool OnStart() { return true; }
   
 private:
   bool draw_debug{false};

@@ -18,7 +18,7 @@ namespace Critterbits {
 typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteState;
 typedef enum { CBE_COLLIDE_NONE, CBE_COLLIDE_COLLIDE, CBE_COLLIDE_TRIGGER } CollisionType;
 
-class Sprite : public Entity, public std::enable_shared_from_this<Sprite> {
+class Sprite : public Entity {
   public:
     SpriteState state{CBE_SPRITE_NEW};
     std::string sprite_name;
@@ -44,7 +44,9 @@ class Sprite : public Entity, public std::enable_shared_from_this<Sprite> {
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     void SetFrame(int);
     void SetPosition(int,int);
-    void Start();
+
+protected:
+    bool OnStart();
 
   private:
     int current_frame{0};

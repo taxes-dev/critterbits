@@ -305,12 +305,14 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const struct MapTile & tile
     unsigned int tile_gid = tile.gid & TMX_FLIP_BITS_REMOVAL;
     bool flip_x = false;
     bool flip_y = false;
+    double rotate = 0.;
     if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_DIAGONALLY)) {
+        rotate = -90.;
+    } 
+    if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_HORIZONTALLY)) {
         flip_x = true;
-        flip_y = true;
-    } else if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_HORIZONTALLY)) {
-        flip_x = true;
-    } else if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_VERTICALLY)) {
+    }
+    if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_VERTICALLY)) {
         flip_y = true;
     }
 
@@ -351,7 +353,7 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const struct MapTile & tile
         }
 
         // render tile
-        SDLx::SDL_RenderTextureClipped(renderer, tiletex, srcrect, dstrect, flip_x, flip_y);
+        SDLx::SDL_RenderTextureClipped(renderer, tiletex, srcrect, dstrect, flip_x, flip_y, rotate);
 
         // reset alpha modulation
         if (tile.alpha_mod < SDL_ALPHA_OPAQUE) {

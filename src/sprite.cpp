@@ -34,7 +34,7 @@ void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
             this->is_colliding_with.push_back(spr->entity_id);
 
             // queue up an event for the collision
-            std::weak_ptr<Sprite> this_sprite = shared_from_this();
+            std::weak_ptr<Sprite> this_sprite = std::dynamic_pointer_cast<Sprite>(shared_from_this());
             EngineEventQueue::GetInstance().QueueCollision([other_sprite, this_sprite]() {
                 if (auto tspr = this_sprite.lock()) {
                     if (auto ospr = other_sprite.lock()) {
@@ -162,7 +162,7 @@ void Sprite::SetPosition(int new_x, int new_y) {
 
                         // notify both sprites that a collision occurred
                         this->NotifyCollision(sprite);
-                        sprite->NotifyCollision(shared_from_this());
+                        sprite->NotifyCollision(std::dynamic_pointer_cast<Sprite>(shared_from_this()));
                     } else {
                         this->RemoveCollisionWith(sprite->entity_id);
                     }
@@ -177,10 +177,12 @@ void Sprite::SetPosition(int new_x, int new_y) {
     this->dim.y = new_y;
 }
 
-void Sprite::Start() {
+bool Sprite::OnStart() {
+    // delay start until resources loaded
     if (this->sprite_sheet_loaded && this->script_loaded) {
         this->state = CBE_SPRITE_READY;
-        Entity::Start();
+        return true;
     }
+    return false;
 }
 }
