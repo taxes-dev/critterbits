@@ -204,10 +204,16 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     }
 
     // loop through tiles in map
+    struct MapTile tile;
+    tile.offsetx = layer->offsetx;
+    tile.offsety = layer->offsety;
+    tile.alpha_mod = alpha_mod;
     for (unsigned long i = 0; i < this->map->height; i++) {
         for (unsigned long j = 0; j < this->map->width; j++) {
-            this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, layer->offsetx,
-                                layer->offsety, alpha_mod, is_collide ? &collision_regions : nullptr);
+            tile.gid = layer->content.gids[(i * this->map->width) + j];
+            tile.row = i;
+            tile.col = j;
+            this->DrawTileOnMap(renderer, tile, is_collide ? &collision_regions : nullptr);
         }
     }
 
@@ -226,11 +232,19 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
 
     SDL_Color obj_color = tmx_to_sdl_color(object_group->color);
 
+    // for S_TILE objects
+    struct MapTile tile;
+    tile.offsetx = layer->offsetx;
+    tile.offsety = layer->offsety;
+    tile.alpha_mod = SDL_ALPHA_OPAQUE;
+
     while (current_obj) {
         if (current_obj->visible) {
             if (current_obj->shape == S_TILE) {
-                this->DrawTileOnMap(renderer, current_obj->gid, current_obj->x * -1, current_obj->y * -1,
-                                    layer->offsetx, layer->offsety, SDL_ALPHA_OPAQUE);
+                tile.col = current_obj->x * -1;
+                tile.row = current_obj->y * -1;
+                tile.gid = current_obj->gid;
+                this->DrawTileOnMap(renderer, tile);
             } else if (this->draw_debug) {
                 // region objects are normally hidden and used as event triggers
                 switch (current_obj->shape) {
@@ -266,22 +280,21 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
     }
 }
 
-void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int offsetx, int offsety,
-                            int alpha_mod, RectRegionCombiner * collision_regions) {
+void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const struct MapTile & tile, RectRegionCombiner * collision_regions) {
     CB_Rect srcrect, dstrect;
-    SDL_Texture * tile;
+    SDL_Texture * tiletex;
     tmx_tileset * ts;
     tmx_image * im;
 
-    unsigned int tile_gid = gid & TMX_FLIP_BITS_REMOVAL;
+    unsigned int tile_gid = tile.gid & TMX_FLIP_BITS_REMOVAL;
     bool flip_x = false;
     bool flip_y = false;
-    if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_DIAGONALLY)) {
+    if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_DIAGONALLY)) {
         flip_x = true;
         flip_y = true;
-    } else if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_HORIZONTALLY)) {
+    } else if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_HORIZONTALLY)) {
         flip_x = true;
-    } else if (TestBitMask<unsigned int>(gid, TMX_FLIPPED_VERTICALLY)) {
+    } else if (TestBitMask<unsigned int>(tile.gid, TMX_FLIPPED_VERTICALLY)) {
         flip_y = true;
     }
 
@@ -301,32 +314,32 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         dstrect.w = ts->tile_width;
         dstrect.h = ts->tile_height;
         // FIXME: this is a hack hack hack
-        if (row < 0) {
-            dstrect.x = row * -1 + offsetx;
-            dstrect.y = col * -1 + offsety;
+        if (tile.row < 0) {
+            dstrect.x = tile.row * -1 + tile.offsetx;
+            dstrect.y = tile.col * -1 + tile.offsety;
         } else {
-            dstrect.x = col * ts->tile_width + offsetx;
-            dstrect.y = row * ts->tile_height + offsety;
+            dstrect.x = tile.col * ts->tile_width + tile.offsetx;
+            dstrect.y = tile.row * ts->tile_height + tile.offsety;
         }
 
         // select source tile or image
         if (im) {
-            tile = static_cast<SDL_Texture *>(im->resource_image);
+            tiletex = static_cast<SDL_Texture *>(im->resource_image);
         } else {
-            tile = static_cast<SDL_Texture *>(ts->image->resource_image);
+            tiletex = static_cast<SDL_Texture *>(ts->image->resource_image);
         }
 
         // set alpha modulation based on layer opacity
-        if (alpha_mod < SDL_ALPHA_OPAQUE) {
-            SDL_SetTextureAlphaMod(tile, alpha_mod);
+        if (tile.alpha_mod < SDL_ALPHA_OPAQUE) {
+            SDL_SetTextureAlphaMod(tiletex, tile.alpha_mod);
         }
 
         // render tile
-        SDLx::SDL_RenderTextureClipped(renderer, tile, srcrect, dstrect, flip_x, flip_y);
+        SDLx::SDL_RenderTextureClipped(renderer, tiletex, srcrect, dstrect, flip_x, flip_y);
 
         // reset alpha modulation
-        if (alpha_mod < SDL_ALPHA_OPAQUE) {
-            SDL_SetTextureAlphaMod(tile, SDL_ALPHA_OPAQUE);
+        if (tile.alpha_mod < SDL_ALPHA_OPAQUE) {
+            SDL_SetTextureAlphaMod(tiletex, SDL_ALPHA_OPAQUE);
         }
 
         // create collision region if needed

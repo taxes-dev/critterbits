@@ -43,6 +43,14 @@ class Tilemap : public Entity {
     static void Tilemap_Quit();
 
   private:
+    struct MapTile {
+      unsigned int gid;
+      int row;
+      int col;
+      int offsetx;
+      int offsety;
+      int alpha_mod;
+    };
     std::string tmx_path;
     tmx_map * map{nullptr};
     SDL_Texture * map_texture{nullptr};
@@ -54,7 +62,7 @@ class Tilemap : public Entity {
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *, RectRegionCombiner &);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int, RectRegionCombiner * = nullptr);
+    inline void DrawTileOnMap(SDL_Renderer *, const struct MapTile &, RectRegionCombiner * = nullptr);
 };
 }
 #endif
