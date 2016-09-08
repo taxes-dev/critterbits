@@ -89,6 +89,11 @@ void Engine::IterateActiveEntities(EntityIterateFunction func) {
             if (func(this->scenes.current_scene->GetTilemap())) {
                 return;
             }
+            for (auto & region : this->scenes.current_scene->GetTilemap()->regions) {
+                if (func(region)) {
+                    return;
+                }
+            }
         }
         for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
             if (func(sprite)) {

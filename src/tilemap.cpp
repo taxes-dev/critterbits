@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
 #include <critterbits.h>
@@ -54,6 +56,16 @@ Tilemap::~Tilemap() {
     }
 }
 
+void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
+    std::shared_ptr<TilemapRegion> region{std::make_shared<TilemapRegion>()};
+    region->dim.x = dim.x * this->render_scale;
+    region->dim.y = dim.y * this->render_scale;
+    region->dim.w = dim.w * this->render_scale;
+    region->dim.h = dim.h * this->render_scale;
+    region->collision = CBE_COLLIDE_COLLIDE;
+    this->regions.push_back(std::move(region));
+}
+
 bool Tilemap::CreateTextures(float scale) {
     // check to see if we already created the textures
     if (this->map_texture != nullptr) {
@@ -72,6 +84,7 @@ bool Tilemap::CreateTextures(float scale) {
     this->dim.h = NextPowerOf2(this->map->height * this->tile_width);
     this->dim.x = 0;
     this->dim.y = 0;
+    this->render_scale = scale;
 
     this->map_texture = this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 
@@ -167,11 +180,25 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
         SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
     }
 
+    // check layer properties for additional features
+    bool is_collide = false, is_foreground = false;
+    tmx_property * prop = layer->properties;
+    while (prop) {
+        if (strcmp(prop->name, CB_TILEMAP_COLLIDE) == 0 &&
+            strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
+            is_collide = true;
+        } else if (strcmp(prop->name, CB_TILEMAP_FOREGROUND) == 0 &&
+            strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
+            is_foreground = true;
+        }
+        prop = prop->next;
+    }
+
     // loop through tiles in map
     for (unsigned long i = 0; i < this->map->height; i++) {
         for (unsigned long j = 0; j < this->map->width; j++) {
             this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, layer->offsetx,
-                                layer->offsety, alpha_mod);
+                                layer->offsety, alpha_mod, is_collide);
         }
     }
 
@@ -231,7 +258,7 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
 }
 
 void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int offsetx, int offsety,
-                            int alpha_mod) {
+                            int alpha_mod, bool is_collide) {
     CB_Rect srcrect, dstrect;
     SDL_Texture * tile;
     tmx_tileset * ts;
@@ -291,6 +318,11 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         // reset alpha modulation
         if (alpha_mod < SDL_ALPHA_OPAQUE) {
             SDL_SetTextureAlphaMod(tile, SDL_ALPHA_OPAQUE);
+        }
+
+        // create collision region if needed
+        if (is_collide) {
+            this->CreateCollisionRegion(dstrect);
         }
     }
 }

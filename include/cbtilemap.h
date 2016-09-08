@@ -7,13 +7,30 @@
 
 #include "cbcoord.h"
 #include "cbentity.h"
+#include "cbsprite.h"
+
+#define CB_TILEMAP_COLLIDE "collide"
+#define CB_TILEMAP_FOREGROUND "foreground"
+
+#define CB_TILEMAP_TMX_PROP_BOOL_TRUE "true"
 
 namespace Critterbits {
+class TilemapRegion : public Sprite {
+public:
+  TilemapRegion();
+
+  void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
+
+private:
+  bool draw_debug{false};
+  
+};
 
 class Tilemap : public Entity {
   public:
     int tile_width;
     int tile_height;
+    std::vector<std::shared_ptr<TilemapRegion>> regions;
 
     Tilemap(const std::string &);
     ~Tilemap();
@@ -29,12 +46,14 @@ class Tilemap : public Entity {
     tmx_map * map{nullptr};
     SDL_Texture * map_texture{nullptr};
     bool draw_debug{false};
+    float render_scale{1.0f};
 
     SDL_Texture * RenderMap(SDL_Renderer *, float);
+    void CreateCollisionRegion(const CB_Rect &);
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int);
+    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int, bool = false);
 };
 }
 #endif
