@@ -236,13 +236,20 @@ int Engine::Run() {
         // Render pass
         SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         SDL_RenderClear(this->renderer);
-        this->IterateActiveEntities([this](std::shared_ptr<Entity> entity) {
-            if (entity->dim.intersects(this->viewport->dim)) {
-                entity->Render(this->renderer, this->viewport->GetViewableRect(entity->dim));
-                this->counters.RenderedEntity();
-            }
-            return false;
-        });
+        for (auto & z_index : {CBE_Z_BACKGROUND, CBE_Z_MIDGROUND, CBE_Z_FOREGROUND}) {
+            this->IterateActiveEntities([this, z_index](std::shared_ptr<Entity> entity) {
+                if (entity->dim.intersects(this->viewport->dim)) {
+                    CB_ViewClippingInfo clip{this->viewport->GetViewableRect(entity->dim)};
+                    clip.z_index = z_index;
+                    entity->Render(this->renderer, clip);
+                    if (z_index == CBE_Z_BACKGROUND) {
+                        // guard is to make sure we only count each entity rendered once per frame
+                        this->counters.RenderedEntity();
+                    }
+                }
+                return false;
+            });
+        }
 
         if (this->config->debug.draw_info_pane) {
             this->RenderDebugPane(0 /*entities.size()*/); // FIXME: lost ability to count entities directly

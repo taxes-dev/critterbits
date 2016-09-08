@@ -37,7 +37,6 @@ class Tilemap : public Entity {
     ~Tilemap();
     bool CreateTextures(float scale);
     EntityType GetEntityType() { return CBE_TILEMAP; };
-    SDL_Texture * GetMapTexture() const { return this->map_texture; };
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     static void Tilemap_Init();
     static void Tilemap_Quit();
@@ -53,14 +52,15 @@ class Tilemap : public Entity {
     };
     std::string tmx_path;
     tmx_map * map{nullptr};
-    SDL_Texture * map_texture{nullptr};
+    SDL_Texture * bg_map_texture{nullptr};
+    SDL_Texture * fg_map_texture{nullptr};
     bool draw_debug{false};
     float render_scale{1.0f};
 
-    SDL_Texture * RenderMap(SDL_Renderer *, float);
+    bool RenderMap(SDL_Renderer *, float);
     void CreateCollisionRegion(const CB_Rect &);
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *, RectRegionCombiner &);
+    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *, RectRegionCombiner *);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
     inline void DrawTileOnMap(SDL_Renderer *, const struct MapTile &, RectRegionCombiner * = nullptr);
 };

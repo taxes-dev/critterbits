@@ -68,7 +68,7 @@ void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
 
 bool Tilemap::CreateTextures(float scale) {
     // check to see if we already created the textures
-    if (this->map_texture != nullptr) {
+    if (this->bg_map_texture != nullptr && this->fg_map_texture != nullptr) {
         return true;
     }
 
@@ -86,34 +86,43 @@ bool Tilemap::CreateTextures(float scale) {
     this->dim.y = 0;
     this->render_scale = scale;
 
-    this->map_texture = this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
-
-    return this->map_texture != nullptr;
+    return this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 }
 
 void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
     Entity::Render(renderer, clip);
-    if (this->map_texture != nullptr) {
-        SDLx::SDL_RenderTextureClipped(renderer, this->map_texture, clip.source, clip.dest);
+    SDL_Texture * texture = nullptr;
+    if (clip.z_index == CBE_Z_BACKGROUND && this->bg_map_texture != nullptr) {
+        texture = this->bg_map_texture;
+    } else if (clip.z_index == CBE_Z_FOREGROUND && this->fg_map_texture != nullptr) {
+        texture = this->fg_map_texture;
+    }
+    if (texture != nullptr) {
+        SDLx::SDL_RenderTextureClipped(renderer, texture, clip.source, clip.dest);
     }
 }
 
-SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
+bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // create texture to hold the map
     int max_w = Engine::GetInstance().GetMaxTextureWidth();
     int max_h = Engine::GetInstance().GetMaxTextureHeight();
     if (max_w < this->dim.w || max_h < this->dim.h) {
         LOG_ERR("Tilemap::RenderMap map size would result in over-sized texture (" + std::to_string(this->dim.w) + "x" +
                 std::to_string(this->dim.h) + ")");
-        return nullptr;
+        return false;
     }
 
-    SDL_Texture * texture =
-        SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
-
-    if (texture == nullptr) {
-        LOG_SDL_ERR("Tilemap::RenderMap unable to create texture for map");
-        return nullptr;
+    SDL_Texture * current_texture = nullptr;
+    SDL_Texture * fg_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
+    if (fg_texture == nullptr) {
+        LOG_SDL_ERR("Tilemap::RenderMap unable to create foreground texture for map");
+        return false;
+    }
+    SDL_Texture * bg_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
+    if (bg_texture == nullptr) {
+        SDLx::SDL_CleanUp(fg_texture);
+        LOG_SDL_ERR("Tilemap::RenderMap unable to create background texture for map");
+        return false;
     }
 
     // used for creating collision regions
@@ -121,25 +130,57 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
 
     // set render target to the map texture
     float original_scale_x, original_scale_y;
+    SDL_BlendMode original_blend_mode;
     SDL_RenderGetScale(renderer, &original_scale_x, &original_scale_y);
-    SDL_SetRenderTarget(renderer, texture);
-    SDL_RenderSetScale(renderer, scale, scale);
+    SDL_GetRenderDrawBlendMode(renderer, &original_blend_mode);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    // clear map to background color
+    // clear background texture to map background color
+    SDL_SetRenderTarget(renderer, bg_texture);
+    SDL_SetTextureBlendMode(bg_texture, SDL_BLENDMODE_BLEND);
     SDL_Color bg_color = tmx_to_sdl_color(this->map->backgroundcolor);
     SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+    SDL_RenderClear(renderer);
+
+    // clear foreground texture to transparent
+    SDL_SetRenderTarget(renderer, fg_texture);
+    SDL_SetTextureBlendMode(fg_texture, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
     // iterate layers and draw
     tmx_layer * current_layer = this->map->ly_head;
     while (current_layer) {
         if (current_layer->visible) {
+                // check layer properties for additional features
+                bool is_collide = false, is_foreground = false;
+                tmx_property * prop = current_layer->properties;
+                while (prop) {
+                    if (strcmp(prop->name, CB_TILEMAP_COLLIDE) == 0 &&
+                        strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
+                        is_collide = true;
+                    } else if (strcmp(prop->name, CB_TILEMAP_FOREGROUND) == 0 &&
+                        strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
+                        is_foreground = true;
+                    }
+                    prop = prop->next;
+                }
+
+                if (is_foreground) {
+                    SDL_SetRenderTarget(renderer, fg_texture);
+                    current_texture = fg_texture;
+                } else {
+                    SDL_SetRenderTarget(renderer, bg_texture);
+                    current_texture = bg_texture;
+                }
+                    SDL_RenderSetScale(renderer, scale, scale);
+
             if (current_layer->type == L_OBJGR) {
-                this->DrawObjectLayer(renderer, texture, current_layer);
+                this->DrawObjectLayer(renderer, current_texture, current_layer);
             } else if (current_layer->type == L_IMAGE) {
-                this->DrawImageLayer(renderer, texture, current_layer);
+                this->DrawImageLayer(renderer, current_texture, current_layer);
             } else if (current_layer->type == L_LAYER) {
-                this->DrawMapLayer(renderer, texture, current_layer, collision_regions);
+                this->DrawMapLayer(renderer, current_texture, current_layer, is_collide ? &collision_regions : nullptr);
             }
         }
         current_layer = current_layer->next;
@@ -147,6 +188,7 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
 
     // reset render target
     SDL_SetRenderTarget(renderer, NULL);
+    SDL_SetRenderDrawBlendMode(renderer, original_blend_mode);
     SDL_RenderSetScale(renderer, original_scale_x, original_scale_y);
 
     // finally, create actual collision map regions
@@ -155,7 +197,9 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
         this->CreateCollisionRegion(region);
     }
 
-    return texture;
+    this->bg_map_texture = bg_texture;
+    this->fg_map_texture = fg_texture;
+    return true;
 }
 
 void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
@@ -168,40 +212,18 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     SDL_QueryTexture(source_image, NULL, NULL, &(dim.w), &(dim.h));
 
     if (op < 1.) {
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
         SDL_SetTextureAlphaMod(source_image, op * SDL_ALPHA_OPAQUE);
     }
     SDL_RenderCopy(renderer, source_image, NULL, &dim);
     if (op < 1.) {
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
         SDL_SetTextureAlphaMod(source_image, SDL_ALPHA_OPAQUE);
     }
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer, RectRegionCombiner & collision_regions) {
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer, RectRegionCombiner * collision_regions) {
     // prepare blend mode if opacity less than 100%
     float op = layer->opacity;
     int alpha_mod = op * SDL_ALPHA_OPAQUE;
-    if (op < 1.) {
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    }
-
-    // check layer properties for additional features
-    bool is_collide = false, is_foreground = false;
-    tmx_property * prop = layer->properties;
-    while (prop) {
-        if (strcmp(prop->name, CB_TILEMAP_COLLIDE) == 0 &&
-            strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
-            is_collide = true;
-        } else if (strcmp(prop->name, CB_TILEMAP_FOREGROUND) == 0 &&
-            strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
-            is_foreground = true;
-        }
-        prop = prop->next;
-    }
 
     // loop through tiles in map
     struct MapTile tile;
@@ -213,14 +235,8 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
             tile.gid = layer->content.gids[(i * this->map->width) + j];
             tile.row = i;
             tile.col = j;
-            this->DrawTileOnMap(renderer, tile, is_collide ? &collision_regions : nullptr);
+            this->DrawTileOnMap(renderer, tile, collision_regions);
         }
-    }
-
-    // reset blend mode
-    if (op < 1.) {
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
     }
 }
 

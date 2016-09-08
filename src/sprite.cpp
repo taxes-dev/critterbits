@@ -103,7 +103,7 @@ void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
 void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
     Entity::Render(renderer, clip_rect);
     if (this->state == CBE_SPRITE_READY) {
-        if (this->sprite_sheet != nullptr) {
+        if (this->sprite_sheet != nullptr && clip_rect.z_index == CBE_Z_MIDGROUND) {
             // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
             CB_Rect dst_rect = clip_rect.dest;
             dst_rect.w = this->dim.w;
@@ -111,7 +111,7 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
             SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), dst_rect, this->flip_x,
                                            this->flip_y);
         }
-        if (this->draw_debug) {
+        if (this->draw_debug && clip_rect.z_index == CBE_Z_FOREGROUND) {
             rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
                           255, 0, 0, 127);
             boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
