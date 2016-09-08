@@ -106,6 +106,8 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
         if (this->sprite_sheet != nullptr && clip_rect.z_index == CBE_Z_MIDGROUND) {
             // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
             CB_Rect dst_rect = clip_rect.dest;
+            dst_rect.x -= clip_rect.source.x;
+            dst_rect.y -= clip_rect.source.y;
             dst_rect.w = this->dim.w;
             dst_rect.h = this->dim.h;
             SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), dst_rect, this->flip_x,
