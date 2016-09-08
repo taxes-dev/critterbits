@@ -51,11 +51,13 @@ class EngineCounters {
   public:
     EngineCounters() { this->Reset(); };
 
+    void CountedEntity();
     float GetAverageFps() { return this->fps; };
     float GetDeltaFromRemainingFrameTime();
     float GetDeltaTime() { return this->delta_time; };
     unsigned int GetRemainingFrameTime() { return this->frame_time; };
     unsigned int GetRenderedEntitiesCount() { return this->render_count; };
+    unsigned int GetTotalEntitiesCount() { return this->entity_count; };
     void NewFrame();
     void RenderedEntity();
     void Reset();
@@ -69,6 +71,7 @@ class EngineCounters {
     unsigned int last_ticks;
     unsigned int frame_time;
     unsigned int frame_count;
+    unsigned int entity_count;
     unsigned int render_count;
     unsigned int update_count;
 };

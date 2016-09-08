@@ -4,6 +4,10 @@
 #include <critterbits.h>
 
 namespace Critterbits {
+void EngineCounters::CountedEntity() {
+    this->entity_count++;
+}
+
 float EngineCounters::GetDeltaFromRemainingFrameTime() {
     return std::min(this->delta_time, this->frame_time / 1000.0f);
 }
@@ -14,6 +18,7 @@ void EngineCounters::NewFrame() {
     this->last_ticks = this->ticks;
     this->frame_count++;
     this->render_count = 0;
+    this->entity_count = 0;
     if (this->frame_count % 10 == 0) {
         this->fps = (this->fps + 1000.0f / this->frame_time) / 2.0f;
     }
@@ -27,6 +32,7 @@ void EngineCounters::Reset() {
     this->last_ticks = 0;
     this->frame_time = 0;
     this->frame_count = 0;
+    this->entity_count = 0;
     this->render_count = 0;
     this->update_count = 0;
 }

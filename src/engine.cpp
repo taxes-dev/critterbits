@@ -247,12 +247,15 @@ int Engine::Run() {
                         this->counters.RenderedEntity();
                     }
                 }
+                if (z_index == CBE_Z_BACKGROUND) {
+                    this->counters.CountedEntity();
+                }
                 return false;
             });
         }
 
         if (this->config->debug.draw_info_pane) {
-            this->RenderDebugPane(0 /*entities.size()*/); // FIXME: lost ability to count entities directly
+            this->RenderDebugPane(this->counters.GetTotalEntitiesCount());
         }
         SDL_RenderPresent(this->renderer);
 
