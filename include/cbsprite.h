@@ -2,6 +2,7 @@
 #ifndef CBSPRITE_H
 #define CBSPRITE_H
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -50,7 +51,7 @@ class Sprite : public Entity, public std::enable_shared_from_this<Sprite> {
     int sprite_sheet_rows{0};
     int sprite_sheet_cols{0};
     bool draw_debug{false};
-    SDL_Texture * sprite_sheet{nullptr}; // TODO: centrally manage sprite sheets so they can be shared between sprites
+    std::shared_ptr<SDL_Texture> sprite_sheet;
     bool sprite_sheet_loaded{false};
     bool script_loaded{false};
     std::vector<entity_id_t> is_colliding_with;
@@ -62,16 +63,18 @@ class Sprite : public Entity, public std::enable_shared_from_this<Sprite> {
 
 class SpriteManager {
   public:
-    std::list<std::shared_ptr<Sprite>> sprites;
+    std::vector<std::shared_ptr<Sprite>> sprites;
 
     SpriteManager(){};
     static std::string GetSpritePath(const std::string &);
+    std::shared_ptr<SDL_Texture> GetSpriteSheet(const std::string &);
     bool LoadQueuedSprites();
     void QueueSprite(const std::string &);
     void UnloadSprite(std::shared_ptr<Sprite>);
 
   private:
-    std::list<std::string> queued_sprites;
+    std::vector<std::string> queued_sprites;
+    std::map<std::string, std::shared_ptr<SDL_Texture>> sprite_sheets;
 
     SpriteManager(const SpriteManager &) = delete;
     SpriteManager(SpriteManager &&) = delete;

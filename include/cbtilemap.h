@@ -21,7 +21,8 @@ public:
   TilemapRegion();
 
   void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
-
+  void SetPosition(int new_x, int new_y) {}; // map regions are static
+  
 private:
   bool draw_debug{false};
   

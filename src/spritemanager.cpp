@@ -1,4 +1,5 @@
 #include <critterbits.h>
+#include <SDL_image.h>
 
 namespace Critterbits {
 /*
@@ -54,6 +55,24 @@ static YamlValueParserCollection sprite_val_parsers = {{"sprite_sheet", sprite_s
 
 std::string SpriteManager::GetSpritePath(const std::string & asset_name) {
     return Engine::GetInstance().config->asset_path + CB_SPRITE_PATH + PATH_SEP + asset_name;
+}
+
+std::shared_ptr<SDL_Texture> SpriteManager::GetSpriteSheet(const std::string & sprite_sheet_path) {
+    auto it = this->sprite_sheets.find(sprite_sheet_path);
+    if (it == this->sprite_sheets.end()) {
+        LOG_INFO("SpriteManager::GetSpriteSheet attempting to load sprite sheet " + sprite_sheet_path);
+        SDL_Texture * sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), sprite_sheet_path.c_str());
+        if (sprite_sheet == nullptr) {
+            LOG_SDL_ERR("SpriteManager::GetSpriteSheet unable to load sprite sheet to texture");
+            return nullptr;
+        }
+        std::shared_ptr<SDL_Texture> sprite_sheet_ptr{sprite_sheet, [](SDL_Texture * texture) { SDLx::SDL_CleanUp(texture); }};
+        this->sprite_sheets.insert(std::make_pair(sprite_sheet_path, sprite_sheet_ptr));
+        return std::move(sprite_sheet_ptr);
+    } else {
+        LOG_INFO("SpriteManager::GetSpriteSheet found already loaded sprite sheet " + sprite_sheet_path);
+        return it->second;
+    }
 }
 
 bool SpriteManager::LoadQueuedSprites() {

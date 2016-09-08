@@ -7,9 +7,6 @@ namespace Critterbits {
 Sprite::Sprite() { this->draw_debug = Engine::GetInstance().config->debug.draw_sprite_rects; }
 
 Sprite::~Sprite() {
-    if (this->sprite_sheet != nullptr) {
-        SDLx::SDL_CleanUp(this->sprite_sheet);
-    }
 }
 
 CB_Rect Sprite::GetFrameRect() const {
@@ -66,12 +63,12 @@ void Sprite::NotifyLoaded() {
 
     EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
         LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
-        this->sprite_sheet = IMG_LoadTexture(Engine::GetInstance().GetRenderer(), this->sprite_sheet_path.c_str());
+        this->sprite_sheet = Engine::GetInstance().scenes.current_scene->sprites.GetSpriteSheet(this->sprite_sheet_path);
         if (this->sprite_sheet == nullptr) {
             LOG_SDL_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet to texture");
         } else {
             int w, h;
-            SDL_QueryTexture(this->sprite_sheet, NULL, NULL, &w, &h);
+            SDL_QueryTexture(this->sprite_sheet.get(), NULL, NULL, &w, &h);
             this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
             this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
         }
@@ -110,7 +107,7 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
             dst_rect.y -= clip_rect.source.y;
             dst_rect.w = this->dim.w;
             dst_rect.h = this->dim.h;
-            SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet, this->GetFrameRect(), dst_rect, this->flip_x,
+            SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet.get(), this->GetFrameRect(), dst_rect, this->flip_x,
                                            this->flip_y);
         }
         if (this->draw_debug && clip_rect.z_index == CBE_Z_FOREGROUND) {
