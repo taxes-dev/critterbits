@@ -6,13 +6,15 @@ namespace Critterbits {
     void RectRegionCombiner::Combine() {
         LOG_INFO("RectRegionCombiner::Combine starting with " + std::to_string(this->regions.size()) + " regions to combine");
         int combines;
-        std::vector<CB_Rect> new_regions;
         CB_Rect new_rect;
 
-        // remove duplicates
+        // remove duplicates and completely overlapping rects
         this->regions.erase(
             std::unique(this->regions.begin(), this->regions.end(), [](const CB_Rect & rect1, const CB_Rect & rect2) {
-                return rect1 == rect2 || rect1.inside(rect2) || rect2.inside(rect1); 
+                // NOTE: need to check this on other STL implementations, as we're relying on the
+                // notion that rect1 will be overwritten with rect2 by std::unique. If it's the other
+                // way around, the small rect would be preserved instead of the larger one.
+                return rect1 == rect2 || rect1.inside(rect2); 
             }),
             this->regions.end());
 
@@ -32,7 +34,7 @@ namespace Critterbits {
                             new_rect.y = rect1.y;
                             new_rect.w = rect1.w + rect2.w;
                             new_rect.h = rect1.h;
-                            new_regions.push_back(new_rect);
+                            this->regions.push_back(new_rect);
                             rect1.w = 0; rect1.h = 0;
                             rect2.w = 0; rect2.h = 0;
                             combines++;
@@ -46,21 +48,20 @@ namespace Critterbits {
                             new_rect.y = std::min(rect1.y, rect2.y);
                             new_rect.w = rect1.w;
                             new_rect.h = rect1.h + rect2.h;
-                            new_regions.push_back(new_rect);
+                            this->regions.push_back(new_rect);
                             rect1.w = 0; rect1.h = 0;
                             rect2.w = 0; rect2.h = 0;
                             combines++;
                         }
                 } // for rect2
-                if (!rect1.empty()) {
-                    new_regions.push_back(rect1);
-                }
             } // for rect1
-            this->regions = new_regions;
-            new_regions.clear();
         } while(combines > 0);
 
+        this->regions.erase(std::remove_if(this->regions.begin(), this->regions.end(), [](const CB_Rect & rect) {
+            return rect.empty();
+        }), this->regions.end());
         this->regions.shrink_to_fit();
+
         LOG_INFO("RectRegionCombiner::Combine combined down to " + std::to_string(this->regions.size()) + " regions");
     }
 }

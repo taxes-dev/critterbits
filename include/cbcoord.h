@@ -52,7 +52,9 @@ typedef struct CB_Rect {
     inline bool operator!=(const CB_Rect & other) const { return !(*this == other); }
 } CB_Rect;
 
-typedef struct CB_ViewClippingInfo { CB_Rect source, dest; } CB_ViewClippingInfo;
+typedef enum {CBE_Z_BACKGROUND,CBE_Z_MIDGROUND,CBE_Z_FOREGROUND} ZIndex;
+
+typedef struct CB_ViewClippingInfo { CB_Rect source, dest; ZIndex z_index{CBE_Z_MIDGROUND}; } CB_ViewClippingInfo;
 }
 
 #endif

@@ -2,9 +2,9 @@
 #ifndef CBSCENE_H
 #define CBSCENE_H
 
-#include <list>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "cbsprite.h"
 #include "cbtilemap.h"
@@ -51,7 +51,7 @@ class SceneManager {
 
   private:
     std::string scene_path;
-    std::list<std::shared_ptr<Scene>> loaded_scenes;
+    std::vector<std::shared_ptr<Scene>> loaded_scenes;
 
     SceneManager(const SceneManager &) = delete;
     SceneManager(SceneManager &&) = delete;
