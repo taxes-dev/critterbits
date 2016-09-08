@@ -6,8 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "cbentity.h"
 #include <SDL.h>
+
+#include "cbentity.h"
 
 #define CB_SPRITE_PATH "sprites"
 #define CB_SPRITE_EXT ".yml"

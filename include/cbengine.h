@@ -10,7 +10,7 @@
 
 #include "cbinput.h"
 #include "cbscene.h"
-#include "cbscripting.h"
+#include "scripting/cbscripting.h"
 #include "cbviewport.h"
 
 #define CB_DEFAULT_WINDOW_W 1024
@@ -79,7 +79,7 @@ class Engine {
     SDL_Rect display_bounds;
     EngineCounters counters;
     InputManager input;
-    ScriptEngine scripts;
+    Scripting::ScriptEngine scripts;
     SceneManager scenes;
     std::shared_ptr<Viewport> viewport{std::make_shared<Viewport>()};
 

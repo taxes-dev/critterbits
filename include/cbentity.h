@@ -2,10 +2,11 @@
 #ifndef CBENTITY_H
 #define CBENTITY_H
 
+#include <SDL.h>
+
 #include <cassert>
 
 #include "cbcoord.h"
-#include <SDL.h>
 
 namespace Critterbits {
 
@@ -14,7 +15,9 @@ typedef unsigned long entity_id_t;
 
 extern entity_id_t next_entity_id;
 
+namespace Scripting {
 class Script;
+}
 
 class Entity {
     friend class Engine;
@@ -23,7 +26,7 @@ class Entity {
     const entity_id_t entity_id{next_entity_id++};
     CB_Rect dim{0, 0, 0, 0};
     std::string tag;
-    std::shared_ptr<Script> script;
+    std::shared_ptr<Scripting::Script> script;
     float time_scale{1.0f};
 
     /* derived classes MUST implement GetEntityType() - not pure virtual due to dynamic casting constraints */

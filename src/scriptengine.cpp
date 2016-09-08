@@ -1,8 +1,10 @@
 #include <critterbits.h>
+#include <scripting/cbscriptsupport.hpp>
 
 #include <duktape/duktape.h>
 
 namespace Critterbits {
+namespace Scripting {
 
 namespace {
 /*
@@ -14,9 +16,8 @@ void duktape_fatal_error(duk_context * ctx, duk_errcode_t code, const char * msg
 }
 
 /*
- * Support functions for ScriptEngine::AddCommonScriptingFunctions()
- */
-
+* Functions callable from JavaScript code
+*/
 duk_ret_t is_key_pressed(duk_context * context) {
     int key_code = duk_get_int(context, 0);
     bool key_pressed = Engine::GetInstance().input.IsKeyPressed(key_code);
@@ -41,7 +42,6 @@ duk_ret_t viewport_follow(duk_context * context) {
     duk_push_boolean(context, success);
     return 1;
 }
-
 /*
  * End support functions
  */
@@ -80,7 +80,14 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_put_prop_string(context, -2, "input");
 
     // viewport
+    std::shared_ptr<Viewport> viewport = Engine::GetInstance().viewport;
     duk_push_object(context); // viewport
+    duk_push_object(context); // dim
+    PushPropertyInt(context, "x", viewport->dim.x);
+    PushPropertyInt(context, "y", viewport->dim.y);
+    PushPropertyInt(context, "w", viewport->dim.w);
+    PushPropertyInt(context, "h", viewport->dim.h);
+    duk_put_prop_string(context, -2, "dim");
     duk_push_c_function(context, viewport_follow, 1);
     duk_put_prop_string(context, -2, "follow");
     duk_put_prop_string(context, -2, "viewport");
@@ -110,7 +117,7 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         return nullptr;
     }
 
-    std::shared_ptr<Script> new_script = std::make_shared<Script>();
+    std::shared_ptr<Script> new_script{std::make_shared<Script>()};
     new_script->script_name = script_name;
     new_script->script_path = script_path;
 
@@ -138,5 +145,6 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
 
     this->loaded_scripts.push_back(new_script);
     return new_script;
+}
 }
 }

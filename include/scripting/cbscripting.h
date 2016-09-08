@@ -8,6 +8,9 @@
 
 #include <duktape/duktape.h>
 
+#include <cbentity.h>
+#include <cbsprite.h>
+
 #define CB_SCRIPT_PATH "scripts"
 #define CB_SCRIPT_EXT ".js"
 
@@ -26,6 +29,7 @@
     "entity_id"
 
 namespace Critterbits {
+namespace Scripting {
 
 class Script {
     friend class ScriptEngine;
@@ -69,5 +73,5 @@ class ScriptEngine {
     void operator=(ScriptEngine const &) = delete;
 };
 }
-
+}
 #endif

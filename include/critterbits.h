@@ -13,7 +13,7 @@
 #include "cb2d.h"
 #include "cbmath.h"
 #include "cbscene.h"
-#include "cbscripting.h"
+#include "scripting/cbscripting.h"
 #include "cbsdl.h"
 #include "cbsprite.h"
 #include "cbtilemap.h"

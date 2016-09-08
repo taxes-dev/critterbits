@@ -1,82 +1,23 @@
 #include <cstring>
 
 #include <critterbits.h>
-
-#include <duktape/duktape.h>
+#include <scripting/cbscriptsupport.hpp>
 
 namespace Critterbits {
-/*
-* Support functions for modifying the duktape context
-*/
-namespace {
-inline int get_bool_property(duk_context * context, const char * property_name, int stack_index = -1) {
-    duk_get_prop_string(context, stack_index, property_name);
-    duk_bool_t value = duk_get_boolean(context, -1);
-    duk_pop(context);
-    return value != 0;
-}
-
-inline int get_float_property(duk_context * context, const char * property_name, int stack_index = -1) {
-    duk_get_prop_string(context, stack_index, property_name);
-    float value = (float)duk_get_number(context, -1);
-    duk_pop(context);
-    return value;
-}
-
-inline int get_int_property(duk_context * context, const char * property_name, int stack_index = -1) {
-    duk_get_prop_string(context, stack_index, property_name);
-    int value = duk_get_int(context, -1);
-    duk_pop(context);
-    return value;
-}
-
-inline std::string get_string_property(duk_context * context, const char * property_name, int stack_index = -1) {
-    duk_get_prop_string(context, stack_index, property_name);
-    const char * value = duk_get_string(context, -1);
-    duk_pop(context);
-    if (value == nullptr) {
-        return "";
-    }
-    return std::string(value);
-}
-
-inline void push_property_bool(duk_context * context, const char * property_name, bool value) {
-    duk_push_boolean(context, value ? 1 : 0);
-    // -2 skips over scalar just pushed and assumes target object is right behind it
-    duk_put_prop_string(context, -2, property_name);
-}
-
-inline void push_property_float(duk_context * context, const char * property_name, float value) {
-    duk_push_number(context, value);
-    duk_put_prop_string(context, -2, property_name);
-}
-
-inline void push_property_int(duk_context * context, const char * property_name, int value) {
-    duk_push_int(context, value);
-    duk_put_prop_string(context, -2, property_name);
-}
-
-inline void push_property_string(duk_context * context, const char * property_name, const std::string & value) {
-    duk_push_string(context, value.c_str());
-    duk_put_prop_string(context, -2, property_name);
-}
-
-inline void push_property_entity_id(duk_context * context, entity_id_t value) {
-    duk_push_uint(context, value);
-    duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
-}
+namespace Scripting {
 /*
 * Functions callable from JavaScript code
 */
+namespace {
 duk_ret_t mark_entity_destroyed(duk_context * context) {
     duk_push_this(context);
-    push_property_bool(context, CB_SCRIPT_HIDDEN_DESTROYED, true);
+    PushPropertyBool(context, CB_SCRIPT_HIDDEN_DESTROYED, true);
     duk_pop(context);
     return 0;
 }
 }
 /*
- * End support functions
+ * End callable support functions
  */
 
 void Script::DiscoverGlobals() {
@@ -120,15 +61,15 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
     duk_push_object(this->context); // root
 
     duk_push_object(this->context); // dim
-    push_property_int(this->context, "x", entity->dim.x);
-    push_property_int(this->context, "y", entity->dim.y);
-    push_property_int(this->context, "w", entity->dim.w);
-    push_property_int(this->context, "h", entity->dim.h);
+    PushPropertyInt(this->context, "x", entity->dim.x);
+    PushPropertyInt(this->context, "y", entity->dim.y);
+    PushPropertyInt(this->context, "w", entity->dim.w);
+    PushPropertyInt(this->context, "h", entity->dim.h);
     duk_put_prop_string(this->context, -2, "dim");
 
-    push_property_entity_id(this->context, entity->entity_id);
-    push_property_string(this->context, "tag", entity->tag);
-    push_property_float(this->context, "time_scale", entity->time_scale);
+    PushPropertyEntityId(this->context, entity->entity_id);
+    PushPropertyString(this->context, "tag", entity->tag);
+    PushPropertyFloat(this->context, "time_scale", entity->time_scale);
 
     duk_push_c_function(this->context, mark_entity_destroyed, 0);
     duk_put_prop_string(this->context, -2, "destroy");
@@ -147,18 +88,18 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
 }
 
 void Script::ExtendEntityWithSprite(std::shared_ptr<Sprite> sprite) {
-    push_property_string(this->context, "entity_type", "sprite");
-    push_property_float(this->context, "sprite_scale", sprite->sprite_scale);
-    push_property_int(this->context, "tile_height", sprite->tile_height);
-    push_property_int(this->context, "tile_width", sprite->tile_width);
-    push_property_int(this->context, "tile_offset_x", sprite->tile_offset_x);
-    push_property_int(this->context, "tile_offset_y", sprite->tile_offset_y);
-    push_property_bool(this->context, "flip_x", sprite->flip_x);
-    push_property_bool(this->context, "flip_y", sprite->flip_y);
+    PushPropertyString(this->context, "entity_type", "sprite");
+    PushPropertyFloat(this->context, "sprite_scale", sprite->sprite_scale);
+    PushPropertyInt(this->context, "tile_height", sprite->tile_height);
+    PushPropertyInt(this->context, "tile_width", sprite->tile_width);
+    PushPropertyInt(this->context, "tile_offset_x", sprite->tile_offset_x);
+    PushPropertyInt(this->context, "tile_offset_y", sprite->tile_offset_y);
+    PushPropertyBool(this->context, "flip_x", sprite->flip_x);
+    PushPropertyBool(this->context, "flip_y", sprite->flip_y);
 
     duk_push_object(this->context); // frame
-    push_property_int(this->context, "current", sprite->GetFrame());
-    push_property_int(this->context, "count", sprite->GetFrameCount());
+    PushPropertyInt(this->context, "current", sprite->GetFrame());
+    PushPropertyInt(this->context, "count", sprite->GetFrameCount());
     duk_put_prop_string(this->context, -2, "frame");
 }
 
@@ -167,18 +108,18 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
     if (duk_get_prop_string(this->context, -1, stash_name) != 0) {
         // only mutable properties are retrieved
         duk_get_prop_string(this->context, -1, "dim");
-        int new_x = get_int_property(this->context, "x");
-        int new_y = get_int_property(this->context, "y");
-        entity->dim.w = get_int_property(this->context, "w");
-        entity->dim.h = get_int_property(this->context, "h");
+        int new_x = GetIntProperty(this->context, "x");
+        int new_y = GetIntProperty(this->context, "y");
+        entity->dim.w = GetIntProperty(this->context, "w");
+        entity->dim.h = GetIntProperty(this->context, "h");
         duk_pop(this->context); // dim
-        entity->time_scale = get_float_property(this->context, "time_scale");
+        entity->time_scale = GetFloatProperty(this->context, "time_scale");
 
         // set position (may result in collisions)
         entity->SetPosition(new_x, new_y);
 
         // special case: "destroyed flag"
-        bool destroyed = get_bool_property(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
+        bool destroyed = GetBoolProperty(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
         if (destroyed) {
             entity->MarkDestroy();
         }
@@ -195,15 +136,15 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
 }
 
 void Script::RetrieveSpriteFromContext(std::shared_ptr<Sprite> sprite) {
-    sprite->sprite_scale = get_float_property(this->context, "sprite_scale");
-    sprite->tile_height = get_int_property(this->context, "tile_height");
-    sprite->tile_width = get_int_property(this->context, "tile_width");
-    sprite->tile_offset_x = get_int_property(this->context, "tile_offset_x");
-    sprite->tile_offset_y = get_int_property(this->context, "tile_offset_y");
-    sprite->flip_x = get_bool_property(this->context, "flip_x");
-    sprite->flip_y = get_bool_property(this->context, "flip_y");
+    sprite->sprite_scale = GetFloatProperty(this->context, "sprite_scale");
+    sprite->tile_height = GetIntProperty(this->context, "tile_height");
+    sprite->tile_width = GetIntProperty(this->context, "tile_width");
+    sprite->tile_offset_x = GetIntProperty(this->context, "tile_offset_x");
+    sprite->tile_offset_y = GetIntProperty(this->context, "tile_offset_y");
+    sprite->flip_x = GetBoolProperty(this->context, "flip_x");
+    sprite->flip_y = GetBoolProperty(this->context, "flip_y");
     duk_get_prop_string(this->context, -1, "frame");
-    int current_frame = get_int_property(this->context, "current");
+    int current_frame = GetIntProperty(this->context, "current");
     sprite->SetFrame(current_frame);
     duk_pop(this->context); // frame
 }
@@ -268,5 +209,6 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
             this->global_update = false;
         }
     }
+}
 }
 }
