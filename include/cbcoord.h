@@ -31,11 +31,15 @@ typedef struct CB_Rect {
     int w;
     int h;
 
-    CB_Rect() : x(0), y(0), w(0), h(0){};
+    CB_Rect() : x{0}, y{0}, w{0}, h{0}{};
     CB_Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h){};
 
     inline int bottom() const { return y + h; };
     inline int right() const { return x + w; };
+    inline bool empty() const { return w < 1 && h < 1; };
+    inline bool inside(const CB_Rect & rect) const {
+        return x >= rect.x && right() <= rect.right() && y >= rect.y && bottom() <= rect.bottom(); 
+    };
     inline bool intersects(const CB_Rect & rect) const {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
@@ -44,6 +48,8 @@ typedef struct CB_Rect {
         return "[" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(w) + "," + std::to_string(h) +
                "]";
     }
+    inline bool operator==(const CB_Rect & other) const { return x == other.x && y == other.y && w == other.w && h == other.h; }
+    inline bool operator!=(const CB_Rect & other) const { return !(*this == other); }
 } CB_Rect;
 
 typedef struct CB_ViewClippingInfo { CB_Rect source, dest; } CB_ViewClippingInfo;

@@ -7,6 +7,7 @@
 
 #include "cbcoord.h"
 #include "cbentity.h"
+#include "cb2d.h"
 #include "cbsprite.h"
 
 #define CB_TILEMAP_COLLIDE "collide"
@@ -51,9 +52,9 @@ class Tilemap : public Entity {
     SDL_Texture * RenderMap(SDL_Renderer *, float);
     void CreateCollisionRegion(const CB_Rect &);
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
+    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *, RectRegionCombiner &);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int, bool = false);
+    inline void DrawTileOnMap(SDL_Renderer *, unsigned int, int, int, int, int, int, RectRegionCombiner * = nullptr);
 };
 }
 #endif

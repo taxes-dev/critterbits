@@ -116,6 +116,9 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
         return nullptr;
     }
 
+    // used for creating collision regions
+    RectRegionCombiner collision_regions;
+
     // set render target to the map texture
     float original_scale_x, original_scale_y;
     SDL_RenderGetScale(renderer, &original_scale_x, &original_scale_y);
@@ -136,7 +139,7 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
             } else if (current_layer->type == L_IMAGE) {
                 this->DrawImageLayer(renderer, texture, current_layer);
             } else if (current_layer->type == L_LAYER) {
-                this->DrawMapLayer(renderer, texture, current_layer);
+                this->DrawMapLayer(renderer, texture, current_layer, collision_regions);
             }
         }
         current_layer = current_layer->next;
@@ -145,6 +148,12 @@ SDL_Texture * Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // reset render target
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderSetScale(renderer, original_scale_x, original_scale_y);
+
+    // finally, create actual collision map regions
+    collision_regions.Combine();
+    for (CB_Rect & region : collision_regions.regions) {
+        this->CreateCollisionRegion(region);
+    }
 
     return texture;
 }
@@ -171,7 +180,7 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     }
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer, RectRegionCombiner & collision_regions) {
     // prepare blend mode if opacity less than 100%
     float op = layer->opacity;
     int alpha_mod = op * SDL_ALPHA_OPAQUE;
@@ -198,7 +207,7 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     for (unsigned long i = 0; i < this->map->height; i++) {
         for (unsigned long j = 0; j < this->map->width; j++) {
             this->DrawTileOnMap(renderer, layer->content.gids[(i * this->map->width) + j], i, j, layer->offsetx,
-                                layer->offsety, alpha_mod, is_collide);
+                                layer->offsety, alpha_mod, is_collide ? &collision_regions : nullptr);
         }
     }
 
@@ -258,7 +267,7 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
 }
 
 void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, int col, int offsetx, int offsety,
-                            int alpha_mod, bool is_collide) {
+                            int alpha_mod, RectRegionCombiner * collision_regions) {
     CB_Rect srcrect, dstrect;
     SDL_Texture * tile;
     tmx_tileset * ts;
@@ -321,8 +330,8 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, unsigned int gid, int row, 
         }
 
         // create collision region if needed
-        if (is_collide) {
-            this->CreateCollisionRegion(dstrect);
+        if (collision_regions != nullptr) {
+            collision_regions->regions.push_back(dstrect);
         }
     }
 }
