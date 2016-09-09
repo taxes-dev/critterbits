@@ -65,7 +65,7 @@ void Sprite::NotifyLoaded() {
         LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
         this->sprite_sheet = Engine::GetInstance().scenes.current_scene->sprites.GetSpriteSheet(this->sprite_sheet_path);
         if (this->sprite_sheet == nullptr) {
-            LOG_SDL_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet to texture");
+            LOG_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet");
         } else {
             int w, h;
             SDL_QueryTexture(this->sprite_sheet.get(), NULL, NULL, &w, &h);
