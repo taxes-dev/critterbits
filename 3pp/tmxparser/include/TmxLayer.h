@@ -57,7 +57,8 @@ namespace Tmx
         Layer(const Layer &_layer);
 
     public:
-        Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
+        Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity,
+        const int _offsetx, const int _offsety, const bool _visible, const LayerType _layerType);
         virtual ~Layer();
 
         // Parse a layer element.
@@ -82,6 +83,12 @@ namespace Tmx
         int GetHeight() const { return height; }
 
         float GetOpacity() const { return opacity; }
+
+        // Gets the X-axis rendering offset of this layer in pixels.
+        int GetOffsetX() const { return offsetx; }
+
+        // Gets the Y-axis rendering offset of this layer in pixels.
+        int GetOffsetY() const { return offsety; }
 
         // Get the visibility of the layer
         bool IsVisible() const { return visible; }
@@ -112,6 +119,8 @@ namespace Tmx
         int height;
     
         float opacity;
+        int offsetx;
+        int offsety;
         bool visible;
         int zOrder;
         const int parseOrder;

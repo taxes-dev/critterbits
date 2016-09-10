@@ -248,8 +248,8 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
 
     // loop through tiles in map
     struct MapTileInfo tile_info;
-    tile_info.offsetx = layer->GetX();
-    tile_info.offsety = layer->GetY();
+    tile_info.offsetx = layer->GetOffsetX();
+    tile_info.offsety = layer->GetOffsetY();
     tile_info.alpha_mod = alpha_mod;
     for (int i = 0; i < this->map->GetHeight(); i++) {
         for (int j = 0; j < this->map->GetWidth(); j++) {

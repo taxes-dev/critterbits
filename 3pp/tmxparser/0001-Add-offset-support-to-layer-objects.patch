@@ -1,0 +1,144 @@
+From c879e251a4d28d1dc31407c3057371acbf9e606d Mon Sep 17 00:00:00 2001
+From: Havi S <havi@blitterfly.com>
+Date: Sat, 10 Sep 2016 15:19:50 -0500
+Subject: [PATCH] Add offset support to layer objects
+
+---
+ src/TmxImageLayer.cpp  |  5 ++++-
+ src/TmxLayer.cpp       |  5 ++++-
+ src/TmxLayer.h         | 11 ++++++++++-
+ src/TmxObjectGroup.cpp |  5 ++++-
+ src/TmxTileLayer.cpp   |  5 ++++-
+ 5 files changed, 26 insertions(+), 5 deletions(-)
+
+diff --git a/src/TmxImageLayer.cpp b/src/TmxImageLayer.cpp
+index 162f856..bc57232 100644
+--- a/src/TmxImageLayer.cpp
++++ b/src/TmxImageLayer.cpp
+@@ -34,7 +34,7 @@ using std::string;
+ namespace Tmx 
+ {
+     ImageLayer::ImageLayer(const Tmx::Map *_map) 
+-        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_IMAGE_LAYER)
++        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, 0, 0, true, TMX_LAYERTYPE_IMAGE_LAYER)
+         , image(NULL)
+     {
+     }
+@@ -54,6 +54,9 @@ namespace Tmx
+         imageLayerElem->QueryIntAttribute("x", &x);
+         imageLayerElem->QueryIntAttribute("y", &y);
+ 
++        imageLayerElem->QueryIntAttribute("offsetx", &offsetx);
++        imageLayerElem->QueryIntAttribute("offsety", &offsety);
++
+         imageLayerElem->QueryFloatAttribute("opacity", &opacity);
+         imageLayerElem->QueryBoolAttribute("visible", &visible);
+ 
+diff --git a/src/TmxLayer.cpp b/src/TmxLayer.cpp
+index e6e3d72..a6fd8d4 100644
+--- a/src/TmxLayer.cpp
++++ b/src/TmxLayer.cpp
+@@ -43,7 +43,8 @@ int Tmx::Layer::nextParseOrder = 0;
+ 
+ namespace Tmx 
+ {
+-    Layer::Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType) 
++    Layer::Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity,
++    const int _offsetx, const int _offsety, const bool _visible, const LayerType _layerType) 
+         : map(_map)
+         , name(_name)
+         , x(_x)
+@@ -51,6 +52,8 @@ namespace Tmx
+         , width(_width)
+         , height(_height)
+         , opacity(_opacity)
++        , offsetx(_offsetx)
++        , offsety(_offsety)
+         , visible(_visible)
+         , zOrder(nextParseOrder)
+         , parseOrder(nextParseOrder)
+diff --git a/src/TmxLayer.h b/src/TmxLayer.h
+index af7f8f1..9ff9223 100644
+--- a/src/TmxLayer.h
++++ b/src/TmxLayer.h
+@@ -57,7 +57,8 @@ namespace Tmx
+         Layer(const Layer &_layer);
+ 
+     public:
+-        Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
++        Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity,
++        const int _offsetx, const int _offsety, const bool _visible, const LayerType _layerType);
+         virtual ~Layer();
+ 
+         // Parse a layer element.
+@@ -83,6 +84,12 @@ namespace Tmx
+ 
+         float GetOpacity() const { return opacity; }
+ 
++        // Gets the X-axis rendering offset of this layer in pixels.
++        int GetOffsetX() const { return offsetx; }
++
++        // Gets the Y-axis rendering offset of this layer in pixels.
++        int GetOffsetY() const { return offsety; }
++
+         // Get the visibility of the layer
+         bool IsVisible() const { return visible; }
+ 
+@@ -112,6 +119,8 @@ namespace Tmx
+         int height;
+     
+         float opacity;
++        int offsetx;
++        int offsety;
+         bool visible;
+         int zOrder;
+         const int parseOrder;
+diff --git a/src/TmxObjectGroup.cpp b/src/TmxObjectGroup.cpp
+index 3343f6a..ba41f5f 100644
+--- a/src/TmxObjectGroup.cpp
++++ b/src/TmxObjectGroup.cpp
+@@ -34,7 +34,7 @@
+ namespace Tmx 
+ {
+     ObjectGroup::ObjectGroup(const Tmx::Map *_map)
+-        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
++        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, 0, 0, true, TMX_LAYERTYPE_OBJECTGROUP)
+         , color()
+         , objects()
+     {}
+@@ -60,6 +60,9 @@ namespace Tmx
+             color = objectGroupElem->Attribute("color");
+         }
+         
++        objectGroupElem->QueryIntAttribute("offsetx", &offsetx);
++        objectGroupElem->QueryIntAttribute("offsety", &offsety);
++        
+         objectGroupElem->QueryFloatAttribute("opacity", &opacity);
+         objectGroupElem->QueryBoolAttribute("visible", &visible);
+ 
+diff --git a/src/TmxTileLayer.cpp b/src/TmxTileLayer.cpp
+index 2c19763..3c4db2b 100644
+--- a/src/TmxTileLayer.cpp
++++ b/src/TmxTileLayer.cpp
+@@ -43,7 +43,7 @@
+ namespace Tmx 
+ {
+     TileLayer::TileLayer(const Map *_map) 
+-        : Layer(_map, std::string(), 0, 0, _map->GetWidth(), _map->GetHeight(), 1.0f, true, TMX_LAYERTYPE_TILE)
++        : Layer(_map, std::string(), 0, 0, _map->GetWidth(), _map->GetHeight(), 1.0f, 0, 0, true, TMX_LAYERTYPE_TILE)
+         , tile_map(NULL)  // Set the map to null to specify that it is not yet allocated.
+         , encoding(TMX_ENCODING_XML)
+         , compression(TMX_COMPRESSION_NONE)
+@@ -70,6 +70,9 @@ namespace Tmx
+         tileLayerElem->QueryIntAttribute("x", &x);
+         tileLayerElem->QueryIntAttribute("y", &y);
+ 
++        tileLayerElem->QueryIntAttribute("offsetx", &offsetx);
++        tileLayerElem->QueryIntAttribute("offsety", &offsety);
++
+         tileLayerElem->QueryFloatAttribute("opacity", &opacity);
+         tileLayerElem->QueryBoolAttribute("visible", &visible);
+ 
+-- 
+2.7.4
+
