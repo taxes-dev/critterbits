@@ -225,21 +225,26 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
 }
 
 void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ImageLayer * layer) {
-    /*SDL_Rect dim;
-    SDL_Texture * source_image = static_cast<SDL_Texture *>(layer->content.image->resource_image);
-    float op = layer->opacity;
-
-    dim.x = layer->offsetx;
-    dim.y = layer->offsety;
-    SDL_QueryTexture(source_image, NULL, NULL, &(dim.w), &(dim.h));
-
-    if (op < 1.) {
-        SDL_SetTextureAlphaMod(source_image, op * SDL_ALPHA_OPAQUE);
+    SDL_Rect dim;
+    const Tmx::Image * image = layer->GetImage();
+    if (image == nullptr) {
+        return;
     }
-    SDL_RenderCopy(renderer, source_image, NULL, &dim);
+
+    std::shared_ptr<SDL_Texture> source_image = TilesetImageManager::GetInstance().GetTilesetImage(this->tmx_path, image->GetSource());
+    float op = layer->GetOpacity();
+
+    dim.x = layer->GetOffsetX();
+    dim.y = layer->GetOffsetY();
+    SDL_QueryTexture(source_image.get(), NULL, NULL, &(dim.w), &(dim.h));
+
     if (op < 1.) {
-        SDL_SetTextureAlphaMod(source_image, SDL_ALPHA_OPAQUE);
-    }*/
+        SDL_SetTextureAlphaMod(source_image.get(), op * SDL_ALPHA_OPAQUE);
+    }
+    SDL_RenderCopy(renderer, source_image.get(), NULL, &dim);
+    if (op < 1.) {
+        SDL_SetTextureAlphaMod(source_image.get(), SDL_ALPHA_OPAQUE);
+    }
 }
 
 void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::TileLayer * layer, RectRegionCombiner * collision_regions) {
