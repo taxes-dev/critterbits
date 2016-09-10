@@ -2,8 +2,10 @@
 #ifndef CBTILEMAP_H
 #define CBTILEMAP_H
 
+#include <memory>
+#include <string>
 #include <SDL.h>
-#include <tmx/tmx.h>
+#include <TmxMap.h>
 
 #include "cbcoord.h"
 #include "cbentity.h"
@@ -55,7 +57,7 @@ class Tilemap : public Entity {
       int alpha_mod;
     };
     std::string tmx_path;
-    tmx_map * map{nullptr};
+    std::unique_ptr<Tmx::Map> map{nullptr};
     SDL_Texture * bg_map_texture{nullptr};
     SDL_Texture * fg_map_texture{nullptr};
     bool draw_debug{false};
@@ -63,9 +65,9 @@ class Tilemap : public Entity {
 
     bool RenderMap(SDL_Renderer *, float);
     void CreateCollisionRegion(const CB_Rect &);
-    void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
-    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *, RectRegionCombiner *);
-    void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const tmx_layer *);
+    void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ImageLayer *);
+    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const Tmx::TileLayer *, RectRegionCombiner *);
+    void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ObjectGroup *);
     inline void DrawTileOnMap(SDL_Renderer *, const struct MapTile &, RectRegionCombiner * = nullptr);
 };
 }

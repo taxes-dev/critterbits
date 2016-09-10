@@ -1,8 +1,9 @@
 #include <cstring>
 
+#include <critterbits.h>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
-#include <critterbits.h>
+#include <Tmx.h>
 
 namespace Critterbits {
 
@@ -51,9 +52,9 @@ Tilemap::Tilemap(const std::string & map_path) : tmx_path(map_path) {
 }
 
 Tilemap::~Tilemap() {
-    if (this->map != nullptr) {
+    /*if (this->map != nullptr) {
         tmx_map_free(this->map);
-    }
+    }*/
 }
 
 void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
@@ -73,18 +74,25 @@ bool Tilemap::CreateTextures(float scale) {
     }
 
     // first load up the tilemap
-    if (!(this->map = tmx_load(this->tmx_path.c_str()))) {
-        LOG_ERR("Tilemap::CreateTextures unable to load TMX map " + tmx_errno);
+    this->map.reset(new Tmx::Map());
+    map->ParseFile(this->tmx_path);
+    if (this->map->HasError()) {
+        LOG_ERR("Tilemap::CreateTextures unable to load TMX map " + this->map->GetErrorText());
         return false;
     }
 
-    this->tile_height = this->map->tile_height * scale;
-    this->tile_width = this->map->tile_width * scale;
-    this->dim.w = NextPowerOf2(this->map->width * this->tile_height);
-    this->dim.h = NextPowerOf2(this->map->height * this->tile_width);
+    this->tile_height = this->map->GetTileHeight() * scale;
+    this->tile_width = this->map->GetTileWidth() * scale;
+    this->dim.w = NextPowerOf2(this->map->GetWidth() * this->tile_height);
+    this->dim.h = NextPowerOf2(this->map->GetHeight() * this->tile_width);
     this->dim.x = 0;
     this->dim.y = 0;
     this->render_scale = scale;
+
+    LOG_INFO("tile_height " + std::to_string(this->tile_height));
+    LOG_INFO("tile_width " + std::to_string(this->tile_width));
+    LOG_INFO("dim.h "  + std::to_string(this->dim.h));
+    LOG_INFO("dim.w " + std::to_string(this->dim.w));
 
     return this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 }
@@ -103,7 +111,8 @@ void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) 
 }
 
 bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
-    // create texture to hold the map
+    return false;
+    /*// create texture to hold the map
     int max_w = Engine::GetInstance().GetMaxTextureWidth();
     int max_h = Engine::GetInstance().GetMaxTextureHeight();
     if (max_w < this->dim.w || max_h < this->dim.h) {
@@ -199,11 +208,11 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
 
     this->bg_map_texture = bg_texture;
     this->fg_map_texture = fg_texture;
-    return true;
+    return true;*/
 }
 
-void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
-    SDL_Rect dim;
+void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ImageLayer * layer) {
+    /*SDL_Rect dim;
     SDL_Texture * source_image = static_cast<SDL_Texture *>(layer->content.image->resource_image);
     float op = layer->opacity;
 
@@ -217,12 +226,12 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     SDL_RenderCopy(renderer, source_image, NULL, &dim);
     if (op < 1.) {
         SDL_SetTextureAlphaMod(source_image, SDL_ALPHA_OPAQUE);
-    }
+    }*/
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer, RectRegionCombiner * collision_regions) {
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::TileLayer * layer, RectRegionCombiner * collision_regions) {
     // prepare blend mode if opacity less than 100%
-    float op = layer->opacity;
+    /*float op = layer->opacity;
     int alpha_mod = op * SDL_ALPHA_OPAQUE;
 
     // loop through tiles in map
@@ -237,11 +246,11 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
             tile.col = j;
             this->DrawTileOnMap(renderer, tile, collision_regions);
         }
-    }
+    }*/
 }
 
-void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const tmx_layer * layer) {
-    SDL_Rect rect;
+void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ObjectGroup * object_group) {
+    /*SDL_Rect rect;
 
     tmx_object_group * object_group = layer->content.objgr;
     tmx_object * current_obj = object_group->head;
@@ -293,11 +302,11 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
             }
         }
         current_obj = current_obj->next;
-    }
+    }*/
 }
 
 void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const struct MapTile & tile, RectRegionCombiner * collision_regions) {
-    CB_Rect srcrect, dstrect;
+    /*CB_Rect srcrect, dstrect;
     SDL_Texture * tiletex;
     tmx_tileset * ts;
     tmx_image * im;
@@ -364,12 +373,12 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const struct MapTile & tile
         if (collision_regions != nullptr) {
             collision_regions->regions.push_back(dstrect);
         }
-    }
+    }*/
 }
 
 void Tilemap::Tilemap_Init() {
-    tmx_img_load_func = (void * (*)(const char *))sdl_img_loader;
-    tmx_img_free_func = (void (*)(void *))SDL_DestroyTexture;
+    /*tmx_img_load_func = (void * (*)(const char *))sdl_img_loader;
+    tmx_img_free_func = (void (*)(void *))SDL_DestroyTexture;*/
 }
 
 void Tilemap::Tilemap_Quit() {}

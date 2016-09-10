@@ -6,7 +6,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${critterbits_SOURCE_DIR}/cmake")
 
 # Set an output directory for our binaries
 set(BIN_DIR ${critterbits_SOURCE_DIR}/bin)
+
+# Third party dependencies
 set(PROJECT_TRDPARTY_DIR ${critterbits_SOURCE_DIR}/3pp)
+set(TINYXML2_ROOT ${PROJECT_TRDPARTY_DIR}/tinyxml2-4.0.1)
+set(TMXPARSER_ROOT ${PROJECT_TRDPARTY_DIR}/tmxparser)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+	set(LIBYAML_ROOT ${PROJECT_TRDPARTY_DIR}/libyaml_win32)
+endif()
 
 # Bump up warning levels appropriately for clang, gcc & msvc
 # Also set debug/optimization flags depending on the build type. IDE users choose this when
@@ -40,10 +47,14 @@ find_package(SDL2_gfx REQUIRED)
 find_package(YAML REQUIRED)
 
 # Find TMX parser dependencies (tmxparser, tinyxml2)
-find_package(TinyXml2 REQUIRED)
-find_package(TmxParser REQUIRED)
+find_package(TINYXML2 REQUIRED)
+find_package(TMXPARSER REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR} ${LIBYAML_INCLUDE_DIR} 3pp include)
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR}
+	${LIBYAML_INCLUDE_DIRS}
+	${TINYXML2_INCLUDE_DIRS}
+	${TMXPARSER_INCLUDE_DIRS}
+	3pp include)
 
 # clang-format target
 file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
