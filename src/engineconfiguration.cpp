@@ -64,11 +64,10 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
 
     LOG_INFO("EngineConfiguration unexpanded source path: " + unexpanded_path);
 
-    char * expanded_path = realpath(unexpanded_path.c_str(), NULL);
-    if (expanded_path != NULL) {
+    std::string expanded_path = GetExpandedPath(unexpanded_path);
+    if (!expanded_path.empty()) {
         this->asset_path = std::string(expanded_path) + PATH_SEP;
         LOG_INFO("EngineConfiguration expanded source path: " + this->asset_path);
-        free(expanded_path);
         this->ReloadConfiguration();
     }
 }

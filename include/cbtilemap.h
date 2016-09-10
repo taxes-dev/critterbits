@@ -2,10 +2,12 @@
 #ifndef CBTILEMAP_H
 #define CBTILEMAP_H
 
+#include <map>
 #include <memory>
 #include <string>
 #include <SDL.h>
 #include <TmxMap.h>
+#include <TmxMapTile.h>
 
 #include "cbcoord.h"
 #include "cbentity.h"
@@ -48,8 +50,7 @@ class Tilemap : public Entity {
     static void Tilemap_Quit();
 
   private:
-    struct MapTile {
-      unsigned int gid;
+    struct MapTileInfo {
       int row;
       int col;
       int offsetx;
@@ -68,7 +69,21 @@ class Tilemap : public Entity {
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ImageLayer *);
     void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const Tmx::TileLayer *, RectRegionCombiner *);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ObjectGroup *);
-    inline void DrawTileOnMap(SDL_Renderer *, const struct MapTile &, RectRegionCombiner * = nullptr);
+    inline void DrawTileOnMap(SDL_Renderer *, const Tmx::MapTile &, const MapTileInfo &, RectRegionCombiner * = nullptr);
+};
+
+class TilesetImageManager {
+  public:
+    static TilesetImageManager & GetInstance();
+
+    std::shared_ptr<SDL_Texture> GetTilesetImage(const std::string &, const std::string &);
+
+private:
+  std::map<std::string, std::shared_ptr<SDL_Texture>> tileset_images;
+
+    TilesetImageManager() {};
+    TilesetImageManager(const TilesetImageManager &) = delete;
+    TilesetImageManager(TilesetImageManager &&) = delete;
 };
 }
 #endif
