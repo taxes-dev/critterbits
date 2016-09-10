@@ -40,6 +40,7 @@ class Tilemap : public Entity {
     int tile_width;
     int tile_height;
     std::vector<std::shared_ptr<TilemapRegion>> regions;
+    SDL_Color bg_color{0,0,0,0};
 
     Tilemap(const std::string &);
     ~Tilemap();

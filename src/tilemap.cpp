@@ -105,6 +105,7 @@ bool Tilemap::CreateTextures(float scale) {
     this->dim.x = 0;
     this->dim.y = 0;
     this->render_scale = scale;
+    this->bg_color = tmx_to_sdl_color(this->map->GetBackgroundColor());
 
     return this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 }
@@ -160,8 +161,7 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // clear background texture to map background color
     SDL_SetRenderTarget(renderer, bg_texture);
     SDL_SetTextureBlendMode(bg_texture, SDL_BLENDMODE_BLEND);
-    SDL_Color bg_color = tmx_to_sdl_color(this->map->GetBackgroundColor());
-    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+    SDL_SetRenderDrawColor(renderer, this->bg_color.r, this->bg_color.g, this->bg_color.b, this->bg_color.a);
     SDL_RenderClear(renderer);
 
     // clear foreground texture to transparent

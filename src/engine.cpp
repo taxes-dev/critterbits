@@ -223,7 +223,13 @@ int Engine::Run() {
         this->input.ClearInputEvents();
 
         // Render pass
-        SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
+        if (this->scenes.current_scene != nullptr &&
+            this->scenes.current_scene->HasTilemap()) {
+            SDL_Color bg_color = this->scenes.current_scene->GetTilemap()->bg_color;
+            SDL_SetRenderDrawColor(this->renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+        } else {
+            SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
+        }
         SDL_RenderClear(this->renderer);
         for (auto & z_index : {CBE_Z_BACKGROUND, CBE_Z_MIDGROUND, CBE_Z_FOREGROUND}) {
             this->IterateActiveEntities([this, z_index](std::shared_ptr<Entity> entity) {
