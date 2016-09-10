@@ -22,14 +22,11 @@ Engine::Engine() {
         return;
     }
 
-    // initialize TMX library
-    Tilemap::Tilemap_Init();
     this->initialized = true;
 }
 
 Engine::~Engine() {
     SDLx::SDL_CleanUp(this->renderer, this->window);
-    Tilemap::Tilemap_Quit();
     IMG_Quit();
     SDL_Quit();
 }

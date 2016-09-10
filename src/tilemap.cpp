@@ -12,18 +12,30 @@ namespace Critterbits {
  * Support functions for Tilemap::RenderMap()
  */
 namespace {
-void draw_object_polyline(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
-    int i;
-    for (i = 1; i < pointsc; i++) {
-        SDL_RenderDrawLine(renderer, x + points[i - 1][0], y + points[i - 1][1], x + points[i][0], y + points[i][1]);
+void draw_object_polyline(SDL_Renderer * renderer, const Tmx::Polyline * polyline, double x, double y) {
+    for (int i = 1; i < polyline->GetNumPoints(); i++) {
+        SDL_RenderDrawLine(renderer,
+            x + polyline->GetPoint(i - 1).x,
+            y + polyline->GetPoint(i - 1).y,
+            x + polyline->GetPoint(i).x,
+            y + polyline->GetPoint(i).y);
     }
 }
 
-void draw_object_polygon(SDL_Renderer * renderer, double ** points, double x, double y, int pointsc) {
-    draw_object_polyline(renderer, points, x, y, pointsc);
-    if (pointsc > 2) {
-        SDL_RenderDrawLine(renderer, x + points[0][0], y + points[0][1], x + points[pointsc - 1][0],
-                           y + points[pointsc - 1][1]);
+void draw_object_polygon(SDL_Renderer * renderer, const Tmx::Polygon * polygon, double x, double y) {
+    for (int i = 1; i < polygon->GetNumPoints(); i++) {
+        SDL_RenderDrawLine(renderer,
+            x + polygon->GetPoint(i - 1).x,
+            y + polygon->GetPoint(i - 1).y,
+            x + polygon->GetPoint(i).x,
+            y + polygon->GetPoint(i).y);
+    }
+    if (polygon->GetNumPoints() > 2) {
+        SDL_RenderDrawLine(renderer,
+            x + polygon->GetPoint(0).x,
+            y + polygon->GetPoint(0).y,
+            x + polygon->GetPoint(polygon->GetNumPoints() - 1).x,
+            y + polygon->GetPoint(polygon->GetNumPoints() - 1).y);
     }
 }
 
@@ -45,11 +57,6 @@ SDL_Color tmx_to_sdl_color(const std::string & tmx_color) {
     return color;
 }
 
-/*
- * Support functions for Tilemap::Tilemap_Init()
- */
-
-void * sdl_img_loader(const char * path) { return IMG_LoadTexture(Engine::GetInstance().GetRenderer(), path); }
 }
 /*
  * End support functions
@@ -60,9 +67,7 @@ Tilemap::Tilemap(const std::string & map_path) : tmx_path(map_path) {
 }
 
 Tilemap::~Tilemap() {
-    /*if (this->map != nullptr) {
-        tmx_map_free(this->map);
-    }*/
+    SDLx::SDL_CleanUp(this->bg_map_texture, this->fg_map_texture);
 }
 
 void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
@@ -265,59 +270,55 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
 }
 
 void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ObjectGroup * object_group) {
-    /*SDL_Rect rect;
-
-    tmx_object_group * object_group = layer->content.objgr;
-    tmx_object * current_obj = object_group->head;
-
-    SDL_Color obj_color = tmx_to_sdl_color(object_group->color);
+    SDL_Rect rect;
+    SDL_Color obj_color;
+    if (object_group->GetColor().empty()) {
+        obj_color = {255, 0, 0, SDL_ALPHA_OPAQUE};
+    } else {
+        obj_color = tmx_to_sdl_color(object_group->GetColor());
+    }
 
     // for S_TILE objects
-    struct MapTile tile;
-    tile.offsetx = layer->offsetx;
-    tile.offsety = layer->offsety;
-    tile.alpha_mod = SDL_ALPHA_OPAQUE;
+    struct MapTileInfo tile_info;
+    tile_info.offsetx = object_group->GetOffsetX();
+    tile_info.offsety = object_group->GetOffsetY();
+    tile_info.alpha_mod = object_group->GetOpacity() * SDL_ALPHA_OPAQUE;
 
-    while (current_obj) {
-        if (current_obj->visible) {
-            if (current_obj->shape == S_TILE) {
-                tile.col = current_obj->x * -1;
-                tile.row = current_obj->y * -1;
-                tile.gid = current_obj->gid;
-                this->DrawTileOnMap(renderer, tile);
+    for (auto & current_obj : object_group->GetObjects()) {
+        if (current_obj->IsVisible()) {
+            if (current_obj->GetGid() > 0) {
+                tile_info.col = current_obj->GetX() * -1;
+                tile_info.row = current_obj->GetY() * -1;
+                Tmx::MapTile tile{(unsigned int)current_obj->GetGid(), this->map->FindTileset((unsigned int)current_obj->GetGid())->GetFirstGid(),
+                    (unsigned int)this->map->FindTilesetIndex((unsigned int)current_obj->GetGid())};
+                this->DrawTileOnMap(renderer, tile, tile_info);
             } else if (this->draw_debug) {
                 // region objects are normally hidden and used as event triggers
-                switch (current_obj->shape) {
-                    case S_SQUARE:
-                        rect.x = current_obj->x + layer->offsetx;
-                        rect.y = current_obj->y + layer->offsety;
-                        rect.w = current_obj->width;
-                        rect.h = current_obj->height;
+                if (current_obj->GetPolygon() != nullptr) {
                         SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        SDL_RenderDrawRect(renderer, &rect);
-                        break;
-                    case S_POLYGON:
+                        draw_object_polygon(renderer, current_obj->GetPolygon(), current_obj->GetX() + tile_info.offsetx,
+                                            current_obj->GetY() + tile_info.offsety);
+                } else if (current_obj->GetPolyline() != nullptr) {
                         SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polygon(renderer, current_obj->points, current_obj->x + layer->offsetx,
-                                            current_obj->y + layer->offsety, current_obj->points_len);
-                        break;
-                    case S_POLYLINE:
-                        SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polyline(renderer, current_obj->points, current_obj->x + layer->offsetx,
-                                             current_obj->y + layer->offsety, current_obj->points_len);
-                        break;
-                    case S_ELLIPSE:
-                        int radius_x = current_obj->width / 2, radius_y = current_obj->height / 2;
-                        int center_x = current_obj->x + layer->offsetx + radius_x,
-                            center_y = current_obj->y + layer->offsety + radius_y;
+                        draw_object_polyline(renderer, current_obj->GetPolyline(), current_obj->GetX() + tile_info.offsetx,
+                                             current_obj->GetY() + tile_info.offsety);
+                } else if (current_obj->GetEllipse() != nullptr) {
+                        int radius_x = current_obj->GetWidth() / 2, radius_y = current_obj->GetHeight() / 2;
+                        int center_x = current_obj->GetX() + tile_info.offsetx + radius_x,
+                            center_y = current_obj->GetY() + tile_info.offsety + radius_y;
                         ellipseRGBA(renderer, center_x, center_y, radius_x, radius_y, obj_color.r, obj_color.g,
                                     obj_color.b, obj_color.a);
-                        break;
+                } else {
+                        rect.x = current_obj->GetX() + tile_info.offsetx;
+                        rect.y = current_obj->GetY() + tile_info.offsety;
+                        rect.w = current_obj->GetWidth();
+                        rect.h = current_obj->GetHeight();
+                        SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
+                        SDL_RenderDrawRect(renderer, &rect);
                 }
             }
         }
-        current_obj = current_obj->next;
-    }*/
+    }
 }
 
 void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, const MapTileInfo & tile_info,
@@ -348,8 +349,8 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
         dstrect.h = tiles->GetTileHeight();
         // FIXME: this is a hack hack hack
         if (tile_info.row < 0) {
-            dstrect.x = tile_info.row * -1 + tile_info.offsetx;
-            dstrect.y = tile_info.col * -1 + tile_info.offsety;
+            dstrect.x = tile_info.col * -1 + tile_info.offsetx;
+            dstrect.y = tile_info.row * -1 + tile_info.offsety;
         } else {
             dstrect.x = tile_info.col * tiles->GetTileWidth() + tile_info.offsetx;
             dstrect.y = tile_info.row * tiles->GetTileHeight() + tile_info.offsety;
@@ -382,11 +383,4 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
         }
     }
 }
-
-void Tilemap::Tilemap_Init() {
-    /*tmx_img_load_func = (void * (*)(const char *))sdl_img_loader;
-    tmx_img_free_func = (void (*)(void *))SDL_DestroyTexture;*/
-}
-
-void Tilemap::Tilemap_Quit() {}
 }

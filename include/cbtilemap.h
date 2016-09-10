@@ -46,8 +46,6 @@ class Tilemap : public Entity {
     bool CreateTextures(float scale);
     EntityType GetEntityType() { return CBE_TILEMAP; };
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
-    static void Tilemap_Init();
-    static void Tilemap_Quit();
 
   private:
     struct MapTileInfo {
