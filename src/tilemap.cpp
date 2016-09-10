@@ -29,13 +29,13 @@ void draw_object_polygon(SDL_Renderer * renderer, double ** points, double x, do
 
 SDL_Color tmx_to_sdl_color(const std::string & tmx_color) {
     SDL_Color color{0, 0, 0, 0};
-    
+
     if (!tmx_color.empty()) {
         // format is #RRGGBB[AA]
         int tmx_color_val = std::strtol(tmx_color.c_str() + 1, NULL, 16);
         if (tmx_color.length() == 7) {
             tmx_color_val = (tmx_color_val << 8) | 0xFF;
-        } 
+        }
         color.r = (tmx_color_val >> 24) & 0xFF;
         color.g = (tmx_color_val >> 16) & 0xFF;
         color.b = (tmx_color_val >> 8) & 0xFF;
@@ -128,12 +128,14 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     }
 
     SDL_Texture * current_texture = nullptr;
-    SDL_Texture * fg_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
+    SDL_Texture * fg_texture =
+        SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
     if (fg_texture == nullptr) {
         LOG_SDL_ERR("Tilemap::RenderMap unable to create foreground texture for map");
         return false;
     }
-    SDL_Texture * bg_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
+    SDL_Texture * bg_texture =
+        SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
     if (bg_texture == nullptr) {
         SDLx::SDL_CleanUp(fg_texture);
         LOG_SDL_ERR("Tilemap::RenderMap unable to create background texture for map");
@@ -166,41 +168,36 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     // iterate layers and draw
     for (auto & current_layer : this->map->GetLayers()) {
         if (current_layer->IsVisible()) {
-                // check layer properties for additional features
-                bool is_collide = false, is_foreground = false;
-                /*tmx_property * prop = current_layer->properties;
-                while (prop) {
-                    if (strcmp(prop->name, CB_TILEMAP_COLLIDE) == 0 &&
-                        strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
-                        is_collide = true;
-                    } else if (strcmp(prop->name, CB_TILEMAP_FOREGROUND) == 0 &&
-                        strcmp(prop->value, CB_TILEMAP_TMX_PROP_BOOL_TRUE) == 0) {
-                        is_foreground = true;
-                    }
-                    prop = prop->next;
-                }*/
+            // check layer properties for additional features
+            bool is_collide = false, is_foreground = false;
+            Tmx::PropertySet properties = current_layer->GetProperties();
+            if (properties.GetStringProperty(CB_TILEMAP_COLLIDE) == CB_TILEMAP_TMX_PROP_BOOL_TRUE) {
+                is_collide = true;
+            }
+            if (properties.GetStringProperty(CB_TILEMAP_FOREGROUND) == CB_TILEMAP_TMX_PROP_BOOL_TRUE) {
+                is_foreground = true;
+            }
 
-                if (is_foreground) {
-                    SDL_SetRenderTarget(renderer, fg_texture);
-                    current_texture = fg_texture;
-                } else {
-                    SDL_SetRenderTarget(renderer, bg_texture);
-                    current_texture = bg_texture;
-                }
-                    SDL_RenderSetScale(renderer, scale, scale);
+            if (is_foreground) {
+                SDL_SetRenderTarget(renderer, fg_texture);
+                current_texture = fg_texture;
+            } else {
+                SDL_SetRenderTarget(renderer, bg_texture);
+                current_texture = bg_texture;
+            }
+            SDL_RenderSetScale(renderer, scale, scale);
 
             switch (current_layer->GetLayerType()) {
                 case Tmx::TMX_LAYERTYPE_TILE:
-                    this->DrawMapLayer(renderer, current_texture,
-                        static_cast<Tmx::TileLayer *>(current_layer),
-                        is_collide ? &collision_regions : nullptr);
-                    break;    
+                    this->DrawMapLayer(renderer, current_texture, static_cast<Tmx::TileLayer *>(current_layer),
+                                       is_collide ? &collision_regions : nullptr);
+                    break;
                 case Tmx::TMX_LAYERTYPE_OBJECTGROUP:
                     this->DrawObjectLayer(renderer, current_texture, static_cast<Tmx::ObjectGroup *>(current_layer));
                     break;
                 case Tmx::TMX_LAYERTYPE_IMAGE_LAYER:
                     this->DrawImageLayer(renderer, current_texture, static_cast<Tmx::ImageLayer *>(current_layer));
-                    break;                    
+                    break;
                 default:
                     LOG_INFO("Tilemap::RenderMap encountered unknown layer type in TMX file");
                     break;
@@ -231,7 +228,8 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
         return;
     }
 
-    std::shared_ptr<SDL_Texture> source_image = TilesetImageManager::GetInstance().GetTilesetImage(this->tmx_path, image->GetSource());
+    std::shared_ptr<SDL_Texture> source_image =
+        TilesetImageManager::GetInstance().GetTilesetImage(this->tmx_path, image->GetSource());
     float op = layer->GetOpacity();
 
     dim.x = layer->GetOffsetX();
@@ -247,7 +245,8 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     }
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::TileLayer * layer, RectRegionCombiner * collision_regions) {
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::TileLayer * layer,
+                           RectRegionCombiner * collision_regions) {
     // set layer opacity
     int alpha_mod = layer->GetOpacity() * SDL_ALPHA_OPAQUE;
 
@@ -321,7 +320,8 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
     }*/
 }
 
-void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, const MapTileInfo & tile_info, RectRegionCombiner * collision_regions) {
+void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, const MapTileInfo & tile_info,
+                            RectRegionCombiner * collision_regions) {
     CB_Rect srcrect, dstrect;
 
     // if we have a tile at this position, draw it
@@ -333,9 +333,9 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
             return;
         }
         int tileset_width = im->GetWidth() - (2 * tiles->GetMargin()) + tiles->GetSpacing();
-		int tiles_x_count = tileset_width / (tiles->GetTileWidth() + tiles->GetSpacing());
+        int tiles_x_count = tileset_width / (tiles->GetTileWidth() + tiles->GetSpacing());
         int tx = tile.id % tiles_x_count;
-		int ty = tile.id / tiles_x_count;
+        int ty = tile.id / tiles_x_count;
 
         // source dimensions and position
         srcrect.x = tiles->GetMargin() + (tx * tiles->GetTileWidth()) + (tx * tiles->GetSpacing());
@@ -356,7 +356,8 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
         }
 
         // select source image
-        std::shared_ptr<SDL_Texture> tileset_image = TilesetImageManager::GetInstance().GetTilesetImage(this->tmx_path, im->GetSource());
+        std::shared_ptr<SDL_Texture> tileset_image =
+            TilesetImageManager::GetInstance().GetTilesetImage(this->tmx_path, im->GetSource());
         if (tileset_image != nullptr) {
 
             // set alpha modulation based on layer opacity
@@ -366,13 +367,13 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
 
             // render tile
             double rotate = tile.flippedDiagonally ? -90. : 0.;
-            SDLx::SDL_RenderTextureClipped(renderer, tileset_image.get(), srcrect, dstrect, tile.flippedHorizontally, tile.flippedVertically, rotate);
+            SDLx::SDL_RenderTextureClipped(renderer, tileset_image.get(), srcrect, dstrect, tile.flippedHorizontally,
+                                           tile.flippedVertically, rotate);
 
             // reset alpha modulation
             if (tile_info.alpha_mod < SDL_ALPHA_OPAQUE) {
                 SDL_SetTextureAlphaMod(tileset_image.get(), SDL_ALPHA_OPAQUE);
             }
-
         }
 
         // create collision region if needed
