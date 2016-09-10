@@ -39,12 +39,9 @@ find_package(SDL2_gfx REQUIRED)
 # Look up libyaml and add dependencies
 find_package(YAML REQUIRED)
 
-# Look up zlib and libxml2 (used by TMX)
-find_package(ZLIB REQUIRED)
-find_package(LibXml2 REQUIRED)
-
-# TMX library
-find_library(LIBTMX_LIBRARY NAMES libtmx tmx PATHS 3pp/tmx NO_DEFAULT_PATH)
+# Find TMX parser dependencies (tmxparser, tinyxml2)
+find_package(TinyXml2 REQUIRED)
+find_package(TmxParser REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR} ${LIBYAML_INCLUDE_DIR} 3pp include)
 
