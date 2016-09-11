@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.3)
 project(critterbits)
 
 # Use our modified FindSDL2* modules
@@ -11,18 +11,24 @@ set(BIN_DIR ${critterbits_SOURCE_DIR}/bin)
 set(PROJECT_TRDPARTY_DIR ${critterbits_SOURCE_DIR}/3pp)
 set(TINYXML2_ROOT ${PROJECT_TRDPARTY_DIR}/tinyxml2-4.0.1)
 set(TMXPARSER_ROOT ${PROJECT_TRDPARTY_DIR}/tmxparser)
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(LIBYAML_ROOT ${PROJECT_TRDPARTY_DIR}/libyaml_win32)
+	add_definitions(-DYAML_DECLARE_STATIC)
 endif()
 
 # Bump up warning levels appropriately for clang, gcc & msvc
 # Also set debug/optimization flags depending on the build type. IDE users choose this when
 # selecting the build mode in their IDE
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-switch -Wno-unused-parameter -pedantic -std=c++11")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -g")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} -O2")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	if(CMAKE_GENERATOR MATCHES "Win64")
+		set(CMAKE_LIBRARY_ARCHITECTURE "win32_x64")
+	else()
+		set(CMAKE_LIBRARY_ARCHITECTURE "win32_x86")
+	endif()
 	if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 		string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	else()
@@ -40,7 +46,7 @@ endif()
 # Look up SDL2 and add the include directory to our include path
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
-find_package(SDL2_ttf REQUIRED)
+#find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 
 # Look up libyaml and add dependencies
@@ -50,7 +56,7 @@ find_package(YAML REQUIRED)
 find_package(TINYXML2 REQUIRED)
 find_package(TMXPARSER REQUIRED)
 
-include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR}
+include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR}
 	${LIBYAML_INCLUDE_DIRS}
 	${TINYXML2_INCLUDE_DIRS}
 	${TMXPARSER_INCLUDE_DIRS} 3pp)

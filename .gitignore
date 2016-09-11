@@ -4,6 +4,7 @@ assets/
 # CMake output
 bin/
 build/
+build_win32/
 
 # Visual Studio Code
 .vscode/

@@ -2,6 +2,7 @@
 #ifndef CBFILES_H
 #define CBFILES_H
 
+#include <algorithm>
 #include <sys/stat.h>
 #include <string>
 
@@ -18,7 +19,9 @@ inline bool FileExists(const std::string & file_path) {
 }
 
 inline std::string StripFileFromPath(const std::string & file_name) {
-    return file_name.substr(0, file_name.find_last_of(PATH_SEP));
+    int index_a = file_name.find_last_of('\\');
+    int index_b = file_name.find_last_of('/');
+    return file_name.substr(0, std::max(index_a, index_b));
 }
 
 

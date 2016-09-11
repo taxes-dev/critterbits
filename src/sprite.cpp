@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <critterbits.h>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>

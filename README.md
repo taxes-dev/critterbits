@@ -12,7 +12,7 @@ Visual Studio 2015, cmake 3.6.2
 
 ### Libraries
 
-External: SDL2-2.0.4-win32-x64, SDL2-devel-2.0.4-VC, SDL2\_image-2.0.1.-win32-x64, SDL2\_image-devel-2.0.1-VC
+External: SDL2-2.0.4-win32-x64, SDL2-devel-2.0.4-VC, SDL2\_image-2.0.1.-win32-x64, SDL2\_image-devel-2.0.1-VC, SDL2\_gfx-1.0.1 (build from source)
 
 Included in repository: duktape-1.5.1, tinyxml2-2.0.4, tmxparser, libyaml-0.17.1
 
