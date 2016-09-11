@@ -2,16 +2,16 @@
 #ifndef CBTILEMAP_H
 #define CBTILEMAP_H
 
-#include <map>
-#include <memory>
-#include <string>
 #include <SDL.h>
 #include <TmxMap.h>
 #include <TmxMapTile.h>
+#include <map>
+#include <memory>
+#include <string>
 
+#include "cb2d.h"
 #include "cbcoord.h"
 #include "cbentity.h"
-#include "cb2d.h"
 #include "cbsprite.h"
 
 #define CB_TILEMAP_COLLIDE "collide"
@@ -21,18 +21,17 @@
 
 namespace Critterbits {
 class TilemapRegion : public Sprite {
-public:
-  TilemapRegion();
+  public:
+    TilemapRegion();
 
-  void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
-  void SetPosition(int new_x, int new_y) {}; // map regions are static
+    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
+    void SetPosition(int new_x, int new_y){}; // map regions are static
 
-protected:
-  bool OnStart() { return true; }
-  
-private:
-  bool draw_debug{false};
-  
+  protected:
+    bool OnStart() { return true; }
+
+  private:
+    bool draw_debug{false};
 };
 
 class Tilemap : public Entity {
@@ -40,7 +39,7 @@ class Tilemap : public Entity {
     int tile_width;
     int tile_height;
     std::vector<std::shared_ptr<TilemapRegion>> regions;
-    SDL_Color bg_color{0,0,0,0};
+    SDL_Color bg_color{0, 0, 0, 0};
 
     Tilemap(const std::string &);
     ~Tilemap();
@@ -50,11 +49,11 @@ class Tilemap : public Entity {
 
   private:
     struct MapTileInfo {
-      int row;
-      int col;
-      int offsetx;
-      int offsety;
-      int alpha_mod;
+        int row;
+        int col;
+        int offsetx;
+        int offsety;
+        int alpha_mod;
     };
     std::string tmx_path;
     std::unique_ptr<Tmx::Map> map{nullptr};
@@ -68,7 +67,8 @@ class Tilemap : public Entity {
     void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ImageLayer *);
     void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const Tmx::TileLayer *, RectRegionCombiner *);
     void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ObjectGroup *);
-    inline void DrawTileOnMap(SDL_Renderer *, const Tmx::MapTile &, const MapTileInfo &, RectRegionCombiner * = nullptr);
+    inline void DrawTileOnMap(SDL_Renderer *, const Tmx::MapTile &, const MapTileInfo &,
+                              RectRegionCombiner * = nullptr);
 };
 
 class TilesetImageManager {
@@ -77,10 +77,10 @@ class TilesetImageManager {
 
     std::shared_ptr<SDL_Texture> GetTilesetImage(const std::string &, const std::string &);
 
-private:
-  std::map<std::string, std::shared_ptr<SDL_Texture>> tileset_images;
+  private:
+    std::map<std::string, std::shared_ptr<SDL_Texture>> tileset_images;
 
-    TilesetImageManager() {};
+    TilesetImageManager(){};
     TilesetImageManager(const TilesetImageManager &) = delete;
     TilesetImageManager(TilesetImageManager &&) = delete;
 };

@@ -10,8 +10,8 @@
 
 #include "cbinput.h"
 #include "cbscene.h"
-#include "scripting/cbscripting.h"
 #include "cbviewport.h"
+#include "scripting/cbscripting.h"
 
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768

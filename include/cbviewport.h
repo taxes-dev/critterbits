@@ -16,7 +16,7 @@ class Viewport : public Entity {
     CB_ViewClippingInfo GetViewableRect(CB_Rect &) const;
     void SetEntityToFollow(std::shared_ptr<Entity>);
 
-protected:
+  protected:
     void OnUpdate(float);
 
   private:

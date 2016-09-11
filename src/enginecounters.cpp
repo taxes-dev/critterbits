@@ -4,9 +4,7 @@
 #include <critterbits.h>
 
 namespace Critterbits {
-void EngineCounters::CountedEntity() {
-    this->entity_count++;
-}
+void EngineCounters::CountedEntity() { this->entity_count++; }
 
 float EngineCounters::GetDeltaFromRemainingFrameTime() {
     return std::min(this->delta_time, this->frame_time / 1000.0f);

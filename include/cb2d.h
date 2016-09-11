@@ -7,19 +7,17 @@
 #include "cbcoord.h"
 
 namespace Critterbits {
-    inline bool AabbCollision(const CB_Rect & rect1, const CB_Rect & rect2) {
-        return (rect1.x < rect2.x + rect2.w &&
-            rect1.x + rect1.w > rect2.x &&
-            rect1.y < rect2.y + rect2.h &&
+inline bool AabbCollision(const CB_Rect & rect1, const CB_Rect & rect2) {
+    return (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h &&
             rect1.h + rect1.y > rect2.y);
-    }
+}
 
 class RectRegionCombiner {
-    public:
-        std::vector<CB_Rect> regions;
+  public:
+    std::vector<CB_Rect> regions;
 
-        RectRegionCombiner() {};
-        void Combine();
+    RectRegionCombiner(){};
+    void Combine();
 };
 }
 #endif

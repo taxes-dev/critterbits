@@ -1,5 +1,5 @@
-#include <critterbits.h>
 #include <SDL_image.h>
+#include <critterbits.h>
 
 namespace Critterbits {
 /*
@@ -66,7 +66,8 @@ std::shared_ptr<SDL_Texture> SpriteManager::GetSpriteSheet(const std::string & s
             LOG_SDL_ERR("SpriteManager::GetSpriteSheet unable to load sprite sheet to texture");
             return nullptr;
         }
-        std::shared_ptr<SDL_Texture> sprite_sheet_ptr{sprite_sheet, [](SDL_Texture * texture) { SDLx::SDL_CleanUp(texture); }};
+        std::shared_ptr<SDL_Texture> sprite_sheet_ptr{sprite_sheet,
+                                                      [](SDL_Texture * texture) { SDLx::SDL_CleanUp(texture); }};
         this->sprite_sheets.insert(std::make_pair(sprite_sheet_path, sprite_sheet_ptr));
         return std::move(sprite_sheet_ptr);
     } else {

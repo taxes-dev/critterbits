@@ -43,9 +43,9 @@ class Sprite : public Entity {
     void NotifyUnloaded();
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     void SetFrame(int);
-    void SetPosition(int,int);
+    void SetPosition(int, int);
 
-protected:
+  protected:
     bool OnStart();
 
   private:

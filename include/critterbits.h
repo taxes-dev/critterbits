@@ -4,20 +4,20 @@
 
 #include <SDL.h>
 
+#include "cb2d.h"
 #include "cbcoord.h"
 #include "cbengine.h"
 #include "cbentity.h"
 #include "cbfiles.h"
 #include "cbinput.h"
 #include "cblogging.h"
-#include "cb2d.h"
 #include "cbmath.h"
 #include "cbscene.h"
-#include "scripting/cbscripting.h"
 #include "cbsdl.h"
 #include "cbsprite.h"
 #include "cbtilemap.h"
 #include "cbviewport.h"
 #include "cbyaml.h"
+#include "scripting/cbscripting.h"
 
 #endif

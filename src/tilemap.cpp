@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <critterbits.h>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
 #include <Tmx.h>
+#include <critterbits.h>
 
 namespace Critterbits {
 
@@ -14,28 +14,20 @@ namespace Critterbits {
 namespace {
 void draw_object_polyline(SDL_Renderer * renderer, const Tmx::Polyline * polyline, double x, double y) {
     for (int i = 1; i < polyline->GetNumPoints(); i++) {
-        SDL_RenderDrawLine(renderer,
-            x + polyline->GetPoint(i - 1).x,
-            y + polyline->GetPoint(i - 1).y,
-            x + polyline->GetPoint(i).x,
-            y + polyline->GetPoint(i).y);
+        SDL_RenderDrawLine(renderer, x + polyline->GetPoint(i - 1).x, y + polyline->GetPoint(i - 1).y,
+                           x + polyline->GetPoint(i).x, y + polyline->GetPoint(i).y);
     }
 }
 
 void draw_object_polygon(SDL_Renderer * renderer, const Tmx::Polygon * polygon, double x, double y) {
     for (int i = 1; i < polygon->GetNumPoints(); i++) {
-        SDL_RenderDrawLine(renderer,
-            x + polygon->GetPoint(i - 1).x,
-            y + polygon->GetPoint(i - 1).y,
-            x + polygon->GetPoint(i).x,
-            y + polygon->GetPoint(i).y);
+        SDL_RenderDrawLine(renderer, x + polygon->GetPoint(i - 1).x, y + polygon->GetPoint(i - 1).y,
+                           x + polygon->GetPoint(i).x, y + polygon->GetPoint(i).y);
     }
     if (polygon->GetNumPoints() > 2) {
-        SDL_RenderDrawLine(renderer,
-            x + polygon->GetPoint(0).x,
-            y + polygon->GetPoint(0).y,
-            x + polygon->GetPoint(polygon->GetNumPoints() - 1).x,
-            y + polygon->GetPoint(polygon->GetNumPoints() - 1).y);
+        SDL_RenderDrawLine(renderer, x + polygon->GetPoint(0).x, y + polygon->GetPoint(0).y,
+                           x + polygon->GetPoint(polygon->GetNumPoints() - 1).x,
+                           y + polygon->GetPoint(polygon->GetNumPoints() - 1).y);
     }
 }
 
@@ -56,7 +48,6 @@ SDL_Color tmx_to_sdl_color(const std::string & tmx_color) {
 
     return color;
 }
-
 }
 /*
  * End support functions
@@ -66,9 +57,7 @@ Tilemap::Tilemap(const std::string & map_path) : tmx_path(map_path) {
     this->draw_debug = Engine::GetInstance().config->debug.draw_map_regions;
 }
 
-Tilemap::~Tilemap() {
-    SDLx::SDL_CleanUp(this->bg_map_texture, this->fg_map_texture);
-}
+Tilemap::~Tilemap() { SDLx::SDL_CleanUp(this->bg_map_texture, this->fg_map_texture); }
 
 void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
     std::shared_ptr<TilemapRegion> region{std::make_shared<TilemapRegion>()};
@@ -289,32 +278,33 @@ void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, co
             if (current_obj->GetGid() > 0) {
                 tile_info.col = current_obj->GetX() * -1;
                 tile_info.row = current_obj->GetY() * -1;
-                Tmx::MapTile tile{(unsigned int)current_obj->GetGid(), this->map->FindTileset((unsigned int)current_obj->GetGid())->GetFirstGid(),
-                    (unsigned int)this->map->FindTilesetIndex((unsigned int)current_obj->GetGid())};
+                Tmx::MapTile tile{(unsigned int)current_obj->GetGid(),
+                                  this->map->FindTileset((unsigned int)current_obj->GetGid())->GetFirstGid(),
+                                  (unsigned int)this->map->FindTilesetIndex((unsigned int)current_obj->GetGid())};
                 this->DrawTileOnMap(renderer, tile, tile_info);
             } else if (this->draw_debug) {
                 // region objects are normally hidden and used as event triggers
                 if (current_obj->GetPolygon() != nullptr) {
-                        SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polygon(renderer, current_obj->GetPolygon(), current_obj->GetX() + tile_info.offsetx,
-                                            current_obj->GetY() + tile_info.offsety);
+                    SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
+                    draw_object_polygon(renderer, current_obj->GetPolygon(), current_obj->GetX() + tile_info.offsetx,
+                                        current_obj->GetY() + tile_info.offsety);
                 } else if (current_obj->GetPolyline() != nullptr) {
-                        SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        draw_object_polyline(renderer, current_obj->GetPolyline(), current_obj->GetX() + tile_info.offsetx,
-                                             current_obj->GetY() + tile_info.offsety);
+                    SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
+                    draw_object_polyline(renderer, current_obj->GetPolyline(), current_obj->GetX() + tile_info.offsetx,
+                                         current_obj->GetY() + tile_info.offsety);
                 } else if (current_obj->GetEllipse() != nullptr) {
-                        int radius_x = current_obj->GetWidth() / 2, radius_y = current_obj->GetHeight() / 2;
-                        int center_x = current_obj->GetX() + tile_info.offsetx + radius_x,
-                            center_y = current_obj->GetY() + tile_info.offsety + radius_y;
-                        ellipseRGBA(renderer, center_x, center_y, radius_x, radius_y, obj_color.r, obj_color.g,
-                                    obj_color.b, obj_color.a);
+                    int radius_x = current_obj->GetWidth() / 2, radius_y = current_obj->GetHeight() / 2;
+                    int center_x = current_obj->GetX() + tile_info.offsetx + radius_x,
+                        center_y = current_obj->GetY() + tile_info.offsety + radius_y;
+                    ellipseRGBA(renderer, center_x, center_y, radius_x, radius_y, obj_color.r, obj_color.g, obj_color.b,
+                                obj_color.a);
                 } else {
-                        rect.x = current_obj->GetX() + tile_info.offsetx;
-                        rect.y = current_obj->GetY() + tile_info.offsety;
-                        rect.w = current_obj->GetWidth();
-                        rect.h = current_obj->GetHeight();
-                        SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
-                        SDL_RenderDrawRect(renderer, &rect);
+                    rect.x = current_obj->GetX() + tile_info.offsetx;
+                    rect.y = current_obj->GetY() + tile_info.offsety;
+                    rect.w = current_obj->GetWidth();
+                    rect.h = current_obj->GetHeight();
+                    SDL_SetRenderDrawColor(renderer, obj_color.r, obj_color.g, obj_color.b, obj_color.a);
+                    SDL_RenderDrawRect(renderer, &rect);
                 }
             }
         }

@@ -164,7 +164,8 @@ void Script::CallOnCollision(std::shared_ptr<Entity> entity, std::shared_ptr<Ent
             RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
             RetrieveEntityFromContext(other_entity, other_entity_name.c_str());
         } else {
-            LOG_ERR("Script::CallOnCollision oncollision() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            LOG_ERR("Script::CallOnCollision oncollision() call failed in " + this->script_path + " - " +
+                    std::string(duk_safe_to_string(this->context, -1)));
             duk_pop_2(this->context);
             // turn off the oncollision script so we don't get caught in an infinite loop of errors
             this->global_oncollision = false;
@@ -183,7 +184,8 @@ void Script::CallStart(std::shared_ptr<Entity> entity) {
             duk_pop_2(this->context);
             RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
         } else {
-            LOG_ERR("Script::CallStart start() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            LOG_ERR("Script::CallStart start() call failed in " + this->script_path + " - " +
+                    std::string(duk_safe_to_string(this->context, -1)));
             duk_pop_2(this->context);
             // turn off the start script so we don't get caught in an infinite loop of errors
             this->global_start = false;
@@ -203,7 +205,8 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
             duk_pop_2(this->context);
             RetrieveEntityFromContext(entity, CB_SCRIPT_ENTITY_THIS);
         } else {
-            LOG_ERR("Script::CallUpdate update() call failed in " + this->script_path + " - " + std::string(duk_safe_to_string(this->context, -1)));
+            LOG_ERR("Script::CallUpdate update() call failed in " + this->script_path + " - " +
+                    std::string(duk_safe_to_string(this->context, -1)));
             duk_pop_2(this->context);
             // turn off the update script so we don't get caught in an infinite loop of errors
             this->global_update = false;
