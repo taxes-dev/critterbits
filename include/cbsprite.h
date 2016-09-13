@@ -12,7 +12,7 @@
 #include "cbentity.h"
 
 #define CB_SPRITE_PATH "sprites"
-#define CB_SPRITE_EXT ".yml"
+#define CB_SPRITE_EXT ".toml"
 
 namespace Critterbits {
 typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteState;
@@ -68,7 +68,7 @@ class SpriteManager {
     std::vector<std::shared_ptr<Sprite>> sprites;
 
     SpriteManager(){};
-    static std::string GetSpritePath(const std::string &);
+    std::string GetSpritePath(const std::string &);
     std::shared_ptr<SDL_Texture> GetSpriteSheet(const std::string &);
     bool LoadQueuedSprites();
     void QueueSprite(const std::string &);

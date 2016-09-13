@@ -30,11 +30,11 @@ std::string TomlParser::GetTableString(const std::string & key, const std::strin
     return this->table->get_qualified_as<std::string>(key).value_or(default_value);
 }
 
-void TomlParser::IterateTableArray(const std::string & table_name, const std::function<void(const TomlParser &)> & iterator) const {
+void TomlParser::IterateTableArray(const std::string & table_name,
+                                   const std::function<void(const TomlParser &)> & iterator) const {
     auto tarr = this->table->get_table_array(table_name);
 
-    for (const auto & arr_table : *tarr)
-    {
+    for (const auto & arr_table : *tarr) {
         TomlParser subparser{arr_table};
         iterator(subparser);
     }

@@ -44,7 +44,7 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         std::string scene_path = this->GetScenePath(scene_name + CB_SCENE_EXT);
         Toml::TomlParser parser{scene_path};
         if (parser.IsReady()) {
-            std::string map_path = parser.GetTableString("scene.map_path");
+            std::string map_path = parser.GetTableString("scene.map");
             if (!map_path.empty()) {
                 new_scene->map_path = this->GetScenePath(map_path); 
             }
