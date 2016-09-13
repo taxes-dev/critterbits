@@ -11,10 +11,6 @@ set(BIN_DIR ${critterbits_SOURCE_DIR}/bin)
 set(PROJECT_TRDPARTY_DIR ${critterbits_SOURCE_DIR}/3pp)
 set(TINYXML2_ROOT ${PROJECT_TRDPARTY_DIR}/tinyxml2-4.0.1)
 set(TMXPARSER_ROOT ${PROJECT_TRDPARTY_DIR}/tmxparser)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	set(LIBYAML_ROOT ${PROJECT_TRDPARTY_DIR}/libyaml_win32)
-	add_definitions(-DYAML_DECLARE_STATIC)
-endif()
 
 # Bump up warning levels appropriately for clang, gcc & msvc
 # Also set debug/optimization flags depending on the build type. IDE users choose this when
@@ -36,11 +32,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	endif()
 endif()
 
-if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE} -Os -fomit-frame-pointer")
-elseif (${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
+elseif (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Look up SDL2 and add the include directory to our include path
@@ -49,15 +45,11 @@ find_package(SDL2_image REQUIRED)
 #find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 
-# Look up libyaml and add dependencies
-find_package(YAML REQUIRED)
-
 # Find TMX parser dependencies (tmxparser, tinyxml2)
 find_package(TINYXML2 REQUIRED)
 find_package(TMXPARSER REQUIRED)
 
 include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR}
-	${LIBYAML_INCLUDE_DIRS}
 	${TINYXML2_INCLUDE_DIRS}
 	${TMXPARSER_INCLUDE_DIRS} 3pp)
 include_directories(include)
