@@ -17,7 +17,7 @@
 #include "cbsprite.h"
 #include "cbtilemap.h"
 #include "cbviewport.h"
-#include "cbyaml.h"
+#include "cbtoml.h"
 #include "scripting/cbscripting.h"
 
 #endif

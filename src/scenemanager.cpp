@@ -9,7 +9,7 @@ namespace Critterbits {
 /*
  * Support functions for SceneManager::ReloadConfiguraLoadScenetion()
  */
-namespace {
+/*namespace {
 void map_parser(void * context, const std::string & value) {
     Scene * scene = static_cast<Scene *>(context);
     scene->map_path = SceneManager::GetScenePath(value);
@@ -33,7 +33,7 @@ YamlSequenceParserCollection scene_seq_parsers = {{"sprites", sprites_parser}};
 
 YamlValueParserCollection scene_val_parsers = {
     {"map", map_parser}, {"map_scale", map_scale_parser}, {"persistent", persistent_parser}};
-}
+}*/
 /*
  * End support functions
  */
@@ -80,11 +80,11 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
             return false;
         }
 
-        YamlParser parser;
+        /*YamlParser parser;
         parser.sequence_parsers = scene_seq_parsers;
         parser.value_parsers = scene_val_parsers;
         parser.Parse(new_scene.get(), *scene_content);
-        delete scene_content;
+        delete scene_content;*/
 
         this->current_scene = new_scene;
         this->loaded_scenes.push_back(std::move(new_scene));

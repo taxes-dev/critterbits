@@ -2,51 +2,9 @@
 
 #include <critterbits.h>
 
+#include <cpptoml/cpptoml.h>
+
 namespace Critterbits {
-/*
- * Support functions for EngineConfiguration::ReloadConfiguration()
- */
-namespace {
-
-void debug_draw_info_pane_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->debug.draw_info_pane = YamlParser::ToBool(value);
-}
-
-void debug_draw_sprite_rects_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->debug.draw_sprite_rects = YamlParser::ToBool(value);
-}
-
-void debug_draw_map_regions_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->debug.draw_map_regions = YamlParser::ToBool(value);
-}
-
-void window_full_screen_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window.full_screen = YamlParser::ToBool(value);
-}
-
-void window_height_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window.height = YamlParser::ToInt(value);
-}
-
-void window_width_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window.width = YamlParser::ToInt(value);
-}
-
-void window_title_parser(void * context, const std::string & value) {
-    static_cast<EngineConfiguration *>(context)->window.title = value;
-}
-
-YamlValueParserCollection config_parsers = {{"debug.draw_info_pane", debug_draw_info_pane_parser},
-                                            {"debug.draw_map_regions", debug_draw_map_regions_parser},
-                                            {"debug.draw_sprite_rects", debug_draw_sprite_rects_parser},
-                                            {"window.full_screen", window_full_screen_parser},
-                                            {"window.height", window_height_parser},
-                                            {"window.title", window_title_parser},
-                                            {"window.width", window_width_parser}};
-}
-/*
- * End support functions
- */
 
 EngineConfiguration::EngineConfiguration(const std::string & source_path) {
     char * base_path = SDL_GetBasePath();
@@ -73,19 +31,28 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
 }
 
 bool EngineConfiguration::ReloadConfiguration() {
-    this->valid = false;
-
     LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " + this->asset_path +
-             CB_CONFIG_YAML);
-    std::string * config_content = nullptr;
-    if (ReadTextFile(this->asset_path + CB_CONFIG_YAML, &config_content)) {
-        // parse YAML into configuration
-        YamlParser parser;
-        parser.value_parsers = config_parsers;
-        parser.Parse(this, *config_content);
+             CB_CONFIG_FILE);
+    try {
+        auto config = Toml::TomlParser{this->asset_path + CB_CONFIG_FILE};
+        if (config.IsReady()) {
+            this->valid = false;
 
-        delete config_content;
-        return this->Validate();
+            // debug settings
+            this->debug.draw_info_pane = config.GetTableBool("debug.draw_info_pane");
+            this->debug.draw_map_regions = config.GetTableBool("debug.draw_map_regions");
+            this->debug.draw_sprite_rects = config.GetTableBool("debug.draw_sprite_rects");
+
+            // window settings
+            this->window.full_screen = config.GetTableBool("window.full_screen");
+            this->window.height = config.GetTableInt("window.height", CB_DEFAULT_WINDOW_H);
+            this->window.title = config.GetTableString("window.title", CB_DEFAULT_WINDOW_TITLE);
+            this->window.width = config.GetTableInt("window.width", CB_DEFAULT_WINDOW_W);
+
+            this->Validate();
+        }
+    } catch (cpptoml::parse_exception & e) {
+        LOG_ERR("EngineConfiguration::ReloadConfiguration TOML parsing error " + std::string(e.what()));
     }
 
     return this->valid;

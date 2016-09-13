@@ -5,7 +5,7 @@ namespace Critterbits {
 /*
 * Support functions for SpriteManager::LoadQueuedSprites()
 */
-static void sprite_scale_parser(void * context, const std::string & value) {
+/*static void sprite_scale_parser(void * context, const std::string & value) {
     static_cast<Sprite *>(context)->sprite_scale = YamlParser::ToFloat(value);
 }
 
@@ -49,6 +49,7 @@ static YamlValueParserCollection sprite_val_parsers = {{"sprite_sheet", sprite_s
                                                        {"tile_offset_y", tile_offset_y_parser},
                                                        {"tile_width", tile_width_parser},
                                                        {"collision", collision_parser}};
+                                                       */
 /*
 * End support functions
 */
@@ -82,7 +83,7 @@ bool SpriteManager::LoadQueuedSprites() {
     std::string * sprite_content = nullptr;
     std::string sprite_name;
 
-    YamlParser parser;
+    /*YamlParser parser;
     parser.value_parsers = sprite_val_parsers;
 
     for (auto it = this->queued_sprites.begin(); it != this->queued_sprites.end();) {
@@ -114,7 +115,7 @@ bool SpriteManager::LoadQueuedSprites() {
             success = false;
             it++;
         }
-    }
+    }*/
     return success;
 }
 

@@ -15,7 +15,8 @@
 
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768
-#define CB_CONFIG_YAML "cbconfig.yml"
+#define CB_DEFAULT_WINDOW_TITLE "Critterbits"
+#define CB_CONFIG_FILE "cbconfig.toml"
 #define CB_DEFAULT_ASSET_PATH "./assets"
 #define CB_DESIRED_UPS 60.0f
 
