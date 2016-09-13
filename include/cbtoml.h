@@ -2,6 +2,7 @@
 #ifndef CBTOML_H
 #define CBTOML_H
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -23,16 +24,20 @@ class TomlParser {
                 return std::string{};
             }
         };
-        bool GetTableBool(const std::string &, bool = false);
-        float GetTableFloat(const std::string &, float = 0.f);
-        int GetTableInt(const std::string &, int = 0);
-        std::string GetTableString(const std::string &, const std::string & = "");
+        bool GetTableBool(const std::string &, bool = false) const;
+        float GetTableFloat(const std::string &, float = 0.f) const;
+        int GetTableInt(const std::string &, int = 0) const;
+        std::string GetTableString(const std::string &, const std::string & = "") const;
         bool IsReady() const { return this->state == CBE_TOML_READY; };
+        void IterateTableArray(const std::string &, const std::function<void(const TomlParser &)> &) const;
 
     private:
-        TomlParserState state{CBE_TOML_NEW};
+        TomlParserState state;
         std::shared_ptr<cpptoml::table> table;
         std::string parse_error;
+
+        TomlParser() : state(CBE_TOML_NEW) {};
+        TomlParser(std::shared_ptr<cpptoml::table> _table) : state{CBE_TOML_READY}, table(_table) {};
 };
 
 }

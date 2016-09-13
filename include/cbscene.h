@@ -11,7 +11,7 @@
 
 #define CB_SCENE_PATH "scenes"
 #define CB_FIRST_SCENE "startup"
-#define CB_SCENE_EXT ".yml"
+#define CB_SCENE_EXT ".toml"
 
 namespace Critterbits {
 
@@ -47,7 +47,7 @@ class SceneManager {
         return this->current_scene != nullptr && this->current_scene->state == CBE_SCENE_ACTIVE;
     };
     bool LoadScene(const std::string &);
-    static std::string GetScenePath(const std::string &);
+    std::string GetScenePath(const std::string &);
 
   private:
     std::string scene_path;

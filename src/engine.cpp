@@ -116,8 +116,6 @@ int Engine::Run() {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
-    //DEBUG
-    return 0;
 
     // discover display bounds
     SDL_GetDisplayBounds(0, &this->display_bounds);
