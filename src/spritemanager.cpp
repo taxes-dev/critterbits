@@ -30,14 +30,17 @@ bool SpriteManager::LoadQueuedSprites() {
     bool success = true;
 
     for (auto it = this->queued_sprites.begin(); it != this->queued_sprites.end();) {
-        std::string sprite_name{*it + CB_SPRITE_EXT};
+        const QueuedSprite & qsprite = *it;
+        std::string sprite_name{qsprite.name + CB_SPRITE_EXT};
         std::string sprite_path_current{SpriteManager::GetSpritePath(sprite_name)};
         LOG_INFO("SpriteManager::LoadQueuedSprites attempting to load " + sprite_path_current);
 
         Toml::TomlParser parser{sprite_path_current};
         if (parser.IsReady()) {
             std::shared_ptr<Sprite> new_sprite = std::make_shared<Sprite>();
-            new_sprite->sprite_name = *it;
+            new_sprite->sprite_name = qsprite.name;
+            new_sprite->dim.x = qsprite.at.x;
+            new_sprite->dim.y = qsprite.at.y;
             new_sprite->sprite_path = sprite_path_current;
 
             // parse sprite features
@@ -74,7 +77,7 @@ bool SpriteManager::LoadQueuedSprites() {
     return success;
 }
 
-void SpriteManager::QueueSprite(const std::string & sprite_name) { this->queued_sprites.push_back(sprite_name); }
+void SpriteManager::QueueSprite(const QueuedSprite & queued_sprite) { this->queued_sprites.push_back(queued_sprite); }
 
 void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
     for (auto it = this->sprites.begin(); it != this->sprites.end();) {

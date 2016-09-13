@@ -18,6 +18,11 @@ namespace Critterbits {
 typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteState;
 typedef enum { CBE_COLLIDE_NONE, CBE_COLLIDE_COLLIDE, CBE_COLLIDE_TRIGGER } CollisionType;
 
+typedef struct QueuedSprite {
+  std::string name;
+  CB_Point at;
+} QueuedSprite;
+
 class Sprite : public Entity {
   public:
     SpriteState state{CBE_SPRITE_NEW};
@@ -71,11 +76,11 @@ class SpriteManager {
     std::string GetSpritePath(const std::string &);
     std::shared_ptr<SDL_Texture> GetSpriteSheet(const std::string &);
     bool LoadQueuedSprites();
-    void QueueSprite(const std::string &);
+    void QueueSprite(const QueuedSprite &);
     void UnloadSprite(std::shared_ptr<Sprite>);
 
   private:
-    std::vector<std::string> queued_sprites;
+    std::vector<QueuedSprite> queued_sprites;
     std::map<std::string, std::shared_ptr<SDL_Texture>> sprite_sheets;
 
     SpriteManager(const SpriteManager &) = delete;

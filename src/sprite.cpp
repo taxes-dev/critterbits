@@ -58,8 +58,6 @@ void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
 
 void Sprite::NotifyLoaded() {
     LOG_INFO("Sprite::NotifyLoaded sprite was loaded " + this->sprite_name);
-    this->dim.x = 0;
-    this->dim.y = 0;
     this->dim.w = this->tile_width * this->sprite_scale;
     this->dim.h = this->tile_height * this->sprite_scale;
 

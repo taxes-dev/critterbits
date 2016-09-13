@@ -51,7 +51,13 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
             new_scene->map_scale = parser.GetTableFloat("scene.map_scale", 1.0f);
             new_scene->persistent = parser.GetTableBool("scene.persistent");
             parser.IterateTableArray("sprite", [&new_scene](const Toml::TomlParser & table) {
-                new_scene->sprites.QueueSprite(table.GetTableString("name"));
+                QueuedSprite qsprite{
+                    table.GetTableString("name"),
+                    table.GetTablePoint("at")
+                };
+                if (!qsprite.name.empty()) {
+                    new_scene->sprites.QueueSprite(qsprite);
+                }
             });
         } else {
             LOG_ERR("SceneManager::LoadScene unable to parse scene file " + scene_path);

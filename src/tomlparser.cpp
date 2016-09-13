@@ -26,6 +26,16 @@ int TomlParser::GetTableInt(const std::string & key, int default_value) const {
     return (int)this->table->get_qualified_as<int64_t>(key).value_or((int64_t)default_value);
 }
 
+CB_Point TomlParser::GetTablePoint(const std::string & key, CB_Point default_value) const {
+    auto table2 = this->table->get_table(key);
+    int64_t x = default_value.x, y = default_value.y;
+    if (table2) {
+        x = table2->get_as<int64_t>("x").value_or(default_value.x);
+        y = table2->get_as<int64_t>("y").value_or(default_value.y);
+    }
+    return CB_Point{(int)x, (int)y};
+}
+
 std::string TomlParser::GetTableString(const std::string & key, const std::string & default_value) const {
     return this->table->get_qualified_as<std::string>(key).value_or(default_value);
 }

@@ -8,6 +8,8 @@
 
 #include <cpptoml/cpptoml.h>
 
+#include "cbcoord.h"
+
 namespace Critterbits {
 namespace Toml {
 
@@ -27,6 +29,7 @@ class TomlParser {
     bool GetTableBool(const std::string &, bool = false) const;
     float GetTableFloat(const std::string &, float = 0.f) const;
     int GetTableInt(const std::string &, int = 0) const;
+    CB_Point GetTablePoint(const std::string &, CB_Point = {0 ,0}) const;
     std::string GetTableString(const std::string &, const std::string & = "") const;
     bool IsReady() const { return this->state == CBE_TOML_READY; };
     void IterateTableArray(const std::string &, const std::function<void(const TomlParser &)> &) const;
