@@ -1,6 +1,4 @@
-#include <SDL.h>
-
-#include <critterbits.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 void InputManager::AddSdlEvent(const SDL_Event & event) {

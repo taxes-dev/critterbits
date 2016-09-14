@@ -1,4 +1,4 @@
-#include <critterbits.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 

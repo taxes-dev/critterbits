@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include <critterbits.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 void RectRegionCombiner::Combine() {

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBSCRIPTING_H
-#define CBSCRIPTING_H
+#ifndef CBSCRIPTING_HPP
+#define CBSCRIPTING_HPP
 
 #include <cassert>
 #include <memory>
@@ -9,8 +9,8 @@
 
 #include <duktape/duktape.h>
 
-#include <cbentity.h>
-#include <cbsprite.h>
+#include <cbentity.hpp>
+#include <cbsprite.hpp>
 
 #define CB_SCRIPT_PATH "scripts"
 #define CB_SCRIPT_EXT ".js"

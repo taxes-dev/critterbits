@@ -1,8 +1,6 @@
 #include <string>
 
-#include <critterbits.h>
-
-#include <cpptoml/cpptoml.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 

@@ -1,5 +1,5 @@
+#include <critterbits.hpp>
 #include <SDL_image.h>
-#include <critterbits.h>
 
 namespace Critterbits {
 TilesetImageManager & TilesetImageManager::GetInstance() {

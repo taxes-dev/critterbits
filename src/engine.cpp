@@ -3,9 +3,9 @@
 #include <list>
 #include <sstream>
 
+#include <critterbits.hpp>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
-#include <critterbits.h>
 
 namespace Critterbits {
 

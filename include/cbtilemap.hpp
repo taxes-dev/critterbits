@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBTILEMAP_H
-#define CBTILEMAP_H
+#ifndef CBTILEMAP_HPP
+#define CBTILEMAP_HPP
 
 #include <SDL.h>
 #include <TmxMap.h>
@@ -9,10 +9,10 @@
 #include <memory>
 #include <string>
 
-#include "cb2d.h"
-#include "cbcoord.h"
-#include "cbentity.h"
-#include "cbsprite.h"
+#include "cb2d.hpp"
+#include "cbcoord.hpp"
+#include "cbentity.hpp"
+#include "cbsprite.hpp"
 
 #define CB_TILEMAP_COLLIDE "collide"
 #define CB_TILEMAP_FOREGROUND "foreground"

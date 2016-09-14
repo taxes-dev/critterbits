@@ -1,9 +1,8 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <critterbits.hpp>
 #include <scripting/cbscriptsupport.hpp>
-#include <cblogging.h>
-#include <cbsprite.h>
 
 namespace Critterbits {
 namespace Scripting {

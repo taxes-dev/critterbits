@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBSPRITE_H
-#define CBSPRITE_H
+#ifndef CBSPRITE_HPP
+#define CBSPRITE_HPP
 
 #include <map>
 #include <memory>
@@ -9,7 +9,7 @@
 
 #include <SDL.h>
 
-#include "cbentity.h"
+#include "cbentity.hpp"
 
 #define CB_SPRITE_PATH "sprites"
 #define CB_SPRITE_EXT ".toml"

@@ -1,7 +1,4 @@
-#include <SDL.h>
-
-#include <cbcoord.h>
-#include <cbsdl.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 namespace SDLx {

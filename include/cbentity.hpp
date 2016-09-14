@@ -1,13 +1,13 @@
 #pragma once
-#ifndef CBENTITY_H
-#define CBENTITY_H
+#ifndef CBENTITY_HPP
+#define CBENTITY_HPP
 
 #include <SDL.h>
 
 #include <cassert>
 #include <memory>
 
-#include "cbcoord.h"
+#include "cbcoord.hpp"
 
 namespace Critterbits {
 

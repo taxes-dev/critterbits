@@ -1,11 +1,11 @@
 #pragma once
-#ifndef CBVIEWPORT_H
-#define CBVIEWPORT_H
+#ifndef CBVIEWPORT_HPP
+#define CBVIEWPORT_HPP
 
 #include <memory>
 
-#include "cbcoord.h"
-#include "cbentity.h"
+#include "cbcoord.hpp"
+#include "cbentity.hpp"
 
 namespace Critterbits {
 

@@ -1,15 +1,15 @@
 #pragma once
-#ifndef CBLOGGING_H
-#define CBLOGGING_H
+#ifndef CBLOGGING_HPP
+#define CBLOGGING_HPP
 
 #include <SDL.h>
 #include <iostream>
 
-/*#ifdef NDEBUG
+#ifdef NDEBUG
 #define LOG_INFO(m)
-#else*/
+#else
 #define LOG_INFO(m) Critterbits::LogInfo(std::cout, m)
-//#endif
+#endif
 
 #define LOG_ERR(m) Critterbits::LogError(std::cerr, m)
 #define LOG_SDL_ERR(m) Critterbits::LogSdlError(std::cerr, m)

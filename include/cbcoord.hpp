@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBCOORD_H
-#define CBCOORD_H
+#ifndef CBCOORD_HPP
+#define CBCOORD_HPP
 
 #include <iostream>
 #include <string>

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBINPUT_H
-#define CBINPUT_H
+#ifndef CBINPUT_HPP
+#define CBINPUT_HPP
 
 #include <vector>
 

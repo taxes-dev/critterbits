@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBENGINE_H
-#define CBENGINE_H
+#ifndef CBENGINE_HPP
+#define CBENGINE_HPP
 
 #include <SDL.h>
 #include <functional>
@@ -8,10 +8,10 @@
 #include <memory>
 #include <string>
 
-#include "cbinput.h"
-#include "cbscene.h"
-#include "cbviewport.h"
-#include "scripting/cbscripting.h"
+#include "cbinput.hpp"
+#include "cbscene.hpp"
+#include "cbviewport.hpp"
+#include "scripting/cbscripting.hpp"
 
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768

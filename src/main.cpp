@@ -1,6 +1,6 @@
 #include <string>
 
-#include <critterbits.h>
+#include <critterbits.hpp>
 
 using namespace Critterbits;
 

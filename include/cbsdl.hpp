@@ -1,11 +1,11 @@
 #pragma once
-#ifndef CBSDL_H
-#define CBSDL_H
+#ifndef CBSDL_HPP
+#define CBSDL_HPP
 
 #include <SDL.h>
 #include <utility>
 
-#include "cbcoord.h"
+#include "cbcoord.hpp"
 
 namespace Critterbits {
 namespace SDLx {

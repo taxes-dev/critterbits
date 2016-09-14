@@ -1,7 +1,5 @@
-#include <critterbits.h>
+#include <critterbits.hpp>
 #include <scripting/cbscriptsupport.hpp>
-
-#include <duktape/duktape.h>
 
 namespace Critterbits {
 namespace Scripting {

@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include <critterbits.h>
+#include <critterbits.hpp>
 #include <scripting/cbscriptsupport.hpp>
 
 namespace Critterbits {

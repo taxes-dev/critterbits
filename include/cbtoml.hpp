@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBTOML_H
-#define CBTOML_H
+#ifndef CBTOML_HPP
+#define CBTOML_HPP
 
 #include <functional>
 #include <memory>
@@ -8,7 +8,7 @@
 
 #include <cpptoml/cpptoml.h>
 
-#include "cbcoord.h"
+#include "cbcoord.hpp"
 
 namespace Critterbits {
 namespace Toml {

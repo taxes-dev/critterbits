@@ -1,13 +1,13 @@
 #pragma once
-#ifndef CBSCENE_H
-#define CBSCENE_H
+#ifndef CBSCENE_HPP
+#define CBSCENE_HPP
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "cbsprite.h"
-#include "cbtilemap.h"
+#include "cbsprite.hpp"
+#include "cbtilemap.hpp"
 
 #define CB_SCENE_PATH "scenes"
 #define CB_FIRST_SCENE "startup"

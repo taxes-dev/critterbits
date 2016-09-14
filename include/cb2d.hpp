@@ -1,10 +1,10 @@
 #pragma once
-#ifndef CB2D_H
-#define CB2D_H
+#ifndef CB2D_HPP
+#define CB2D_HPP
 
 #include <vector>
 
-#include "cbcoord.h"
+#include "cbcoord.hpp"
 
 namespace Critterbits {
 inline bool AabbCollision(const CB_Rect & rect1, const CB_Rect & rect2) {

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBMATH_H
-#define CBMATH_H
+#ifndef CBMATH_HPP
+#define CBMATH_HPP
 
 namespace Critterbits {
 

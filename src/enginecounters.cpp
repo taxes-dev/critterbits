@@ -1,7 +1,6 @@
 #include <algorithm>
 
-#include <SDL.h>
-#include <critterbits.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 void EngineCounters::CountedEntity() { this->entity_count++; }

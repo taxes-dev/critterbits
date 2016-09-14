@@ -2,7 +2,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include <cbfiles.h>
+#include <cbfiles.hpp>
 
 namespace Critterbits {
 

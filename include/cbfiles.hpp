@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CBFILES_H
-#define CBFILES_H
+#ifndef CBFILES_HPP
+#define CBFILES_HPP
 
 #include <algorithm>
 #include <string>
