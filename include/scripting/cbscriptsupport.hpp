@@ -10,28 +10,41 @@
 
 namespace Critterbits {
 namespace Scripting {
-inline int GetBoolProperty(duk_context * context, const char * property_name, int stack_index = -1) {
+inline int GetPropertyBool(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     duk_bool_t value = duk_get_boolean(context, -1);
     duk_pop(context);
     return value != 0;
 }
 
-inline int GetFloatProperty(duk_context * context, const char * property_name, int stack_index = -1) {
+inline int GetPropertyFloat(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     float value = (float)duk_get_number(context, -1);
     duk_pop(context);
     return value;
 }
 
-inline int GetIntProperty(duk_context * context, const char * property_name, int stack_index = -1) {
+inline int GetPropertyInt(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     int value = duk_get_int(context, -1);
     duk_pop(context);
     return value;
 }
 
-inline std::string GetStringProperty(duk_context * context, const char * property_name, int stack_index = -1) {
+inline CB_Rect GetPropertyRect(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    CB_Rect value;
+    if (duk_is_object(context, -1)) {
+        value.x = GetPropertyInt(context, "x");
+        value.y = GetPropertyInt(context, "y");
+        value.w = GetPropertyInt(context, "w");
+        value.h = GetPropertyInt(context, "h");
+    }
+    duk_pop(context);
+    return value;
+}
+
+inline std::string GetPropertyString(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     const char * value = duk_get_string(context, -1);
     duk_pop(context);
@@ -54,6 +67,15 @@ inline void PushPropertyFloat(duk_context * context, const char * property_name,
 
 inline void PushPropertyInt(duk_context * context, const char * property_name, int value) {
     duk_push_int(context, value);
+    duk_put_prop_string(context, -2, property_name);
+}
+
+inline void PushPropertyRect(duk_context * context, const char * property_name, const CB_Rect & value) {
+    duk_push_object(context);
+    PushPropertyInt(context, "x", value.x);
+    PushPropertyInt(context, "y", value.y);
+    PushPropertyInt(context, "w", value.w);
+    PushPropertyInt(context, "h", value.h);
     duk_put_prop_string(context, -2, property_name);
 }
 

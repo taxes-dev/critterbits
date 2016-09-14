@@ -82,12 +82,7 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     // viewport
     std::shared_ptr<Viewport> viewport = Engine::GetInstance().viewport;
     duk_push_object(context); // viewport
-    duk_push_object(context); // dim
-    PushPropertyInt(context, "x", viewport->dim.x);
-    PushPropertyInt(context, "y", viewport->dim.y);
-    PushPropertyInt(context, "w", viewport->dim.w);
-    PushPropertyInt(context, "h", viewport->dim.h);
-    duk_put_prop_string(context, -2, "dim");
+    PushPropertyRect(context, "dim", viewport->dim);
     duk_push_c_function(context, viewport_follow, 1);
     duk_put_prop_string(context, -2, "follow");
     duk_put_prop_string(context, -2, "viewport");
@@ -113,7 +108,7 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         Engine::GetInstance().config->asset_path + CB_SCRIPT_PATH + PATH_SEP + script_name + CB_SCRIPT_EXT;
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
     if (!FileExists(script_path)) {
-        LOG_INFO("ScriptEngine::Loadscript script not found");
+        LOG_INFO("ScriptEngine::LoadScript script not found");
         return nullptr;
     }
 

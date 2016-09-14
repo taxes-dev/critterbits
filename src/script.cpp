@@ -59,14 +59,7 @@ void Script::CreateEntityInContext(std::shared_ptr<Entity> entity, const char * 
     duk_push_global_stash(this->context); // will save to the global stash when we're done
 
     duk_push_object(this->context); // root
-
-    duk_push_object(this->context); // dim
-    PushPropertyInt(this->context, "x", entity->dim.x);
-    PushPropertyInt(this->context, "y", entity->dim.y);
-    PushPropertyInt(this->context, "w", entity->dim.w);
-    PushPropertyInt(this->context, "h", entity->dim.h);
-    duk_put_prop_string(this->context, -2, "dim");
-
+    PushPropertyRect(this->context, "dim", entity->dim);
     PushPropertyEntityId(this->context, entity->entity_id);
     PushPropertyString(this->context, "tag", entity->tag);
     PushPropertyFloat(this->context, "time_scale", entity->time_scale);
@@ -107,19 +100,16 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
     duk_push_global_stash(this->context);
     if (duk_get_prop_string(this->context, -1, stash_name) != 0) {
         // only mutable properties are retrieved
-        duk_get_prop_string(this->context, -1, "dim");
-        int new_x = GetIntProperty(this->context, "x");
-        int new_y = GetIntProperty(this->context, "y");
-        entity->dim.w = GetIntProperty(this->context, "w");
-        entity->dim.h = GetIntProperty(this->context, "h");
-        duk_pop(this->context); // dim
-        entity->time_scale = GetFloatProperty(this->context, "time_scale");
+        CB_Rect new_dim = GetPropertyRect(this->context, "dim");
+        entity->dim.w = new_dim.w;
+        entity->dim.h = new_dim.h;
+        entity->time_scale = GetPropertyFloat(this->context, "time_scale");
 
         // set position (may result in collisions)
-        entity->SetPosition(new_x, new_y);
+        entity->SetPosition(new_dim.x, new_dim.y);
 
         // special case: "destroyed flag"
-        bool destroyed = GetBoolProperty(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
+        bool destroyed = GetPropertyBool(this->context, CB_SCRIPT_HIDDEN_DESTROYED);
         if (destroyed) {
             entity->MarkDestroy();
         }
@@ -136,15 +126,15 @@ void Script::RetrieveEntityFromContext(std::shared_ptr<Entity> entity, const cha
 }
 
 void Script::RetrieveSpriteFromContext(std::shared_ptr<Sprite> sprite) {
-    sprite->sprite_scale = GetFloatProperty(this->context, "sprite_scale");
-    sprite->tile_height = GetIntProperty(this->context, "tile_height");
-    sprite->tile_width = GetIntProperty(this->context, "tile_width");
-    sprite->tile_offset_x = GetIntProperty(this->context, "tile_offset_x");
-    sprite->tile_offset_y = GetIntProperty(this->context, "tile_offset_y");
-    sprite->flip_x = GetBoolProperty(this->context, "flip_x");
-    sprite->flip_y = GetBoolProperty(this->context, "flip_y");
+    sprite->sprite_scale = GetPropertyFloat(this->context, "sprite_scale");
+    sprite->tile_height = GetPropertyInt(this->context, "tile_height");
+    sprite->tile_width = GetPropertyInt(this->context, "tile_width");
+    sprite->tile_offset_x = GetPropertyInt(this->context, "tile_offset_x");
+    sprite->tile_offset_y = GetPropertyInt(this->context, "tile_offset_y");
+    sprite->flip_x = GetPropertyBool(this->context, "flip_x");
+    sprite->flip_y = GetPropertyBool(this->context, "flip_y");
     duk_get_prop_string(this->context, -1, "frame");
-    int current_frame = GetIntProperty(this->context, "current");
+    int current_frame = GetPropertyInt(this->context, "current");
     sprite->SetFrame(current_frame);
     duk_pop(this->context); // frame
 }
