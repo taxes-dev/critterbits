@@ -1,5 +1,5 @@
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 #include <critterbits.hpp>
 #include <scripting/cbscriptsupport.hpp>
@@ -37,7 +37,6 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
     duk_put_prop_string(context, -2, "frame");
 }
 
-
 void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sprite, int stack_index) {
     sprite->sprite_scale = GetPropertyFloat(context, "sprite_scale", stack_index);
     sprite->tile_height = GetPropertyInt(context, "tile_height", stack_index);
@@ -51,7 +50,7 @@ void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sp
     sprite->SetFrame(current_frame);
     duk_pop(context); // frame
 }
-/* 
+/*
  * End of support functions
  */
 }

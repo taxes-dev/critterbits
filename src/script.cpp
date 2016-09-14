@@ -133,7 +133,6 @@ void Script::PostCallRetrieveAllEntities() {
             }
             duk_pop(context);
         }
- 
     }
     duk_pop_2(this->context); // stash and array
     ClearEntitiesInContext(this->context);

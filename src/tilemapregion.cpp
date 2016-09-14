@@ -1,5 +1,5 @@
-#include <critterbits.hpp>
 #include <SDL2_gfxPrimitives.h>
+#include <critterbits.hpp>
 
 namespace Critterbits {
 TilemapRegion::TilemapRegion() { this->draw_debug = Engine::GetInstance().config->debug.draw_map_regions; }
