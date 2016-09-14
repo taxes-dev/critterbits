@@ -64,7 +64,7 @@ void Engine::DestroyMarkedEntities() {
 }
 
 std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
-    std::shared_ptr<Entity> ret = nullptr;
+    std::shared_ptr<Entity> ret{nullptr};
     this->IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
         if (entity->entity_id == entity_id) {
             ret = entity;
@@ -73,6 +73,19 @@ std::shared_ptr<Entity> Engine::FindEntityById(entity_id_t entity_id) {
         return false;
     });
     return ret;
+}
+
+std::vector<std::shared_ptr<Entity>> Engine::FindEntitiesByTag(const std::string & tag) {
+    std::vector<std::shared_ptr<Entity>> entities;
+    if (!tag.empty()) {
+        this->IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
+            if (entity->tag == tag) {
+                entities.push_back(entity);
+            }
+            return false;
+        });
+    }
+    return entities;
 }
 
 Engine & Engine::GetInstance() {

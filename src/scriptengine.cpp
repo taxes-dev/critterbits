@@ -18,6 +18,24 @@ void duktape_fatal_error(duk_context * ctx, duk_errcode_t code, const char * msg
 /*
 * Functions callable from JavaScript code
 */
+duk_ret_t find_entities_by_tag(duk_context * context) {
+    int nargs = duk_get_top(context);
+    std::vector<std::string> tags;
+    for (int i = 0; i < nargs; i++) {
+        tags.push_back(std::string(duk_get_string(context, i)));
+    }
+    int arr_idx = duk_push_array(context);
+    int prop_idx = 0;
+    for (auto & tag : tags) {
+        for (auto & entity : Engine::GetInstance().FindEntitiesByTag(tag)) {
+            // TODO: push actual entity
+            duk_push_int(context, entity->entity_id);
+            duk_put_prop_index(context, arr_idx, prop_idx++);
+        }
+    }
+    return 1;
+}
+
 duk_ret_t is_key_pressed(duk_context * context) {
     int key_code = duk_get_int(context, 0);
     bool key_pressed = Engine::GetInstance().input.IsKeyPressed(key_code);
@@ -86,6 +104,10 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_push_c_function(context, viewport_follow, 1);
     duk_put_prop_string(context, -2, "follow");
     duk_put_prop_string(context, -2, "viewport");
+
+    // global functions
+    duk_push_c_function(context, find_entities_by_tag, DUK_VARARGS);
+    duk_put_prop_string(context, -2, "find_by_tag");
 
     duk_pop(context); // global
 }
