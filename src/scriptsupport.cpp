@@ -12,9 +12,11 @@ namespace {
 * Functions callable from JavaScript code
 */
 duk_ret_t mark_entity_destroyed(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_this(context);
     PushPropertyBool(context, CB_SCRIPT_HIDDEN_DESTROYED, true);
     duk_pop(context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
     return 0;
 }
 
@@ -22,6 +24,7 @@ duk_ret_t mark_entity_destroyed(duk_context * context) {
  * Sprite entity push/pop
  */
 void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprite) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     PushPropertyString(context, "entity_type", "sprite");
     PushPropertyFloat(context, "sprite_scale", sprite->sprite_scale);
     PushPropertyInt(context, "tile_height", sprite->tile_height);
@@ -35,9 +38,11 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
     PushPropertyInt(context, "current", sprite->GetFrame());
     PushPropertyInt(context, "count", sprite->GetFrameCount());
     duk_put_prop_string(context, -2, "frame");
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sprite, int stack_index) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     sprite->sprite_scale = GetPropertyFloat(context, "sprite_scale", stack_index);
     sprite->tile_height = GetPropertyInt(context, "tile_height", stack_index);
     sprite->tile_width = GetPropertyInt(context, "tile_width", stack_index);
@@ -49,6 +54,7 @@ void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sp
     int current_frame = GetPropertyInt(context, "current", -1);
     sprite->SetFrame(current_frame);
     duk_pop(context); // frame
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 /*
  * End of support functions
