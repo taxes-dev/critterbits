@@ -18,8 +18,6 @@
 #define CB_SCRIPT_GLOBAL_START "start"
 #define CB_SCRIPT_GLOBAL_UPDATE "update"
 
-#define CB_SCRIPT_ENTITY_NAME(e) "entity_" + std::to_string(e->entity_id)
-
 namespace Critterbits {
 namespace Scripting {
 
@@ -41,6 +39,7 @@ class Script {
     bool global_update{false};
 
     void DiscoverGlobals();
+    void PostCallRetrieveAllEntities();
 };
 
 class ScriptEngine {

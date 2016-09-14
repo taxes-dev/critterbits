@@ -14,6 +14,9 @@ namespace Critterbits {
 typedef enum { CBE_UNDEFINED, CBE_SPRITE, CBE_TILEMAP, CBE_VIEWPORT } EntityType;
 typedef unsigned long entity_id_t;
 
+#define CB_ENTITY_ID_INVALID 0L
+#define CB_ENTITY_ID_FIRST 1L
+
 extern entity_id_t next_entity_id;
 
 namespace Scripting {

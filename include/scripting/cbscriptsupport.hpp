@@ -10,6 +10,7 @@
 #include <cbentity.h>
 #include <duktape/duktape.h>
 
+#define CB_SCRIPT_ENTITY_STASH_ARRAY "entities"
 #define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
     "\xff"                                                                                                             \
     "destroyed"
@@ -19,6 +20,7 @@
 
 namespace Critterbits {
 namespace Scripting {
+
 inline int GetPropertyBool(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     duk_bool_t value = duk_get_boolean(context, -1);
@@ -98,9 +100,13 @@ inline void PushPropertyEntityId(duk_context * context, entity_id_t value) {
     duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
 }
 
-void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity>, const char *);
+void ClearEntitiesInContext(duk_context *);
 
-void RetrieveEntityFromContext(duk_context * context, std::shared_ptr<Entity>, const char *);
+void CreateEntityInContext(duk_context *, std::shared_ptr<Entity>);
+
+void RetrieveEntityFromContext(duk_context *, std::shared_ptr<Entity>);
+
+void RetrieveEntityFromContextAt(duk_context *, std::shared_ptr<Entity>, int = -1);
 }
 }
 #endif

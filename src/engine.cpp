@@ -9,7 +9,7 @@
 
 namespace Critterbits {
 
-entity_id_t next_entity_id = 0;
+entity_id_t next_entity_id = CB_ENTITY_ID_FIRST;
 
 Engine::Engine() {
     // initialize SDL

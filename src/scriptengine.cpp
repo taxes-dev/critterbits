@@ -28,8 +28,7 @@ duk_ret_t find_entities_by_tag(duk_context * context) {
     int prop_idx = 0;
     for (auto & tag : tags) {
         for (auto & entity : Engine::GetInstance().FindEntitiesByTag(tag)) {
-            // TODO: push actual entity
-            duk_push_int(context, entity->entity_id);
+            CreateEntityInContext(context, entity);
             duk_put_prop_index(context, arr_idx, prop_idx++);
         }
     }
