@@ -3,10 +3,19 @@
 #define CBSCRIPTSUPPORT_HPP
 // Note: This file is only used internally by the scripting module, don't include in critterbits.h
 
+#include <memory>
 #include <string>
 
+#include <cbcoord.h>
 #include <cbentity.h>
 #include <duktape/duktape.h>
+
+#define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
+    "\xff"                                                                                                             \
+    "destroyed"
+#define CB_SCRIPT_HIDDEN_ENTITYID                                                                                      \
+    "\xff"                                                                                                             \
+    "entity_id"
 
 namespace Critterbits {
 namespace Scripting {
@@ -88,6 +97,10 @@ inline void PushPropertyEntityId(duk_context * context, entity_id_t value) {
     duk_push_uint(context, value);
     duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
 }
+
+void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity>, const char *);
+
+void RetrieveEntityFromContext(duk_context * context, std::shared_ptr<Entity>, const char *);
 }
 }
 #endif

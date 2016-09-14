@@ -20,13 +20,6 @@
 
 #define CB_SCRIPT_ENTITY_NAME(e) "entity_" + std::to_string(e->entity_id)
 
-#define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
-    "\xff"                                                                                                             \
-    "destroyed"
-#define CB_SCRIPT_HIDDEN_ENTITYID                                                                                      \
-    "\xff"                                                                                                             \
-    "entity_id"
-
 namespace Critterbits {
 namespace Scripting {
 
@@ -47,11 +40,7 @@ class Script {
     bool global_start{false};
     bool global_update{false};
 
-    void CreateEntityInContext(std::shared_ptr<Entity>, const char *);
-    void ExtendEntityWithSprite(std::shared_ptr<Sprite>);
     void DiscoverGlobals();
-    void RetrieveEntityFromContext(std::shared_ptr<Entity>, const char *);
-    void RetrieveSpriteFromContext(std::shared_ptr<Sprite>);
 };
 
 class ScriptEngine {
