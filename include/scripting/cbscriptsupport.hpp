@@ -18,6 +18,25 @@
     "\xff"                                                                                                             \
     "entity_id"
 
+// It's easy to leave stuff lying around on the duktape stack unintentionally. Use these as function guards.
+#ifdef NDEBUG
+#define CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(ctx)
+#define CB_SCRIPT_ASSERT_STACK_CLEAN_END(ctx)
+#define CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(ctx)
+#define CB_SCRIPT_ASSERT_STACK_RETURN1_END(ctx)
+#else
+#define CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(ctx) \
+  duk_idx_t _stack_clean_begin = duk_get_top(ctx);
+#define CB_SCRIPT_ASSERT_STACK_CLEAN_END(ctx) \
+  duk_idx_t _stack_clean_end = duk_get_top(ctx); \
+  assert(_stack_clean_begin == _stack_clean_end);
+#define CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(ctx) \
+  duk_idx_t _stack_return1_begin = duk_get_top(ctx);
+#define CB_SCRIPT_ASSERT_STACK_RETURN1_END(ctx) \
+  duk_idx_t _stack_return1_end = duk_get_top(ctx); \
+  assert(_stack_return1_begin + 1 == _stack_return1_end);
+#endif 
+
 namespace Critterbits {
 namespace Scripting {
 

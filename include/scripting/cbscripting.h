@@ -2,6 +2,7 @@
 #ifndef CBSCRIPTING_H
 #define CBSCRIPTING_H
 
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>

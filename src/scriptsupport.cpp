@@ -58,12 +58,15 @@ void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sp
 }
 
 void ClearEntitiesInContext(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_global_stash(context);
     duk_del_prop_string(context, -1, CB_SCRIPT_ENTITY_STASH_ARRAY);
     duk_pop(context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     duk_push_global_stash(context); // will save to the global stash when we're done
 
     // create array if it doesn't exist
@@ -129,9 +132,12 @@ void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity
     // swap the entity with the stash array and then pop the stash array off
     duk_swap_top(context, -2);
     duk_pop(context);
+
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
 }
 
 void RetrieveEntityFromContext(duk_context * context, std::shared_ptr<Entity> entity) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_global_stash(context);
     if (duk_get_prop_string(context, -1, CB_SCRIPT_ENTITY_STASH_ARRAY)) {
         // got the array, now find the entity
@@ -169,9 +175,11 @@ void RetrieveEntityFromContext(duk_context * context, std::shared_ptr<Entity> en
         LOG_ERR("Script::RetrieveEntityFromContext unable to retrieve stash array");
     }
     duk_pop_2(context); // stash and array
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void RetrieveEntityFromContextAt(duk_context * context, std::shared_ptr<Entity> entity, int stack_index) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     if (duk_is_object(context, stack_index)) {
         // only mutable properties are retrieved
         CB_Rect new_dim = GetPropertyRect(context, "dim", stack_index);
@@ -192,6 +200,7 @@ void RetrieveEntityFromContextAt(duk_context * context, std::shared_ptr<Entity> 
             RetrieveSpriteFromContext(context, std::dynamic_pointer_cast<Sprite>(entity), stack_index);
         }
     }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 }
 }

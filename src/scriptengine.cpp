@@ -82,6 +82,7 @@ ScriptEngine::~ScriptEngine() {
     duk_put_prop_string(context, -2, #k);
 
 void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_global_object(context);
 
     // input manager
@@ -109,6 +110,7 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     duk_put_prop_string(context, -2, "find_by_tag");
 
     duk_pop(context); // global
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script_name) {

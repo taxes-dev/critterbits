@@ -11,6 +11,7 @@ void Script::DiscoverGlobals() {
     if (this->context == nullptr) {
         return;
     }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
 
     // discover which functions are available that the engine is interested in calling
 
@@ -39,9 +40,11 @@ void Script::DiscoverGlobals() {
     }
 
     duk_pop_2(this->context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void Script::CallOnCollision(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> other_entity) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
     if (this->global_oncollision) {
         // setup call to global oncollision script
         duk_push_global_object(this->context);
@@ -60,9 +63,11 @@ void Script::CallOnCollision(std::shared_ptr<Entity> entity, std::shared_ptr<Ent
             this->global_oncollision = false;
         }
     }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void Script::CallStart(std::shared_ptr<Entity> entity) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
     if (this->global_start) {
         // setup call to global start script
         duk_push_global_object(this->context);
@@ -80,9 +85,11 @@ void Script::CallStart(std::shared_ptr<Entity> entity) {
             this->global_start = false;
         }
     }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
     if (this->global_update) {
         // setup call to global update script
         duk_push_global_object(this->context);
@@ -101,9 +108,11 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
             this->global_update = false;
         }
     }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
 void Script::PostCallRetrieveAllEntities() {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     // iterate all entities in the global stash
     duk_push_global_stash(this->context);
     if (duk_get_prop_string(this->context, -1, CB_SCRIPT_ENTITY_STASH_ARRAY)) {
@@ -128,6 +137,7 @@ void Script::PostCallRetrieveAllEntities() {
     }
     duk_pop_2(this->context); // stash and array
     ClearEntitiesInContext(this->context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 }
 }
