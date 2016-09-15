@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <iostream>
 
-#ifdef NDEBUG
+#if (NDEBUG && !WIN32)
 #define LOG_INFO(m)
 #else
 #define LOG_INFO(m) Critterbits::LogInfo(std::cout, m)
