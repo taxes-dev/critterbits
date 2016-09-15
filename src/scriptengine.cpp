@@ -17,6 +17,7 @@ void duktape_fatal_error(duk_context * ctx, duk_errcode_t code, const char * msg
 * Functions callable from JavaScript code
 */
 duk_ret_t find_entities_by_tag(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int nargs = duk_get_top(context);
     std::vector<std::string> tags;
     for (int i = 0; i < nargs; i++) {
@@ -30,17 +31,38 @@ duk_ret_t find_entities_by_tag(duk_context * context) {
             duk_put_prop_index(context, arr_idx, prop_idx++);
         }
     }
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
     return 1;
 }
 
 duk_ret_t is_key_pressed(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int key_code = duk_get_int(context, 0);
     bool key_pressed = Engine::GetInstance().input.IsKeyPressed(key_code);
     duk_push_boolean(context, key_pressed);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
     return 1;
 }
 
+duk_ret_t spawn_sprite(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    if (duk_is_string(context, 0)) {
+        QueuedSprite qsprite;
+        qsprite.name = duk_get_string(context, 0);
+        if (duk_is_object(context, 1)) {
+            qsprite.at.x = GetPropertyInt(context, "x", 1);
+            qsprite.at.y = GetPropertyInt(context, "y", 1);
+        }
+        if (Engine::GetInstance().scenes.current_scene != nullptr) {
+            Engine::GetInstance().scenes.current_scene->sprites.QueueSprite(qsprite);
+        }
+    }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;
+}
+
 duk_ret_t viewport_follow(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     bool success = false;
     if (duk_is_object(context, 0)) {
         duk_get_prop_string(context, 0, CB_SCRIPT_HIDDEN_ENTITYID);
@@ -55,6 +77,7 @@ duk_ret_t viewport_follow(duk_context * context) {
         duk_pop(context);
     }
     duk_push_boolean(context, success);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
     return 1;
 }
 /*
@@ -106,6 +129,8 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     // global functions
     duk_push_c_function(context, find_entities_by_tag, DUK_VARARGS);
     duk_put_prop_string(context, -2, "find_by_tag");
+    duk_push_c_function(context, spawn_sprite, 2);
+    duk_put_prop_string(context, -2, "spawn");
 
     duk_pop(context); // global
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);

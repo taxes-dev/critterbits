@@ -74,10 +74,25 @@ bool SpriteManager::LoadQueuedSprites() {
             it++;
         }
     }
+
+    if (success) {
+        this->new_sprites = false;
+    }
+
     return success;
 }
 
-void SpriteManager::QueueSprite(const QueuedSprite & queued_sprite) { this->queued_sprites.push_back(queued_sprite); }
+void SpriteManager::QueueSprite(const QueuedSprite & queued_sprite) {
+    this->queued_sprites.push_back(queued_sprite);
+    if (!this->new_sprites) {
+        this->new_sprites = true;
+        EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
+            if (!this->LoadQueuedSprites()) {
+                LOG_ERR("SpriteManager::QueueSprite(pre-update) unable to load queued sprites");
+            }
+        });
+    }
+}
 
 void SpriteManager::UnloadSprite(std::shared_ptr<Sprite> sprite) {
     for (auto it = this->sprites.begin(); it != this->sprites.end();) {

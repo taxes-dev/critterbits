@@ -82,6 +82,7 @@ class SpriteManager {
   private:
     std::vector<QueuedSprite> queued_sprites;
     std::map<std::string, std::shared_ptr<SDL_Texture>> sprite_sheets;
+    bool new_sprites{false};
 
     SpriteManager(const SpriteManager &) = delete;
     SpriteManager(SpriteManager &&) = delete;
