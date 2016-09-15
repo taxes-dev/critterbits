@@ -206,6 +206,7 @@ int Engine::Run() {
             // InputManager will process the event if it's input-related
             this->input.AddSdlEvent(e);
         }
+        this->input.ContinueEvents();
 
         // begin simulation loop
         while (this->counters.GetRemainingFrameTime() > 0) {

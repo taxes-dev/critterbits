@@ -2,6 +2,7 @@
 #ifndef CBINPUT_HPP
 #define CBINPUT_HPP
 
+#include <map>
 #include <vector>
 
 #include <SDL.h>
@@ -22,10 +23,12 @@ class InputManager {
 
     void AddSdlEvent(const SDL_Event &);
     void ClearInputEvents();
+    void ContinueEvents();
     bool IsKeyPressed(int);
 
   private:
     std::vector<InputEvent> events;
+    std::map<SDL_Keycode, bool> keyboard_state;
 
     InputManager(const InputManager &) = delete;
     InputManager(InputManager &&) = delete;
