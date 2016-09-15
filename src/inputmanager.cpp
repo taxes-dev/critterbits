@@ -34,7 +34,7 @@ void InputManager::ContinueEvents() {
     }
 }
 
-bool InputManager::IsKeyPressed(int key_code) {
+bool InputManager::IsKeyPressed(CB_KeyCode key_code) {
     for (auto & event : this->events) {
         if (event.type == CBE_INPUT_KEYBOARD && event.key_code == key_code) {
             return true;

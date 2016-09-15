@@ -9,10 +9,11 @@
 
 namespace Critterbits {
 typedef enum { CBE_INPUT_KEYBOARD } InputEventType;
+typedef SDL_Keycode CB_KeyCode;
 
 struct InputEvent {
     InputEventType type;
-    int key_code;
+    CB_KeyCode key_code;
 
     InputEvent(InputEventType type) : type(type){};
 };
@@ -24,7 +25,7 @@ class InputManager {
     void AddSdlEvent(const SDL_Event &);
     void ClearInputEvents();
     void ContinueEvents();
-    bool IsKeyPressed(int);
+    bool IsKeyPressed(CB_KeyCode);
 
   private:
     std::vector<InputEvent> events;

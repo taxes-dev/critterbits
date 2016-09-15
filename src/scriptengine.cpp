@@ -38,8 +38,8 @@ duk_ret_t find_entities_by_tag(duk_context * context) {
 duk_ret_t is_key_pressed(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int key_code = duk_get_int(context, 0);
-    bool key_pressed = Engine::GetInstance().input.IsKeyPressed(key_code);
-    duk_push_boolean(context, key_pressed);
+    bool key_pressed = Engine::GetInstance().input.IsKeyPressed((CB_KeyCode)key_code);
+    duk_push_boolean(context, key_pressed ? 1 : 0);
     CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
     return 1;
 }
