@@ -1,5 +1,5 @@
 add_executable(critterbits
-    main.cpp engine.cpp engineconfiguration.cpp enginecounters.cpp
+    main.cpp animation.cpp engine.cpp engineconfiguration.cpp enginecounters.cpp
     engineeventqueue.cpp entity.cpp files.cpp inputmanager.cpp
     rectregioncombiner.cpp rendering.cpp scene.cpp scenemanager.cpp
     script.cpp scriptengine.cpp scriptsupport.cpp sprite.cpp

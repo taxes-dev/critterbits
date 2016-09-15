@@ -44,9 +44,11 @@ void TomlParser::IterateTableArray(const std::string & table_name,
                                    const std::function<void(const TomlParser &)> & iterator) const {
     auto tarr = this->table->get_table_array(table_name);
 
-    for (const auto & arr_table : *tarr) {
-        TomlParser subparser{arr_table};
-        iterator(subparser);
+    if (tarr) {
+        for (const auto & arr_table : *tarr) {
+            TomlParser subparser{arr_table};
+            iterator(subparser);
+        }
     }
 }
 }

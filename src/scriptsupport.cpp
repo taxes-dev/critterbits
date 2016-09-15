@@ -20,6 +20,47 @@ duk_ret_t mark_entity_destroyed(duk_context * context) {
     return 0;
 }
 
+duk_ret_t play_animation(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    std::string anim_name{duk_get_string(context, 0)};
+    bool stop_others = true;
+    if (duk_is_boolean(context, 1)) {
+        stop_others = duk_get_boolean(context, 1) != 0;
+    }
+    duk_push_this(context);
+    entity_id_t entity_id = GetPropertyEntityId(context);
+    duk_pop(context);
+    std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+    if (entity != nullptr) {
+        std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+        for (auto & anim : sprite->animations) {
+            if (anim->name == anim_name) {
+                anim->Play();
+            } else if (stop_others) {
+                anim->Stop();
+            }
+        }
+    }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;
+}
+
+duk_ret_t stop_all_animation(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    duk_push_this(context);
+    entity_id_t entity_id = GetPropertyEntityId(context);
+    duk_pop(context);
+    std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+    if (entity != nullptr) {
+        std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+        for (auto & anim : sprite->animations) {
+            anim->Stop();
+        }
+    }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;    
+}
+
 /*
  * Sprite entity push/pop
  */
@@ -38,6 +79,15 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
     PushPropertyInt(context, "current", sprite->GetFrame());
     PushPropertyInt(context, "count", sprite->GetFrameCount());
     duk_put_prop_string(context, -2, "frame");
+
+    duk_push_object(context); // animation
+    PushPropertyEntityId(context, sprite->entity_id);
+    duk_push_c_function(context, play_animation, 2);
+    duk_put_prop_string(context, -2, "play");
+    duk_push_c_function(context, stop_all_animation, 0);
+    duk_put_prop_string(context, -2, "stop_all");
+    duk_put_prop_string(context, -2, "animation");
+
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 

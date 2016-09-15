@@ -61,6 +61,31 @@ bool SpriteManager::LoadQueuedSprites() {
             } else if (collide == "trigger") {
                 new_sprite->collision = CBE_COLLIDE_TRIGGER;
             }
+            // animations
+            parser.IterateTableArray("animation", [&new_sprite](const Toml::TomlParser & table) {
+                std::string animation_name = table.GetTableString("name");
+                if (!animation_name.empty()) {
+                    std::shared_ptr<Animation> anim = std::make_shared<Animation>(animation_name);
+                    anim->loop = table.GetTableBool("loop");
+                    table.IterateTableArray("frames", [&anim](const Toml::TomlParser & table) {
+                        KeyFrame key_frame{
+                            table.GetTableString("prop"),
+                            table.GetTableString("val"),
+                            table.GetTableInt("dur")
+                        };
+                        if (key_frame.property.empty()) {
+                            LOG_ERR("SpriteManager::LoadQueuedSprites animation key frame must have a property");
+                            return;
+                        }
+                        if (key_frame.duration < 0) {
+                            LOG_ERR("SpriteManager::LoadQueuedSprites animation key frame cannot have duration less than zero");
+                            return;
+                        }
+                        anim->AddKeyFrame(key_frame);
+                    });
+                    new_sprite->animations.push_back(std::move(anim));
+                }
+            });
 
             // notify new sprite that it's been loaded
             new_sprite->NotifyLoaded();

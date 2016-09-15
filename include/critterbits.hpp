@@ -14,6 +14,7 @@
 #include "cbmath.hpp"
 #include "cbscene.hpp"
 #include "cbsdl.hpp"
+#include "cbanim.hpp"
 #include "cbsprite.hpp"
 #include "cbtilemap.hpp"
 #include "cbviewport.hpp"

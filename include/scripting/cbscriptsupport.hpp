@@ -47,6 +47,13 @@ inline int GetPropertyBool(duk_context * context, const char * property_name, in
     return value != 0;
 }
 
+inline entity_id_t GetPropertyEntityId(duk_context * context, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, CB_SCRIPT_HIDDEN_ENTITYID);
+    entity_id_t entity_id = duk_get_uint(context, -1);
+    duk_pop(context);
+    return entity_id;
+}
+
 inline int GetPropertyFloat(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     float value = (float)duk_get_number(context, -1);
@@ -90,6 +97,11 @@ inline void PushPropertyBool(duk_context * context, const char * property_name, 
     duk_put_prop_string(context, -2, property_name);
 }
 
+inline void PushPropertyEntityId(duk_context * context, entity_id_t value) {
+    duk_push_uint(context, value);
+    duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
+}
+
 inline void PushPropertyFloat(duk_context * context, const char * property_name, float value) {
     duk_push_number(context, value);
     duk_put_prop_string(context, -2, property_name);
@@ -112,11 +124,6 @@ inline void PushPropertyRect(duk_context * context, const char * property_name, 
 inline void PushPropertyString(duk_context * context, const char * property_name, const std::string & value) {
     duk_push_string(context, value.c_str());
     duk_put_prop_string(context, -2, property_name);
-}
-
-inline void PushPropertyEntityId(duk_context * context, entity_id_t value) {
-    duk_push_uint(context, value);
-    duk_put_prop_string(context, -2, CB_SCRIPT_HIDDEN_ENTITYID);
 }
 
 void ClearEntitiesInContext(duk_context *);

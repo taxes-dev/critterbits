@@ -186,4 +186,10 @@ bool Sprite::OnStart() {
     }
     return false;
 }
+
+void Sprite::OnUpdate(float delta_time) {
+    for (auto & anim : this->animations) {
+        anim->Animate(shared_from_this(), delta_time);
+    }
+}
 }

@@ -10,6 +10,7 @@
 #include <SDL.h>
 
 #include "cbentity.hpp"
+#include "cbanim.hpp"
 
 #define CB_SPRITE_PATH "sprites"
 #define CB_SPRITE_EXT ".toml"
@@ -37,6 +38,7 @@ class Sprite : public Entity {
     bool flip_x{false};
     bool flip_y{false};
     CollisionType collision{CBE_COLLIDE_NONE};
+    std::vector<std::shared_ptr<Animation>> animations;
 
     Sprite();
     ~Sprite();
@@ -52,6 +54,7 @@ class Sprite : public Entity {
 
   protected:
     bool OnStart();
+    void OnUpdate(float);
 
   private:
     int current_frame{0};
