@@ -83,6 +83,9 @@ bool SpriteManager::LoadQueuedSprites() {
                         }
                         anim->AddKeyFrame(key_frame);
                     });
+                    if (table.GetTableBool("auto_play")) {
+                        anim->Play();
+                    }
                     new_sprite->animations.push_back(std::move(anim));
                 }
             });

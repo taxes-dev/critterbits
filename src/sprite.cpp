@@ -12,7 +12,7 @@ Sprite::~Sprite() {}
 
 CB_Rect Sprite::GetFrameRect() const {
     CB_Rect frame_rect;
-    frame_rect.x = this->tile_offset_x + this->tile_width * (this->current_frame % this->sprite_sheet_rows);
+    frame_rect.x = this->tile_offset_x + this->tile_width * (this->current_frame % this->sprite_sheet_cols);
     frame_rect.y = this->tile_offset_y + this->tile_height * (this->current_frame / this->sprite_sheet_cols);
     frame_rect.w = this->tile_width;
     frame_rect.h = this->tile_height;
