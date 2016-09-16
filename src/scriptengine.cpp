@@ -167,6 +167,13 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         LOG_ERR("ScriptEngine::LoadScript no scripting runtime");
         return nullptr;
     }
+
+    std::shared_ptr<Script> new_script = this->GetScriptHandle(script_name);
+    if (new_script != nullptr) {
+        LOG_INFO("ScriptEngine::LoadScript found existing script " + script_name);
+        return new_script;
+    }
+
     std::string script_path =
         Engine::GetInstance().config->asset_path + CB_SCRIPT_PATH + PATH_SEP + script_name + CB_SCRIPT_EXT;
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
@@ -175,7 +182,7 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         return nullptr;
     }
 
-    std::shared_ptr<Script> new_script{std::make_shared<Script>()};
+    new_script = std::make_shared<Script>();
     new_script->script_name = script_name;
     new_script->script_path = script_path;
 
