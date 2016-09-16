@@ -13,7 +13,7 @@ entity_id_t next_entity_id = CB_ENTITY_ID_FIRST;
 
 Engine::Engine() {
     // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_TIMER*/) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         LOG_SDL_ERR("Engine::Run SDL_Init");
         return;
     }
@@ -93,6 +93,7 @@ Engine & Engine::GetInstance() {
     return instance;
 }
 
+
 void Engine::IterateActiveEntities(EntityIterateFunction func) {
     if (this->scenes.IsCurrentSceneActive()) {
         if (this->scenes.current_scene->HasTilemap()) {
@@ -129,6 +130,8 @@ int Engine::Run() {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
+
+    // initialize controllers, if needed
 
     // discover display bounds
     SDL_GetDisplayBounds(0, &this->display_bounds);
@@ -183,6 +186,11 @@ int Engine::Run() {
     LOG_INFO("Engine::Run renderer max_texture_width " + std::to_string(r_info.max_texture_width));
     LOG_INFO("Engine::Run renderer max_texture_height " + std::to_string(r_info.max_texture_height));
 
+    // setup input methods
+    this->input.SetControllerActive(this->config->input.controller);
+    this->input.SetKeyboardActive(this->config->input.keyboard);
+    this->input.SetMouseActive(this->config->input.mouse);
+
     // load first scene
     if (!this->scenes.LoadScene(CB_FIRST_SCENE)) {
         LOG_ERR("Engine::Run cannot load startup scene");
@@ -206,7 +214,9 @@ int Engine::Run() {
             // InputManager will process the event if it's input-related
             this->input.AddSdlEvent(e);
         }
-        this->input.ContinueEvents();
+
+        // check input state (non-event)
+        this->input.CheckInputs();
 
         // begin simulation loop
         while (this->counters.GetRemainingFrameTime() > 0) {
@@ -232,9 +242,6 @@ int Engine::Run() {
             // timing update
             this->counters.Updated();
         }
-
-        // Clear remaining input events
-        this->input.ClearInputEvents();
 
         // Render pass
         if (this->scenes.current_scene != nullptr && this->scenes.current_scene->HasTilemap()) {

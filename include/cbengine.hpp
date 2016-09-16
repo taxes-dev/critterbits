@@ -32,10 +32,15 @@ class EngineConfiguration {
         bool draw_sprite_rects{false};
     } debug;
     struct {
+        bool controller{false};
+        bool keyboard{true};
+        bool mouse{false};
+    } input;
+    struct {
         bool full_screen{false};
         int width{CB_DEFAULT_WINDOW_W};
         int height{CB_DEFAULT_WINDOW_H};
-        std::string title;
+        std::string title{CB_DEFAULT_WINDOW_TITLE};
     } window;
 
     EngineConfiguration(){};

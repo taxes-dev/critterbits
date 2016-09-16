@@ -35,6 +35,15 @@ duk_ret_t find_entities_by_tag(duk_context * context) {
     return 1;
 }
 
+duk_ret_t is_controller_direction_pressed(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
+    int direction = duk_get_int(context, 0);
+    bool axis_pressed = Engine::GetInstance().input.IsControllerAxisPressed((CB_InputDirection)direction);
+    duk_push_boolean(context, axis_pressed ? 1 : 0);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
+    return 1;
+}
+
 duk_ret_t is_key_pressed(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int key_code = duk_get_int(context, 0);
@@ -114,6 +123,14 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     CB_PUT_KEYCODE(LEFT);
     CB_PUT_KEYCODE(RIGHT);
     duk_put_prop_string(context, -2, "key_codes");
+    duk_push_object(context); // direction
+    PushPropertyInt(context, "LEFT", CBE_DIR_LEFT);
+    PushPropertyInt(context, "RIGHT", CBE_DIR_RIGHT);
+    PushPropertyInt(context, "UP", CBE_DIR_UP);
+    PushPropertyInt(context, "DOWN", CBE_DIR_DOWN);
+    duk_put_prop_string(context, -2, "direction");
+    duk_push_c_function(context, is_controller_direction_pressed, 1);
+    duk_put_prop_string(context, -2, "is_controller_direction_pressed");
     duk_push_c_function(context, is_key_pressed, 1);
     duk_put_prop_string(context, -2, "is_key_pressed");
     duk_put_prop_string(context, -2, "input");

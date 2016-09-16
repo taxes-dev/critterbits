@@ -3,6 +3,15 @@
 #define CBMATH_HPP
 
 namespace Critterbits {
+template <typename T>
+inline void SetBitMask(T * value, const T mask) {
+    *value = (T)(*value | mask);
+}
+
+template <typename T>
+inline void UnsetBitMask(T * value, const T mask) {
+    *value = (T)(*value & ~mask);
+}
 
 template <typename T>
 inline bool TestBitMask(const T value, const T mask) {

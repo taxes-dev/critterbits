@@ -37,15 +37,20 @@ bool EngineConfiguration::ReloadConfiguration() {
             this->valid = false;
 
             // debug settings
-            this->debug.draw_info_pane = config.GetTableBool("debug.draw_info_pane");
-            this->debug.draw_map_regions = config.GetTableBool("debug.draw_map_regions");
-            this->debug.draw_sprite_rects = config.GetTableBool("debug.draw_sprite_rects");
+            this->debug.draw_info_pane = config.GetTableBool("debug.draw_info_pane", this->debug.draw_info_pane);
+            this->debug.draw_map_regions = config.GetTableBool("debug.draw_map_regions", this->debug.draw_map_regions);
+            this->debug.draw_sprite_rects = config.GetTableBool("debug.draw_sprite_rects", this->debug.draw_sprite_rects);
+
+            // input
+            this->input.controller = config.GetTableBool("input.controller", this->input.controller);
+            this->input.keyboard = config.GetTableBool("input.keyboard", this->input.keyboard);
+            this->input.mouse = config.GetTableBool("input.mouse", this->input.mouse);
 
             // window settings
-            this->window.full_screen = config.GetTableBool("window.full_screen");
-            this->window.height = config.GetTableInt("window.height", CB_DEFAULT_WINDOW_H);
-            this->window.title = config.GetTableString("window.title", CB_DEFAULT_WINDOW_TITLE);
-            this->window.width = config.GetTableInt("window.width", CB_DEFAULT_WINDOW_W);
+            this->window.full_screen = config.GetTableBool("window.full_screen", this->window.full_screen);
+            this->window.height = config.GetTableInt("window.height", this->window.height);
+            this->window.title = config.GetTableString("window.title", this->window.title);
+            this->window.width = config.GetTableInt("window.width", this->window.width);
 
             this->Validate();
         }
@@ -60,6 +65,10 @@ bool EngineConfiguration::Validate() {
     bool b_valid = true;
 
     if (this->window.width < 100 || this->window.height < 100) {
+        b_valid = false;
+    }
+
+    if (!(this->input.controller || this->input.keyboard || this->input.mouse)) {
         b_valid = false;
     }
 
