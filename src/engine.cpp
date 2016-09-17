@@ -43,7 +43,7 @@ void Engine::DestroyMarkedEntities() {
         if (entity->destroyed) {
             switch (entity->GetEntityType()) {
                 case EntityType::Sprite:
-                    if (this->scenes.current_scene != nullptr) {
+                    if (this->scenes.IsCurrentSceneActive()) {
                         this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
                     }
                     break;
@@ -278,7 +278,7 @@ int Engine::Run() {
         }
 
         // Render pass
-        if (this->scenes.current_scene != nullptr && this->scenes.current_scene->HasTilemap()) {
+        if (this->scenes.IsCurrentSceneActive() && this->scenes.current_scene->HasTilemap()) {
             SDL_Color bg_color = this->scenes.current_scene->GetTilemap()->bg_color;
             SDL_SetRenderDrawColor(this->renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         } else {

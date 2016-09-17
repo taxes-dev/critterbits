@@ -18,7 +18,7 @@ std::string SceneManager::GetScenePath(const std::string & asset_name) {
 
 bool SceneManager::LoadScene(const std::string & scene_name) {
     // nothing to do if trying to load the same scene that's loaded
-    if (this->current_scene != nullptr && this->current_scene->scene_name == scene_name) {
+    if (this->IsCurrentSceneActive() && this->current_scene->scene_name == scene_name) {
         return true;
     }
 

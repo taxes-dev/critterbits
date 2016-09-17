@@ -71,7 +71,7 @@ duk_ret_t spawn_sprite(duk_context * context) {
             qsprite.at.x = GetPropertyInt(context, "x", 1);
             qsprite.at.y = GetPropertyInt(context, "y", 1);
         }
-        if (Engine::GetInstance().scenes.current_scene != nullptr) {
+        if (Engine::GetInstance().scenes.IsCurrentSceneActive()) {
             Engine::GetInstance().scenes.current_scene->sprites.QueueSprite(qsprite);
         }
     }
