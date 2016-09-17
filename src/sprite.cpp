@@ -147,11 +147,9 @@ void Sprite::SetPosition(int new_x, int new_y) {
             new_x = new_dim.x;
             new_y = new_dim.y;
 
-            Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
-                if (entity->GetEntityType() == EntityType::Sprite && entity->entity_id != this->entity_id) {
-                    std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-                    if (sprite->IsActive() &&
-                        (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger)) {
+            Engine::GetInstance().IterateActiveSprites([&](std::shared_ptr<Sprite> sprite) {
+                if (sprite->entity_id != this->entity_id) {
+                    if (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger) {
                         // check for collision
                         if (AabbCollision(new_dim, sprite->dim)) {
                             // if full collision, adjust new x/y so they're not inside the collided sprite

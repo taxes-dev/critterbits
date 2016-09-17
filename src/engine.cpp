@@ -34,7 +34,7 @@ Engine::~Engine() {
 void Engine::DestroyMarkedEntities() {
     // copy all the entities to a vector first, as destruction will alter underlying collections
     std::vector<std::shared_ptr<Entity>> entities;
-    this->IterateActiveEntities([&entities](std::shared_ptr<Entity> entity) {
+    this->IterateEntities([&entities](std::shared_ptr<Entity> entity) {
         entities.push_back(entity);
         return false;
     });
@@ -94,7 +94,7 @@ Engine & Engine::GetInstance() {
 }
 
 
-void Engine::IterateActiveEntities(EntityIterateFunction func) {
+void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
     if (this->scenes.IsCurrentSceneActive()) {
         if (this->scenes.current_scene->HasTilemap()) {
             if (func(this->scenes.current_scene->GetTilemap())) {
@@ -114,6 +114,40 @@ void Engine::IterateActiveEntities(EntityIterateFunction func) {
     }
     if (func(this->viewport)) {
         return;
+    }
+}
+
+void Engine::IterateActiveEntities(EntityIterateFunction<Entity> func) {
+    EntityIterateFunction<Entity> wrapper = [&func](std::shared_ptr<Entity> entity) {
+        if (entity->IsActive()) {
+            return func(entity);
+        }
+        return false;
+    };
+    this->IterateEntities(wrapper);
+}
+
+void Engine::IterateActiveSprites(EntityIterateFunction<Sprite> func) {
+    EntityIterateFunction<Sprite> wrapper = [&func](std::shared_ptr<Sprite> sprite) {
+        if (sprite->IsActive()) {
+            return func(sprite);
+        }
+        return false;
+    };
+
+    if (this->scenes.IsCurrentSceneActive()) {
+        if (this->scenes.current_scene->HasTilemap()) {
+            for (auto & region : this->scenes.current_scene->GetTilemap()->regions) {
+                if (wrapper(region)) {
+                    return;
+                }
+            }
+        }
+        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+            if (wrapper(sprite)) {
+                return;
+            }
+        }
     }
 }
 
@@ -226,7 +260,7 @@ int Engine::Run() {
             EngineEventQueue::GetInstance().ExecutePreUpdate();
 
             // Update cycle
-            this->IterateActiveEntities([dt](std::shared_ptr<Entity> entity) {
+            this->IterateEntities([dt](std::shared_ptr<Entity> entity) {
                 // start entity if it hasn't already
                 entity->Start();
 

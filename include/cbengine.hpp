@@ -21,7 +21,8 @@
 #define CB_DESIRED_UPS 60.0f
 
 namespace Critterbits {
-typedef std::function<bool(std::shared_ptr<Entity>)> EntityIterateFunction;
+template<class T>
+using EntityIterateFunction = std::function<bool(std::shared_ptr<T>)>;
 
 class EngineConfiguration {
   public:
@@ -99,7 +100,9 @@ class Engine {
     int GetMaxTextureHeight() const { return this->max_texture_height; };
     int GetMaxTextureWidth() const { return this->max_texture_width; };
     SDL_Renderer * GetRenderer() const { return this->renderer; };
-    void IterateActiveEntities(EntityIterateFunction);
+    void IterateEntities(EntityIterateFunction<Entity> func);
+    void IterateActiveEntities(EntityIterateFunction<Entity>);
+    void IterateActiveSprites(EntityIterateFunction<Sprite>);
     int Run();
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);
 
