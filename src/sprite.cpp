@@ -141,36 +141,43 @@ void Sprite::SetPosition(int new_x, int new_y) {
     // check collisions at new position if we collide
     if (this->collision == CBE_COLLIDE_COLLIDE) {
         CB_Rect new_dim{new_x, new_y, this->dim.w, this->dim.h};
-        Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
-            if (entity->GetEntityType() == CBE_SPRITE && entity->entity_id != this->entity_id) {
-                std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-                if (sprite->collision == CBE_COLLIDE_COLLIDE || sprite->collision == CBE_COLLIDE_TRIGGER) {
-                    // check for collision
-                    if (AabbCollision(new_dim, sprite->dim)) {
-                        // if full collision, adjust new x/y so they're not inside the collided sprite
-                        if (sprite->collision == CBE_COLLIDE_COLLIDE) {
-                            if (new_x > this->dim.x) {
-                                new_x = std::max(this->dim.x, sprite->dim.x - this->dim.w);
-                            } else if (new_x < this->dim.x) {
-                                new_x = std::min(this->dim.x, sprite->dim.right());
-                            }
-                            if (new_y > this->dim.y) {
-                                new_y = std::max(this->dim.y, sprite->dim.y - this->dim.h);
-                            } else if (new_y < this->dim.y) {
-                                new_y = std::min(this->dim.y, sprite->dim.bottom());
-                            }
-                        }
 
-                        // notify both sprites that a collision occurred
-                        this->NotifyCollision(sprite);
-                        sprite->NotifyCollision(std::dynamic_pointer_cast<Sprite>(shared_from_this()));
-                    } else {
-                        this->RemoveCollisionWith(sprite->entity_id);
+        do {
+            // these get reset on each loop to check if we got moved by collision
+            new_x = new_dim.x;
+            new_y = new_dim.y;
+
+            Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
+                if (entity->GetEntityType() == CBE_SPRITE && entity->entity_id != this->entity_id) {
+                    std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+                    if (sprite->collision == CBE_COLLIDE_COLLIDE || sprite->collision == CBE_COLLIDE_TRIGGER) {
+                        // check for collision
+                        if (AabbCollision(new_dim, sprite->dim)) {
+                            // if full collision, adjust new x/y so they're not inside the collided sprite
+                            if (sprite->collision == CBE_COLLIDE_COLLIDE) {
+                                if (new_dim.x > this->dim.x) {
+                                    new_dim.x = std::max(this->dim.x, sprite->dim.x - this->dim.w);
+                                } else if (new_dim.x < this->dim.x) {
+                                    new_dim.x = std::min(this->dim.x, sprite->dim.right());
+                                }
+                                if (new_dim.y > this->dim.y) {
+                                    new_dim.y = std::max(this->dim.y, sprite->dim.y - this->dim.h);
+                                } else if (new_dim.y < this->dim.y) {
+                                    new_dim.y = std::min(this->dim.y, sprite->dim.bottom());
+                                }
+                            }
+
+                            // notify both sprites that a collision occurred
+                            this->NotifyCollision(sprite);
+                            sprite->NotifyCollision(std::dynamic_pointer_cast<Sprite>(shared_from_this()));
+                        } else {
+                            this->RemoveCollisionWith(sprite->entity_id);
+                        }
                     }
                 }
-            }
-            return false;
-        });
+                return false;
+            });
+        } while (new_dim.x != new_x || new_dim.y != new_y);
     }
 
     // update position if valid
