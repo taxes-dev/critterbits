@@ -107,6 +107,11 @@ inline void PushPropertyFloat(duk_context * context, const char * property_name,
     duk_put_prop_string(context, -2, property_name);
 }
 
+inline void PushPropertyFunction(duk_context * context, const char * property_name, duk_c_function func, int nargs = 0) {
+    duk_push_c_function(context, func, nargs);
+    duk_put_prop_string(context, -2, property_name);
+}
+
 inline void PushPropertyInt(duk_context * context, const char * property_name, int value) {
     duk_push_int(context, value);
     duk_put_prop_string(context, -2, property_name);

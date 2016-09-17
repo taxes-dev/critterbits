@@ -9,13 +9,8 @@ InputManager::~InputManager() {
     }
 }
 
-void InputManager::AddNormalizedEvent() {
-
-}
-
 void InputManager::AddSdlEvent(const SDL_Event & event) {
-    if (this->keyboard_active &&
-        event.type == SDL_KEYDOWN && event.key.state == SDL_PRESSED) {
+    if (this->keyboard_active && event.type == SDL_KEYDOWN && event.key.state == SDL_PRESSED) {
         // keyboard pressed
         auto state = this->keyboard_state.find(event.key.keysym.sym);
         if (state == this->keyboard_state.end()) {
@@ -23,16 +18,13 @@ void InputManager::AddSdlEvent(const SDL_Event & event) {
         } else {
             state->second = true;
         }
-    } else if (this->keyboard_active &&
-        event.type == SDL_KEYUP) {
+    } else if (this->keyboard_active && event.type == SDL_KEYUP) {
         // keyboard released
         auto state = this->keyboard_state.find(event.key.keysym.sym);
         if (state != this->keyboard_state.end()) {
             state->second = false;
         }
     }
-    // check for normalized
-    this->AddNormalizedEvent();
 }
 
 void InputManager::CheckInputs() {
@@ -41,25 +33,25 @@ void InputManager::CheckInputs() {
     // keyboard inputs are handled by AddSdlEvent
 
     // check for normalized
-    this->AddNormalizedEvent();
+    this->SetNormalizedInputs();
 }
 
 void InputManager::CheckControllerInputs() {
     if (this->controller_active) {
         SDL_GameControllerUpdate();
 
-        CB_InputDirection dpad{CBE_DIR_NONE};
+        InputDirection dpad{InputDirection::None};
         if (SDL_GameControllerGetButton(this->controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT)) {
-            SetBitMask(&dpad, CBE_DIR_LEFT);
+            SetBitMask(&dpad, InputDirection::Left);
         }
         if (SDL_GameControllerGetButton(this->controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) {
-            SetBitMask(&dpad, CBE_DIR_RIGHT);
+            SetBitMask(&dpad, InputDirection::Right);
         }
         if (SDL_GameControllerGetButton(this->controller, SDL_CONTROLLER_BUTTON_DPAD_UP)) {
-            SetBitMask(&dpad, CBE_DIR_UP);
+            SetBitMask(&dpad, InputDirection::Up);
         }
         if (SDL_GameControllerGetButton(this->controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN)) {
-            SetBitMask(&dpad, CBE_DIR_DOWN);
+            SetBitMask(&dpad, InputDirection::Down);
         }
         this->controller_axis_state = dpad;
     }
@@ -83,26 +75,31 @@ void InputManager::InitializeController() {
 
     int controllers = 0;
     for (int i = 0; i < SDL_NumJoysticks(); i++) {
-		if (SDL_IsGameController(i))
-		{
-			controllers++;
-			std::string name{SDL_GameControllerNameForIndex(i)};
-			LOG_INFO("InputManager::InitializeController game controller " + std::to_string(i) + ": " + (name.empty() ? "(unknown)" : name));
+        if (SDL_IsGameController(i)) {
+            controllers++;
+            std::string name{SDL_GameControllerNameForIndex(i)};
+            LOG_INFO("InputManager::InitializeController game controller " + std::to_string(i) + ": " +
+                     (name.empty() ? "(unknown)" : name));
             this->controller = SDL_GameControllerOpen(i);
             if (this->controller != nullptr) {
                 LOG_INFO("InputManager::InitializeController initialized");
                 this->controller_active = true;
                 break;
             }
-		}
+        }
     }
-	LOG_INFO("InputManager::InitializeController there are " +  std::to_string(controllers) + " game controllers attached");
+    LOG_INFO("InputManager::InitializeController there are " + std::to_string(controllers) +
+             " game controllers attached");
     if (this->controller == nullptr) {
         LOG_INFO("InputManager::InitializeController no suitable controllers found");
     }
 }
 
-bool InputManager::IsControllerAxisPressed(CB_InputDirection direction) {
+bool InputManager::IsAxisPressed(const InputDirection & direction) {
+    return TestBitMask(this->normal_axis_state, direction);
+}
+
+bool InputManager::IsControllerAxisPressed(const InputDirection & direction) {
     return TestBitMask(this->controller_axis_state, direction);
 }
 
@@ -122,4 +119,24 @@ void InputManager::SetControllerActive(bool active) {
     }
 }
 
+void InputManager::SetNormalizedInputs() {
+    this->normal_axis_state = InputDirection::None;
+    if (this->controller_active) {
+        this->normal_axis_state |= this->controller_axis_state;
+    }
+    if (this->keyboard_active) {
+        if (this->IsKeyPressed(SDLK_LEFT)) {
+            this->normal_axis_state |= InputDirection::Left;
+        }
+        if (this->IsKeyPressed(SDLK_RIGHT)) {
+            this->normal_axis_state |= InputDirection::Right;
+        }
+        if (this->IsKeyPressed(SDLK_UP)) {
+            this->normal_axis_state |= InputDirection::Up;
+        }
+        if (this->IsKeyPressed(SDLK_DOWN)) {
+            this->normal_axis_state |= InputDirection::Down;
+        }
+    }
+}
 }

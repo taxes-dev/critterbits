@@ -45,6 +45,25 @@ duk_ret_t play_animation(duk_context * context) {
     return 0;
 }
 
+duk_ret_t stop_animation(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    std::string anim_name{duk_get_string(context, 0)};
+    duk_push_this(context);
+    entity_id_t entity_id = GetPropertyEntityId(context);
+    duk_pop(context);
+    std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+    if (entity != nullptr) {
+        std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
+        for (auto & anim : sprite->animations) {
+            if (anim->name == anim_name) {
+                anim->Stop();
+            }
+        }
+    }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;
+}
+
 duk_ret_t stop_all_animation(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_this(context);
@@ -82,10 +101,9 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
 
     duk_push_object(context); // animation
     PushPropertyEntityId(context, sprite->entity_id);
-    duk_push_c_function(context, play_animation, 2);
-    duk_put_prop_string(context, -2, "play");
-    duk_push_c_function(context, stop_all_animation, 0);
-    duk_put_prop_string(context, -2, "stop_all");
+    PushPropertyFunction(context, "play", play_animation, 2);
+    PushPropertyFunction(context, "stop", stop_animation, 1);
+    PushPropertyFunction(context, "stop_all", stop_all_animation);
     duk_put_prop_string(context, -2, "animation");
 
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
@@ -165,9 +183,7 @@ void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity
         PushPropertyEntityId(context, entity->entity_id);
         PushPropertyString(context, "tag", entity->tag);
         PushPropertyFloat(context, "time_scale", entity->time_scale);
-
-        duk_push_c_function(context, mark_entity_destroyed, 0);
-        duk_put_prop_string(context, -2, "destroy");
+        PushPropertyFunction(context, "destroy", mark_entity_destroyed);
 
         if (entity->GetEntityType() == CBE_SPRITE) {
             ExtendEntityWithSprite(context, std::dynamic_pointer_cast<Sprite>(entity));
