@@ -42,20 +42,20 @@ void Engine::DestroyMarkedEntities() {
     for (auto & entity : entities) {
         if (entity->destroyed) {
             switch (entity->GetEntityType()) {
-                case CBE_SPRITE:
+                case EntityType::Sprite:
                     if (this->scenes.current_scene != nullptr) {
                         this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
                     }
                     break;
-                case CBE_TILEMAP:
-                case CBE_VIEWPORT:
+                case EntityType::Tilemap:
+                case EntityType::Viewport:
                     // tilemaps and viewports should not be destroyed like this
                     LOG_ERR("Engine::DestroyMarkedEntities something marked a tilemap or viewport for destruction");
                     entity->destroyed = false;
                     break;
                 default:
                     LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " +
-                            std::to_string(entity->GetEntityType()));
+                            std::to_string(static_cast<int>(entity->GetEntityType())));
                     entity->destroyed = false;
                     break;
             }
@@ -251,18 +251,18 @@ int Engine::Run() {
             SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         }
         SDL_RenderClear(this->renderer);
-        for (auto & z_index : {CBE_Z_BACKGROUND, CBE_Z_MIDGROUND, CBE_Z_FOREGROUND}) {
+        for (auto z_index : {ZIndex::Background, ZIndex::Midground, ZIndex::Foreground}) {
             this->IterateActiveEntities([this, z_index](std::shared_ptr<Entity> entity) {
                 if (entity->dim.intersects(this->viewport->dim)) {
                     CB_ViewClippingInfo clip{this->viewport->GetViewableRect(entity->dim)};
                     clip.z_index = z_index;
                     entity->Render(this->renderer, clip);
-                    if (z_index == CBE_Z_BACKGROUND) {
+                    if (z_index == ZIndex::Background) {
                         // guard is to make sure we only count each entity rendered once per frame
                         this->counters.RenderedEntity();
                     }
                 }
-                if (z_index == CBE_Z_BACKGROUND) {
+                if (z_index == ZIndex::Background) {
                     this->counters.CountedEntity();
                 }
                 return false;

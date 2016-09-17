@@ -185,7 +185,7 @@ void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity
         PushPropertyFloat(context, "time_scale", entity->time_scale);
         PushPropertyFunction(context, "destroy", mark_entity_destroyed);
 
-        if (entity->GetEntityType() == CBE_SPRITE) {
+        if (entity->GetEntityType() == EntityType::Sprite) {
             ExtendEntityWithSprite(context, std::dynamic_pointer_cast<Sprite>(entity));
         }
 
@@ -266,7 +266,7 @@ void RetrieveEntityFromContextAt(duk_context * context, std::shared_ptr<Entity> 
             entity->MarkDestroy();
         }
 
-        if (entity->GetEntityType() == CBE_SPRITE) {
+        if (entity->GetEntityType() == EntityType::Sprite) {
             RetrieveSpriteFromContext(context, std::dynamic_pointer_cast<Sprite>(entity), stack_index);
         }
     }

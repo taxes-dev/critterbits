@@ -13,14 +13,14 @@
 namespace Critterbits {
 namespace Toml {
 
-typedef enum { CBE_TOML_NEW, CBE_TOML_READY, CBE_TOML_ERR } TomlParserState;
+enum class TomlParserState { New, Ready, Error };
 
 class TomlParser {
   public:
     TomlParser(const std::string &);
 
     std::string GetParserError() const {
-        if (this->state == CBE_TOML_ERR) {
+        if (this->state == TomlParserState::Error) {
             return this->parse_error;
         } else {
             return std::string{};
@@ -31,7 +31,7 @@ class TomlParser {
     int GetTableInt(const std::string &, int = 0) const;
     CB_Point GetTablePoint(const std::string &, CB_Point = {0 ,0}) const;
     std::string GetTableString(const std::string &, const std::string & = "") const;
-    bool IsReady() const { return this->state == CBE_TOML_READY; };
+    bool IsReady() const { return this->state == TomlParserState::Ready; };
     void IterateTableArray(const std::string &, const std::function<void(const TomlParser &)> &) const;
 
   private:
@@ -39,8 +39,8 @@ class TomlParser {
     std::shared_ptr<cpptoml::table> table;
     std::string parse_error;
 
-    TomlParser() : state(CBE_TOML_NEW){};
-    TomlParser(std::shared_ptr<cpptoml::table> _table) : state{CBE_TOML_READY}, table(_table){};
+    TomlParser() : state(TomlParserState::New){};
+    TomlParser(std::shared_ptr<cpptoml::table> _table) : state(TomlParserState::Ready), table(_table){};
 };
 }
 }

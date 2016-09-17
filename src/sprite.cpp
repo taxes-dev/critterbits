@@ -30,7 +30,7 @@ bool Sprite::IsCollidingWith(entity_id_t entity_id) {
 
 void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
     if (auto spr = other_sprite.lock()) {
-        if (!this->IsCollidingWith(spr->entity_id)) {
+        if (spr->state == SpriteState::Active && !this->IsCollidingWith(spr->entity_id)) {
             // record the collision (this is used for de-dupe)
             this->is_colliding_with.push_back(spr->entity_id);
 
@@ -46,7 +46,7 @@ void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
 
                         // full colliders reset after every hit, triggers will collide only once until the colliding
                         // object leaves the trigger area
-                        if (tspr->collision == CBE_COLLIDE_COLLIDE && ospr->collision != CBE_COLLIDE_TRIGGER) {
+                        if (tspr->collision == CollisionType::Collide && ospr->collision != CollisionType::Trigger) {
                             tspr->RemoveCollisionWith(ospr->entity_id);
                         }
                     }
@@ -86,7 +86,7 @@ void Sprite::NotifyLoaded() {
 
 void Sprite::NotifyUnloaded() {
     LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name);
-    this->state = CBE_SPRITE_UNLOADED;
+    this->state = SpriteState::Unloaded;
 }
 
 void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
@@ -100,8 +100,8 @@ void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
 
 void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
     Entity::Render(renderer, clip_rect);
-    if (this->state == CBE_SPRITE_READY) {
-        if (this->sprite_sheet != nullptr && clip_rect.z_index == CBE_Z_MIDGROUND) {
+    if (this->state == SpriteState::Active) {
+        if (this->sprite_sheet != nullptr && clip_rect.z_index == ZIndex::Midground) {
             // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
             CB_Rect dst_rect = clip_rect.dest;
             dst_rect.x -= clip_rect.source.x;
@@ -111,7 +111,7 @@ void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_re
             SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet.get(), this->GetFrameRect(), dst_rect,
                                            this->flip_x, this->flip_y);
         }
-        if (this->draw_debug && clip_rect.z_index == CBE_Z_FOREGROUND) {
+        if (this->draw_debug && clip_rect.z_index == ZIndex::Foreground) {
             rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
                           255, 0, 0, 127);
             boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
@@ -139,7 +139,7 @@ void Sprite::SetPosition(int new_x, int new_y) {
     }
 
     // check collisions at new position if we collide
-    if (this->collision == CBE_COLLIDE_COLLIDE) {
+    if (this->collision == CollisionType::Collide) {
         CB_Rect new_dim{new_x, new_y, this->dim.w, this->dim.h};
 
         do {
@@ -148,13 +148,14 @@ void Sprite::SetPosition(int new_x, int new_y) {
             new_y = new_dim.y;
 
             Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
-                if (entity->GetEntityType() == CBE_SPRITE && entity->entity_id != this->entity_id) {
+                if (entity->GetEntityType() == EntityType::Sprite && entity->entity_id != this->entity_id) {
                     std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-                    if (sprite->collision == CBE_COLLIDE_COLLIDE || sprite->collision == CBE_COLLIDE_TRIGGER) {
+                    if (sprite->state == SpriteState::Active &&
+                        (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger)) {
                         // check for collision
                         if (AabbCollision(new_dim, sprite->dim)) {
                             // if full collision, adjust new x/y so they're not inside the collided sprite
-                            if (sprite->collision == CBE_COLLIDE_COLLIDE) {
+                            if (sprite->collision == CollisionType::Collide) {
                                 if (new_dim.x > this->dim.x) {
                                     new_dim.x = std::max(this->dim.x, sprite->dim.x - this->dim.w);
                                 } else if (new_dim.x < this->dim.x) {
@@ -188,7 +189,7 @@ void Sprite::SetPosition(int new_x, int new_y) {
 bool Sprite::OnStart() {
     // delay start until resources loaded
     if (this->sprite_sheet_loaded && this->script_loaded) {
-        this->state = CBE_SPRITE_READY;
+        this->state = SpriteState::Active;
         return true;
     }
     return false;

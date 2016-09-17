@@ -16,8 +16,8 @@
 #define CB_SPRITE_EXT ".toml"
 
 namespace Critterbits {
-typedef enum { CBE_SPRITE_NEW, CBE_SPRITE_READY, CBE_SPRITE_UNLOADED } SpriteState;
-typedef enum { CBE_COLLIDE_NONE, CBE_COLLIDE_COLLIDE, CBE_COLLIDE_TRIGGER } CollisionType;
+enum class SpriteState { New, Active, Unloaded };
+enum class CollisionType { None, Collide, Trigger };
 
 typedef struct QueuedSprite {
   std::string name;
@@ -26,7 +26,7 @@ typedef struct QueuedSprite {
 
 class Sprite : public Entity {
   public:
-    SpriteState state{CBE_SPRITE_NEW};
+    SpriteState state{SpriteState::New};
     std::string sprite_name;
     std::string sprite_path;
     std::string sprite_sheet_path;
@@ -37,12 +37,12 @@ class Sprite : public Entity {
     int tile_offset_y{0};
     bool flip_x{false};
     bool flip_y{false};
-    CollisionType collision{CBE_COLLIDE_NONE};
+    CollisionType collision{CollisionType::None};
     std::vector<std::shared_ptr<Animation>> animations;
 
     Sprite();
     ~Sprite();
-    EntityType GetEntityType() { return CBE_SPRITE; };
+    EntityType GetEntityType() { return EntityType::Sprite; };
     inline int GetFrame() const { return this->current_frame; };
     inline int GetFrameCount() const { return this->sprite_sheet_rows * this->sprite_sheet_cols; }
     void NotifyCollision(std::weak_ptr<Sprite>);

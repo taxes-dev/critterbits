@@ -11,7 +11,7 @@
 
 namespace Critterbits {
 
-typedef enum { CBE_UNDEFINED, CBE_SPRITE, CBE_TILEMAP, CBE_VIEWPORT } EntityType;
+enum class EntityType { Undefined, Sprite, Tilemap, Viewport };
 typedef unsigned long entity_id_t;
 
 #define CB_ENTITY_ID_INVALID 0L
@@ -36,7 +36,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     /* derived classes MUST implement GetEntityType() - not pure virtual due to dynamic casting constraints */
     virtual EntityType GetEntityType() {
         assert(false);
-        return CBE_UNDEFINED;
+        return EntityType::Undefined;
     };
 
     bool HasScript() { return this->script != nullptr; };

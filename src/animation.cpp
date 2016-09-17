@@ -33,7 +33,7 @@ void Animation::AnimateKeyFrame(std::shared_ptr<Entity> entity, const KeyFrame &
     // entity properties
 
     // sprite properties
-    if (entity->GetEntityType() == CBE_SPRITE) {
+    if (entity->GetEntityType() == EntityType::Sprite) {
         std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
         if (key_frame.property == "flip_x") {
             sprite->flip_x = key_frame.value == "true";
@@ -47,7 +47,7 @@ void Animation::AnimateKeyFrame(std::shared_ptr<Entity> entity, const KeyFrame &
 }
 
 void Animation::Stop() {
-    this->state = CBE_ANIM_STOPPED;
+    this->state = AnimationState::Stopped;
     this->next_key_frame = 0;
     this->next_key_frame_at = 0.f;
     this->key_frame_delta = 0.f;

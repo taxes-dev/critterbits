@@ -6,10 +6,10 @@ namespace Toml {
 TomlParser::TomlParser(const std::string & toml_file) : TomlParser() {
     try {
         this->table = cpptoml::parse_file(toml_file);
-        this->state = CBE_TOML_READY;
+        this->state = TomlParserState::Ready;
     } catch (cpptoml::parse_exception & e) {
         LOG_ERR("TomlParser::TomlParser TOML parsing error " + std::string(e.what()));
-        this->state = CBE_TOML_ERR;
+        this->state = TomlParserState::Error;
         this->parse_error = e.what();
     }
 }

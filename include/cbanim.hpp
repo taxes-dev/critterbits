@@ -9,7 +9,7 @@
 
 namespace Critterbits {
 
-typedef enum { CBE_ANIM_STOPPED, CBE_ANIM_PAUSED, CBE_ANIM_PLAYING } AnimationState;
+enum class AnimationState { Stopped, Paused, Playing };
 
 typedef struct KeyFrame {
     std::string property;
@@ -28,13 +28,13 @@ class Animation {
     Animation(const std::string & name) : name(name), loop(false) {};
     void AddKeyFrame(const KeyFrame & key_frame);
     void Animate(std::shared_ptr<Entity>, float);
-    bool IsPlaying() { return this->state == CBE_ANIM_PLAYING; };
-    void Pause() { this->state = CBE_ANIM_PAUSED; };
-    void Play() { this->state = CBE_ANIM_PLAYING; };
+    bool IsPlaying() { return this->state == AnimationState::Playing; };
+    void Pause() { this->state = AnimationState::Paused; };
+    void Play() { this->state = AnimationState::Playing; };
     void Stop();
 
   private:
-    AnimationState state{CBE_ANIM_STOPPED};
+    AnimationState state{AnimationState::Stopped};
     int next_key_frame{0};
     int key_frame_count{0};
     float key_frame_delta{0.f};

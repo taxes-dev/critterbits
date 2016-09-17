@@ -65,7 +65,7 @@ void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
     region->dim.y = dim.y * this->render_scale;
     region->dim.w = dim.w * this->render_scale;
     region->dim.h = dim.h * this->render_scale;
-    region->collision = CBE_COLLIDE_COLLIDE;
+    region->collision = CollisionType::Collide;
     this->regions.push_back(std::move(region));
 }
 
@@ -102,9 +102,9 @@ bool Tilemap::CreateTextures(float scale) {
 void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
     Entity::Render(renderer, clip);
     SDL_Texture * texture = nullptr;
-    if (clip.z_index == CBE_Z_BACKGROUND && this->bg_map_texture != nullptr) {
+    if (clip.z_index == ZIndex::Background && this->bg_map_texture != nullptr) {
         texture = this->bg_map_texture;
-    } else if (clip.z_index == CBE_Z_FOREGROUND && this->fg_map_texture != nullptr) {
+    } else if (clip.z_index == ZIndex::Foreground && this->fg_map_texture != nullptr) {
         texture = this->fg_map_texture;
     }
     if (texture != nullptr) {

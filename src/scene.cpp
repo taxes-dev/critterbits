@@ -16,12 +16,12 @@ void Scene::NotifyLoaded() {
                 LOG_ERR("Scene::NotifyLoaded(pre-update) unable to generate textures for tilemap " + this->map_path);
             }
         }
-        this->state = CBE_SCENE_ACTIVE;
+        this->state = SceneState::Active;
     });
 }
 
 void Scene::NotifyUnloaded(bool unloading) {
     LOG_INFO("Scene::NotifyUnloaded scene was unloaded: " + this->scene_name);
-    this->state = unloading ? CBE_SCENE_UNLOADED : CBE_SCENE_INACTIVE;
+    this->state = unloading ? SceneState::Unloaded : SceneState::Inactive;
 }
 }

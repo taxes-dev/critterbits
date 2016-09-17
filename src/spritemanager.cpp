@@ -57,9 +57,9 @@ bool SpriteManager::LoadQueuedSprites() {
             new_sprite->sprite_scale = parser.GetTableFloat("sprite_sheet.sprite_scale");
             std::string collide = parser.GetTableString("2d.collision");
             if (collide == "collide") {
-                new_sprite->collision = CBE_COLLIDE_COLLIDE;
+                new_sprite->collision = CollisionType::Collide;
             } else if (collide == "trigger") {
-                new_sprite->collision = CBE_COLLIDE_TRIGGER;
+                new_sprite->collision = CollisionType::Trigger;
             }
             // animations
             parser.IterateTableArray("animation", [&new_sprite](const Toml::TomlParser & table) {
