@@ -24,14 +24,11 @@ class TilemapRegion : public Sprite {
   public:
     TilemapRegion();
 
-    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     void SetPosition(int new_x, int new_y){}; // map regions are static
 
   protected:
     bool OnStart() { return true; }
-
-  private:
-    bool draw_debug{false};
+    void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
 };
 
 class Tilemap : public Entity {
@@ -45,7 +42,9 @@ class Tilemap : public Entity {
     ~Tilemap();
     bool CreateTextures(float scale);
     EntityType GetEntityType() { return EntityType::Tilemap; };
-    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
+  
+  protected:
+    void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
 
   private:
     struct MapTileInfo {

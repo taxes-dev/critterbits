@@ -99,8 +99,7 @@ bool Tilemap::CreateTextures(float scale) {
     return this->RenderMap(Engine::GetInstance().GetRenderer(), scale);
 }
 
-void Tilemap::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
-    Entity::Render(renderer, clip);
+void Tilemap::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip) {
     SDL_Texture * texture = nullptr;
     if (clip.z_index == ZIndex::Background && this->bg_map_texture != nullptr) {
         texture = this->bg_map_texture;

@@ -16,7 +16,6 @@
 #define CB_SPRITE_EXT ".toml"
 
 namespace Critterbits {
-enum class SpriteState { New, Active, Unloaded };
 enum class CollisionType { None, Collide, Trigger };
 
 typedef struct QueuedSprite {
@@ -26,7 +25,6 @@ typedef struct QueuedSprite {
 
 class Sprite : public Entity {
   public:
-    SpriteState state{SpriteState::New};
     std::string sprite_name;
     std::string sprite_path;
     std::string sprite_sheet_path;
@@ -48,19 +46,19 @@ class Sprite : public Entity {
     void NotifyCollision(std::weak_ptr<Sprite>);
     void NotifyLoaded();
     void NotifyUnloaded();
-    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     void SetFrame(int);
     void SetPosition(int, int);
 
   protected:
     bool OnStart();
+    void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+    void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     void OnUpdate(float);
 
   private:
     int current_frame{0};
     int sprite_sheet_rows{0};
     int sprite_sheet_cols{0};
-    bool draw_debug{false};
     std::shared_ptr<SDL_Texture> sprite_sheet;
     bool sprite_sheet_loaded{false};
     bool script_loaded{false};

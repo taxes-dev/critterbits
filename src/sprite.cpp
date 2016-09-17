@@ -6,7 +6,7 @@
 
 namespace Critterbits {
 
-Sprite::Sprite() { this->draw_debug = Engine::GetInstance().config->debug.draw_sprite_rects; }
+Sprite::Sprite() { this->debug = Engine::GetInstance().config->debug.draw_sprite_rects; }
 
 Sprite::~Sprite() {}
 
@@ -30,7 +30,7 @@ bool Sprite::IsCollidingWith(entity_id_t entity_id) {
 
 void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
     if (auto spr = other_sprite.lock()) {
-        if (spr->state == SpriteState::Active && !this->IsCollidingWith(spr->entity_id)) {
+        if (spr->IsActive() && !this->IsCollidingWith(spr->entity_id)) {
             // record the collision (this is used for de-dupe)
             this->is_colliding_with.push_back(spr->entity_id);
 
@@ -86,7 +86,7 @@ void Sprite::NotifyLoaded() {
 
 void Sprite::NotifyUnloaded() {
     LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name);
-    this->state = SpriteState::Unloaded;
+    this->state = EntityState::Unloaded;
 }
 
 void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
@@ -98,43 +98,43 @@ void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
     }
 }
 
-void Sprite::Render(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
-    Entity::Render(renderer, clip_rect);
-    if (this->state == SpriteState::Active) {
-        if (this->sprite_sheet != nullptr && clip_rect.z_index == ZIndex::Midground) {
-            // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
-            CB_Rect dst_rect = clip_rect.dest;
-            dst_rect.x -= clip_rect.source.x;
-            dst_rect.y -= clip_rect.source.y;
-            dst_rect.w = this->dim.w;
-            dst_rect.h = this->dim.h;
-            SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet.get(), this->GetFrameRect(), dst_rect,
-                                           this->flip_x, this->flip_y);
-        }
-        if (this->draw_debug && clip_rect.z_index == ZIndex::Foreground) {
-            rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
-                          255, 0, 0, 127);
-            boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
-                    clip_rect.dest.bottom() + 10, 255, 0, 0, 127);
-            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255,
-                       255);
-            std::string coords = this->dim.xy().to_string();
-            boxRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 2, clip_rect.dest.y - 10,
-                    clip_rect.dest.right() - 1, clip_rect.dest.y - 1, 255, 0, 0, 127);
-            stringRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 1, clip_rect.dest.y - 9, coords.c_str(),
-                       255, 255, 255, 255);
-            std::string f = std::to_string(this->current_frame);
-            boxRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, clip_rect.dest.x + f.length() * 8 + 2,
-                    clip_rect.dest.y + 10, 255, 0, 0, 127);
-            stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, f.c_str(), 255, 255, 255, 255);
-        }
+void Sprite::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
+    if (this->sprite_sheet != nullptr && clip_rect.z_index == ZIndex::Midground) {
+        // FIXME: hack to prevent sprites from getting squished (GetFrameRect() needs to adjust for clipping)
+        CB_Rect dst_rect = clip_rect.dest;
+        dst_rect.x -= clip_rect.source.x;
+        dst_rect.y -= clip_rect.source.y;
+        dst_rect.w = this->dim.w;
+        dst_rect.h = this->dim.h;
+        SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet.get(), this->GetFrameRect(), dst_rect,
+                                        this->flip_x, this->flip_y);
+    }
+}
+
+void Sprite::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
+    if (clip_rect.z_index == ZIndex::Foreground) {
+        rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
+                        255, 0, 0, 127);
+        boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,
+                clip_rect.dest.bottom() + 10, 255, 0, 0, 127);
+        stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.bottom() + 1, this->tag.c_str(), 255, 255, 255,
+                    255);
+        std::string coords = this->dim.xy().to_string();
+        boxRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 2, clip_rect.dest.y - 10,
+                clip_rect.dest.right() - 1, clip_rect.dest.y - 1, 255, 0, 0, 127);
+        stringRGBA(renderer, clip_rect.dest.right() - 8 * coords.length() - 1, clip_rect.dest.y - 9, coords.c_str(),
+                    255, 255, 255, 255);
+        std::string f = std::to_string(this->current_frame);
+        boxRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, clip_rect.dest.x + f.length() * 8 + 2,
+                clip_rect.dest.y + 10, 255, 0, 0, 127);
+        stringRGBA(renderer, clip_rect.dest.x + 1, clip_rect.dest.y + 1, f.c_str(), 255, 255, 255, 255);
     }
 }
 
 void Sprite::SetFrame(int frame) { this->current_frame = Clamp(frame, 0, this->GetFrameCount()); }
 
 void Sprite::SetPosition(int new_x, int new_y) {
-    if (new_x == this->dim.x && new_y == this->dim.y) {
+    if (!this->IsActive() || (new_x == this->dim.x && new_y == this->dim.y)) {
         return;
     }
 
@@ -150,7 +150,7 @@ void Sprite::SetPosition(int new_x, int new_y) {
             Engine::GetInstance().IterateActiveEntities([&](std::shared_ptr<Entity> entity) {
                 if (entity->GetEntityType() == EntityType::Sprite && entity->entity_id != this->entity_id) {
                     std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
-                    if (sprite->state == SpriteState::Active &&
+                    if (sprite->IsActive() &&
                         (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger)) {
                         // check for collision
                         if (AabbCollision(new_dim, sprite->dim)) {
@@ -189,7 +189,6 @@ void Sprite::SetPosition(int new_x, int new_y) {
 bool Sprite::OnStart() {
     // delay start until resources loaded
     if (this->sprite_sheet_loaded && this->script_loaded) {
-        this->state = SpriteState::Active;
         return true;
     }
     return false;

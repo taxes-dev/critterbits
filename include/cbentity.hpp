@@ -12,6 +12,7 @@
 namespace Critterbits {
 
 enum class EntityType { Undefined, Sprite, Tilemap, Viewport };
+enum class EntityState { New, Active, Inactive, Unloaded };
 typedef unsigned long entity_id_t;
 
 #define CB_ENTITY_ID_INVALID 0L
@@ -32,6 +33,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     std::string tag;
     std::shared_ptr<Scripting::Script> script;
     float time_scale{1.0f};
+    EntityState state{EntityState::New};
 
     /* derived classes MUST implement GetEntityType() - not pure virtual due to dynamic casting constraints */
     virtual EntityType GetEntityType() {
@@ -40,19 +42,26 @@ class Entity : public std::enable_shared_from_this<Entity> {
     };
 
     bool HasScript() { return this->script != nullptr; };
+    bool IsActive() { return this->state == EntityState::Active; };
     void MarkDestroy() { this->destroyed = true; };
-    virtual void Render(SDL_Renderer *, const CB_ViewClippingInfo &){};
+    void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     virtual void SetPosition(int x, int y) {
+      if (this->IsActive()) {
         this->dim.x = x;
         this->dim.y = y;
+      }
     };
     void Start();
     void Update(float);
     virtual ~Entity(){};
 
   protected:
+    bool debug{false};
+
     Entity(){};
     virtual bool OnStart() { return true; };
+    virtual void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &) {};
+    virtual void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &) {};
     virtual void OnUpdate(float){};
 
   private:
