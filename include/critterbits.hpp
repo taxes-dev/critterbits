@@ -9,6 +9,7 @@
 #include "cbengine.hpp"
 #include "cbentity.hpp"
 #include "cbfiles.hpp"
+#include "cbresource.hpp"
 #include "cbinput.hpp"
 #include "cblogging.hpp"
 #include "cbmath.hpp"

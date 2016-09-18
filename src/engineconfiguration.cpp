@@ -24,15 +24,19 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
     if (!expanded_path.empty()) {
         this->asset_path = std::string(expanded_path) + PATH_SEP;
         LOG_INFO("EngineConfiguration expanded source path: " + this->asset_path);
+        BaseResourcePath res_path;
+        res_path.base_path = this->asset_path;
+        res_path.source = ResourceSource::File;
+        this->loader = ResourceLoader::GetResourceLoader(res_path);
         this->ReloadConfiguration();
     }
 }
 
 bool EngineConfiguration::ReloadConfiguration() {
-    LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " + this->asset_path +
-             CB_CONFIG_FILE);
+    LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " + this->asset_path + CB_CONFIG_FILE);
     try {
-        auto config = Toml::TomlParser{this->asset_path + CB_CONFIG_FILE};
+        auto config_res = this->loader->OpenTextResource(CB_CONFIG_FILE);
+        auto config = Toml::TomlParser{config_res};
         if (config.IsReady()) {
             this->valid = false;
 

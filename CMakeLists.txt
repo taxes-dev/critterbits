@@ -55,7 +55,7 @@ include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_
 include_directories(include)
 
 # clang-format target
-file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
+file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.hpp)
 foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
     string(FIND ${SOURCE_FILE} ${PROJECT_TRDPARTY_DIR} PROJECT_TRDPARTY_DIR_FOUND)
     if (NOT ${PROJECT_TRDPARTY_DIR_FOUND} EQUAL -1)

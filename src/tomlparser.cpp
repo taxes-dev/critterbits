@@ -3,6 +3,24 @@
 namespace Critterbits {
 namespace Toml {
 
+TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
+    if (stream->good()) {
+        try {
+            cpptoml::parser parser{*stream.get()};
+            this->table = parser.parse();
+            this->state = TomlParserState::Ready;
+        } catch (cpptoml::parse_exception & e) {
+            LOG_ERR("TomlParser::TomlParser TOML parsing error " + std::string(e.what()));
+            this->state = TomlParserState::Error;
+            this->parse_error = e.what();            
+        }
+    } else {
+        LOG_ERR("TomlParser::TomlParser cannot read from provided stream");
+        this->state = TomlParserState::Error;
+        this->parse_error = "bad stream";
+    }
+}
+
 TomlParser::TomlParser(const std::string & toml_file) : TomlParser() {
     try {
         this->table = cpptoml::parse_file(toml_file);

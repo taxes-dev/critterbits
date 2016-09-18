@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include "cbresource.hpp"
 #include "cbinput.hpp"
 #include "cbscene.hpp"
 #include "cbviewport.hpp"
@@ -27,6 +28,7 @@ using EntityIterateFunction = std::function<bool(std::shared_ptr<T>)>;
 class EngineConfiguration {
   public:
     std::string asset_path;
+    std::shared_ptr<ResourceLoader> loader;
     struct {
         bool draw_info_pane{false};
         bool draw_map_regions{false};
