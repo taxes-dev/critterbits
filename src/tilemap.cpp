@@ -3,7 +3,6 @@
 
 #include <cb/critterbits.hpp>
 #include <SDL2_gfxPrimitives.h>
-#include <SDL_image.h>
 #include <Tmx.h>
 
 namespace Critterbits {
@@ -76,8 +75,14 @@ bool Tilemap::CreateTextures(float scale) {
     }
 
     // first load up the tilemap
+    std::string * tmx_data = nullptr;
+    if (Engine::GetInstance().GetResourceLoader()->GetTextResourceContents(this->tmx_path, &tmx_data) == false) {
+        LOG_ERR("Tilemap::CreateTextures unable to load TMX map " + this->tmx_path);
+        return false;
+    }
+
     this->map.reset(new Tmx::Map());
-    map->ParseFile(this->tmx_path);
+    map->ParseText(*tmx_data);
     if (this->map->HasError()) {
         LOG_ERR("Tilemap::CreateTextures unable to load TMX map " + this->map->GetErrorText());
         return false;

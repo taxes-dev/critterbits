@@ -21,17 +21,6 @@ TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
     }
 }
 
-TomlParser::TomlParser(const std::string & toml_file) : TomlParser() {
-    try {
-        this->table = cpptoml::parse_file(toml_file);
-        this->state = TomlParserState::Ready;
-    } catch (cpptoml::parse_exception & e) {
-        LOG_ERR("TomlParser::TomlParser TOML parsing error " + std::string(e.what()));
-        this->state = TomlParserState::Error;
-        this->parse_error = e.what();
-    }
-}
-
 bool TomlParser::GetTableBool(const std::string & key, bool default_value) const {
     return this->table->get_qualified_as<bool>(key).value_or(default_value);
 }

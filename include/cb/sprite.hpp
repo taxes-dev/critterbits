@@ -11,6 +11,7 @@
 
 #include "entity.hpp"
 #include "anim.hpp"
+#include "toml.hpp"
 
 #define CB_SPRITE_PATH "sprites"
 #define CB_SPRITE_EXT ".toml"
@@ -74,7 +75,6 @@ class SpriteManager {
     std::vector<std::shared_ptr<Sprite>> sprites;
 
     SpriteManager(){};
-    std::string GetSpritePath(const std::string &);
     std::shared_ptr<SDL_Texture> GetSpriteSheet(const std::string &);
     bool LoadQueuedSprites();
     void QueueSprite(const QueuedSprite &);
@@ -87,6 +87,9 @@ class SpriteManager {
 
     SpriteManager(const SpriteManager &) = delete;
     SpriteManager(SpriteManager &&) = delete;
+    std::string GetSpritePath(const std::string &) const;
+    std::string GetSpriteSheetPath(const std::string &) const;
+    void ParseSprite(const Toml::TomlParser &, std::shared_ptr<Sprite>) const;
 };
 }
 #endif

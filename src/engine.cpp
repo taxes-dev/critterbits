@@ -3,10 +3,10 @@
 #include <list>
 #include <sstream>
 
-#include <SDL2_gfxPrimitives.h>
-#include <SDL_image.h>
 #include <cb/critterbits.hpp>
 #include <cb/memory/nadeau.hpp>
+#include <SDL_image.h>
+#include <SDL2_gfxPrimitives.h>
 
 namespace Critterbits {
 
@@ -94,6 +94,13 @@ Engine & Engine::GetInstance() {
     return instance;
 }
 
+std::shared_ptr<ResourceLoader> Engine::GetResourceLoader() const {
+    if (this->config == nullptr || this->config->loader == nullptr) {
+        LOG_ERR("Engine::GetResourceLoader called before resource loader is ready (programming error?)");
+        return nullptr;
+    }
+    return this->config->loader;
+}
 
 void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
     if (this->scenes.IsCurrentSceneActive()) {

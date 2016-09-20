@@ -1,4 +1,6 @@
 #include <string>
+#include <limits.h>
+#include <stdlib.h>
 
 #include <cb/critterbits.hpp>
 
@@ -20,7 +22,7 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
 
     LOG_INFO("EngineConfiguration unexpanded source path: " + unexpanded_path);
 
-    std::string expanded_path = GetExpandedPath(unexpanded_path);
+    std::string expanded_path = this->GetExpandedPath(unexpanded_path);
     if (!expanded_path.empty()) {
         this->asset_path = std::string(expanded_path) + PATH_SEP;
         LOG_INFO("EngineConfiguration expanded source path: " + this->asset_path);
@@ -29,6 +31,21 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
         res_path.source = ResourceSource::File;
         this->loader = ResourceLoader::GetResourceLoader(res_path);
         this->ReloadConfiguration();
+    }
+}
+
+std::string EngineConfiguration::GetExpandedPath(const std::string & unexpanded_path) {
+#ifdef _WIN32
+    char * expanded_path = _fullpath(NULL, unexpanded_path.c_str(), _MAX_PATH);
+#else
+    char * expanded_path = realpath(unexpanded_path.c_str(), NULL);
+#endif
+    if (expanded_path != nullptr) {
+        std::string n_expanded_path{expanded_path};
+        delete expanded_path;
+        return n_expanded_path;
+    } else {
+        return std::string{};
     }
 }
 

@@ -120,7 +120,7 @@ ScriptEngine::~ScriptEngine() {
     duk_push_int(context, SDLK_##k);                                                                                   \
     duk_put_prop_string(context, -2, #k);
 
-void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
+void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_global_object(context);
 
@@ -158,13 +158,17 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
-std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script_name) {
+std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script_name) const {
     for (auto & script : this->loaded_scripts) {
         if (script->script_name == script_name) {
             return script;
         }
     }
     return nullptr;
+}
+
+std::string ScriptEngine::GetScriptPath(const std::string & asset_name) const {
+    return CB_SCRIPT_PATH PATH_SEP_STR + asset_name + CB_SCRIPT_EXT;
 }
 
 std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name) {
@@ -179,10 +183,9 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
         return new_script;
     }
 
-    std::string script_path =
-        Engine::GetInstance().config->asset_path + CB_SCRIPT_PATH + PATH_SEP + script_name + CB_SCRIPT_EXT;
+    std::string script_path = this->GetScriptPath(script_name);
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
-    if (!FileExists(script_path)) {
+    if (!Engine::GetInstance().GetResourceLoader()->ResourceExists(script_path)) {
         LOG_INFO("ScriptEngine::LoadScript script not found");
         return nullptr;
     }
@@ -203,12 +206,16 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name
     this->AddCommonScriptingFunctions(new_script->context);
 
     // load associated script file
-    if (duk_peval_file(new_script->context, script_path.c_str()) != 0) {
-        const char * error = duk_safe_to_string(new_script->context, -1);
-        LOG_ERR("ScriptEngine::LoadScript unable to compile script " + std::string(error));
+    std::string * script_contents = nullptr;
+    if (Engine::GetInstance().GetResourceLoader()->GetTextResourceContents(script_path, &script_contents) == false) {
+        LOG_ERR("ScriptEngine::LoadScript unable to get script " + script_path);
         return false;
     }
-    duk_pop(new_script->context); // ignore result of peval
+    if (duk_peval_string_noresult(new_script->context, (*script_contents).c_str()) != 0) {
+        const char * error = duk_safe_to_string(new_script->context, -1);
+        LOG_ERR("ScriptEngine::LoadScript unable to compile script " + script_path + ", error was " + std::string(error));
+        return false;
+    }
 
     // prepare the script object
     new_script->DiscoverGlobals();

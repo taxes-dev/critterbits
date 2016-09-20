@@ -47,7 +47,7 @@ class SceneManager {
         return this->current_scene != nullptr && this->current_scene->state == SceneState::Active;
     };
     bool LoadScene(const std::string &);
-    std::string GetScenePath(const std::string &);
+    std::string GetScenePath(const std::string &) const;
 
   private:
     std::string scene_path;

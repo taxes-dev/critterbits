@@ -54,6 +54,8 @@ class EngineConfiguration {
 
   private:
     bool valid{false};
+
+    std::string GetExpandedPath(const std::string &);
 };
 
 class EngineCounters {
@@ -101,6 +103,7 @@ class Engine {
     static Engine & GetInstance();
     int GetMaxTextureHeight() const { return this->max_texture_height; };
     int GetMaxTextureWidth() const { return this->max_texture_width; };
+    std::shared_ptr<ResourceLoader> GetResourceLoader() const;
     SDL_Renderer * GetRenderer() const { return this->renderer; };
     void IterateEntities(EntityIterateFunction<Entity> func);
     void IterateActiveEntities(EntityIterateFunction<Entity>);

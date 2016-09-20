@@ -12,8 +12,8 @@ SceneManager::~SceneManager() {
     }
 }
 
-std::string SceneManager::GetScenePath(const std::string & asset_name) {
-    return Engine::GetInstance().config->asset_path + CB_SCENE_PATH + PATH_SEP + asset_name;
+std::string SceneManager::GetScenePath(const std::string & asset_name) const {
+    return CB_SCENE_PATH PATH_SEP_STR + asset_name + CB_SCENE_EXT;
 }
 
 bool SceneManager::LoadScene(const std::string & scene_name) {
@@ -40,12 +40,12 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
         std::shared_ptr<Scene> new_scene = std::make_shared<Scene>();
         new_scene->scene_name = scene_name;
 
-        std::string scene_path = this->GetScenePath(scene_name + CB_SCENE_EXT);
-        Toml::TomlParser parser{scene_path};
+        auto scene_file = Engine::GetInstance().GetResourceLoader()->OpenTextResource(this->GetScenePath(scene_name));
+        Toml::TomlParser parser{scene_file};
         if (parser.IsReady()) {
             std::string map_path = parser.GetTableString("scene.map");
             if (!map_path.empty()) {
-                new_scene->map_path = this->GetScenePath(map_path);
+                new_scene->map_path = CB_SCENE_PATH PATH_SEP_STR + map_path;
             }
             new_scene->map_scale = parser.GetTableFloat("scene.map_scale", 1.0f);
             new_scene->persistent = parser.GetTableBool("scene.persistent");

@@ -47,14 +47,15 @@ class ScriptEngine {
   public:
     ScriptEngine();
     ~ScriptEngine();
-    std::shared_ptr<Script> GetScriptHandle(const std::string &);
+    std::shared_ptr<Script> GetScriptHandle(const std::string &) const;
     std::shared_ptr<Script> LoadScript(const std::string &);
 
   private:
     duk_context * context{nullptr};
     std::vector<std::shared_ptr<Script>> loaded_scripts;
 
-    void AddCommonScriptingFunctions(duk_context *);
+    void AddCommonScriptingFunctions(duk_context *) const;
+    std::string GetScriptPath(const std::string &) const;
 
     ScriptEngine(const ScriptEngine &) = delete;
     ScriptEngine(ScriptEngine &&) = delete;

@@ -8,7 +8,6 @@
 #include "coord.hpp"
 #include "engine.hpp"
 #include "entity.hpp"
-#include "files.hpp"
 #include "resource.hpp"
 #include "input.hpp"
 #include "logging.hpp"
