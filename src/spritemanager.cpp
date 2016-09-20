@@ -1,5 +1,5 @@
+#include <cb/critterbits.hpp>
 #include <SDL_image.h>
-#include <critterbits.hpp>
 
 namespace Critterbits {
 

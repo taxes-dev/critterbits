@@ -9,7 +9,7 @@
 
 #include <cpptoml/cpptoml.h>
 
-#include "cbcoord.hpp"
+#include "coord.hpp"
 
 namespace Critterbits {
 namespace Toml {

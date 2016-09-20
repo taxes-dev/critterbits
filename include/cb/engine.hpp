@@ -8,11 +8,11 @@
 #include <memory>
 #include <string>
 
-#include "cbresource.hpp"
-#include "cbinput.hpp"
-#include "cbscene.hpp"
-#include "cbviewport.hpp"
-#include "scripting/cbscripting.hpp"
+#include "resource.hpp"
+#include "input.hpp"
+#include "scene.hpp"
+#include "viewport.hpp"
+#include "scripting/scripting.hpp"
 
 #define CB_DEFAULT_WINDOW_W 1024
 #define CB_DEFAULT_WINDOW_H 768

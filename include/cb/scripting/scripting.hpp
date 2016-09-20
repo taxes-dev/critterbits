@@ -9,8 +9,8 @@
 
 #include <duktape/duktape.h>
 
-#include <cbentity.hpp>
-#include <cbsprite.hpp>
+#include <cb/entity.hpp>
+#include <cb/sprite.hpp>
 
 #define CB_SCRIPT_PATH "scripts"
 #define CB_SCRIPT_EXT ".js"

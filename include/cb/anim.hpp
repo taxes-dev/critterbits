@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "cbentity.hpp"
+#include "entity.hpp"
 
 namespace Critterbits {
 

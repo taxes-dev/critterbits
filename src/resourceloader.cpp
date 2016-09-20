@@ -2,7 +2,7 @@
 #include <fstream>
 #include <memory>
 
-#include <critterbits.hpp>
+#include <cb/critterbits.hpp>
 
 namespace Critterbits {
     std::shared_ptr<ResourceLoader> ResourceLoader::GetResourceLoader(const BaseResourcePath & base_path) {

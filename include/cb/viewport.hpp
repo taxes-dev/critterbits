@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "cbcoord.hpp"
-#include "cbentity.hpp"
+#include "coord.hpp"
+#include "entity.hpp"
 
 namespace Critterbits {
 

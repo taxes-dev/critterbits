@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-#include <cbcoord.hpp>
-#include <cbentity.hpp>
+#include <cb/coord.hpp>
+#include <cb/entity.hpp>
 #include <duktape/duktape.h>
 
 #define CB_SCRIPT_ENTITY_STASH_ARRAY "entities"

@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cb/critterbits.hpp>
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
 #include <Tmx.h>
-#include <critterbits.hpp>
 
 namespace Critterbits {
 

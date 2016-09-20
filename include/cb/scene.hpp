@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "cbsprite.hpp"
-#include "cbtilemap.hpp"
+#include "sprite.hpp"
+#include "tilemap.hpp"
 
 #define CB_SCENE_PATH "scenes"
 #define CB_FIRST_SCENE "startup"

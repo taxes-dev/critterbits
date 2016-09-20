@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <critterbits.hpp>
-#include <scripting/cbscriptsupport.hpp>
+#include <cb/critterbits.hpp>
+#include <cb/scripting/scriptsupport.hpp>
 
 namespace Critterbits {
 namespace Scripting {

@@ -9,10 +9,10 @@
 #include <memory>
 #include <string>
 
-#include "cb2d.hpp"
-#include "cbcoord.hpp"
-#include "cbentity.hpp"
-#include "cbsprite.hpp"
+#include "2d.hpp"
+#include "coord.hpp"
+#include "entity.hpp"
+#include "sprite.hpp"
 
 #define CB_TILEMAP_COLLIDE "collide"
 #define CB_TILEMAP_FOREGROUND "foreground"

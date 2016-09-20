@@ -1,4 +1,4 @@
-#include <critterbits.hpp>
+#include <cb/critterbits.hpp>
 
 namespace Critterbits {
 void Animation::AddKeyFrame(const KeyFrame & key_frame) {

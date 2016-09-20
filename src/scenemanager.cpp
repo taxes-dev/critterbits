@@ -1,7 +1,7 @@
 #include <memory>
 #include <string>
 
-#include <critterbits.hpp>
+#include <cb/critterbits.hpp>
 
 namespace Critterbits {
 

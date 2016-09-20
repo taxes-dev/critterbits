@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <utility>
 
-#include "cbcoord.hpp"
+#include "coord.hpp"
 
 namespace Critterbits {
 namespace SDLx {

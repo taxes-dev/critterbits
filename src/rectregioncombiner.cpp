@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include <critterbits.hpp>
+#include <cb/critterbits.hpp>
 
 namespace Critterbits {
 void RectRegionCombiner::Combine() {
@@ -12,10 +12,8 @@ void RectRegionCombiner::Combine() {
     // remove duplicates and completely overlapping rects
     this->regions.erase(std::unique(this->regions.begin(), this->regions.end(),
                                     [](const CB_Rect & rect1, const CB_Rect & rect2) {
-                                        // NOTE: need to check this on other STL implementations, as we're relying on
-                                        // the
-                                        // notion that rect1 will be overwritten with rect2 by std::unique. If it's the
-                                        // other
+                                        // NOTE: need to check this on other STL implementations, as we're relying on the
+                                        // notion that rect1 will be overwritten with rect2 by std::unique. If it's the other
                                         // way around, the small rect would be preserved instead of the larger one.
                                         return rect1 == rect2 || rect1.inside(rect2);
                                     }),

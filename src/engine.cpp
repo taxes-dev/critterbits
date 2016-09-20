@@ -5,8 +5,8 @@
 
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
-#include <critterbits.hpp>
-#include <memory/nadeau.hpp>
+#include <cb/critterbits.hpp>
+#include <cb/memory/nadeau.hpp>
 
 namespace Critterbits {
 

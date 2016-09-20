@@ -9,8 +9,8 @@
 
 #include <SDL.h>
 
-#include "cbentity.hpp"
-#include "cbanim.hpp"
+#include "entity.hpp"
+#include "anim.hpp"
 
 #define CB_SPRITE_PATH "sprites"
 #define CB_SPRITE_EXT ".toml"

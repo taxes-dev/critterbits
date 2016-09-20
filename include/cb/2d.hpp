@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "cbcoord.hpp"
+#include "coord.hpp"
 
 namespace Critterbits {
 inline bool AabbCollision(const CB_Rect & rect1, const CB_Rect & rect2) {

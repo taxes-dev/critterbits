@@ -7,7 +7,7 @@
 #include <cassert>
 #include <memory>
 
-#include "cbcoord.hpp"
+#include "coord.hpp"
 
 namespace Critterbits {
 
