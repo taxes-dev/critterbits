@@ -1,6 +1,6 @@
 add_executable(critterbits
     main.cpp animation.cpp engine.cpp engineconfiguration.cpp enginecounters.cpp
-    engineeventqueue.cpp entity.cpp files.cpp inputmanager.cpp
+    engineeventqueue.cpp entity.cpp files.cpp inputmanager.cpp memory.cpp
     rectregioncombiner.cpp rendering.cpp resourceloader.cpp scene.cpp
     scenemanager.cpp script.cpp scriptengine.cpp scriptsupport.cpp sprite.cpp
     spritemanager.cpp tilemap.cpp tilemapregion.cpp tilesetimagemanager.cpp

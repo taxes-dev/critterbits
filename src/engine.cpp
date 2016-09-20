@@ -6,6 +6,7 @@
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_image.h>
 #include <critterbits.hpp>
+#include <memory/nadeau.hpp>
 
 namespace Critterbits {
 
@@ -320,9 +321,12 @@ void Engine::RenderDebugPane(int entity_count) {
     std::stringbuf info;
     std::ostream os(&info);
 
-    os << "view" << this->viewport->dim.xy().to_string();
-    os << " ent(" << this->counters.GetRenderedEntitiesCount() << "/" << entity_count << ")";
-    os << " fps " << std::fixed << std::setprecision(1) << this->counters.GetAverageFps();
+    float mem_mb_current = (float)NadeauSoftware::getCurrentRSS() / 1024.f / 1024.f;
+
+    os << "view " << this->viewport->dim.xy().to_string();
+    os << " | ent " << this->counters.GetRenderedEntitiesCount() << "/" << entity_count;
+    os << " | " << std::fixed << std::setprecision(1) << this->counters.GetAverageFps() << " fps";
+    os << " | " << std::fixed << std::setprecision(2) << mem_mb_current << " MB";
 
     roundedBoxRGBA(this->renderer, -6, this->viewport->dim.h - 12, info.str().length() * 8 + 10,
                    this->viewport->dim.h + 6, 6, 0, 0, 0, 127);
