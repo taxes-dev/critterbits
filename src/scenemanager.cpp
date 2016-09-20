@@ -49,6 +49,10 @@ bool SceneManager::LoadScene(const std::string & scene_name) {
             }
             new_scene->map_scale = parser.GetTableFloat("scene.map_scale", 1.0f);
             new_scene->persistent = parser.GetTableBool("scene.persistent");
+            std::string script_path = parser.GetTableString("scene.script");
+            if (!script_path.empty()) {
+                new_scene->script_path = CB_SCENE_PATH PATH_SEP_STR + script_path;
+            }
             parser.IterateTableArray("sprite", [&new_scene](const Toml::TomlParser & table) {
                 QueuedSprite qsprite{table.GetTableString("name"), table.GetTablePoint("at")};
                 if (!qsprite.name.empty()) {

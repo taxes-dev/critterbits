@@ -12,9 +12,6 @@
 #include <cb/entity.hpp>
 #include <cb/sprite.hpp>
 
-#define CB_SCRIPT_PATH "scripts"
-#define CB_SCRIPT_EXT ".js"
-
 #define CB_SCRIPT_GLOBAL_ONCOLLISION "oncollision"
 #define CB_SCRIPT_GLOBAL_START "start"
 #define CB_SCRIPT_GLOBAL_UPDATE "update"
@@ -27,7 +24,6 @@ class Script {
 
   public:
     std::string script_path;
-    std::string script_name;
 
     void CallOnCollision(std::shared_ptr<Entity>, std::shared_ptr<Entity>);
     void CallStart(std::shared_ptr<Entity>);
@@ -55,7 +51,6 @@ class ScriptEngine {
     std::vector<std::shared_ptr<Script>> loaded_scripts;
 
     void AddCommonScriptingFunctions(duk_context *) const;
-    std::string GetScriptPath(const std::string &) const;
 
     ScriptEngine(const ScriptEngine &) = delete;
     ScriptEngine(ScriptEngine &&) = delete;

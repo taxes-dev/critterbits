@@ -70,6 +70,10 @@ bool SpriteManager::LoadQueuedSprites() {
 
 void SpriteManager::ParseSprite(const Toml::TomlParser & parser, std::shared_ptr<Sprite> sprite) const {
     sprite->tag = parser.GetTableString("sprite.tag");
+    sprite->script_path = parser.GetTableString("sprite.script");
+    if (!sprite->script_path.empty()) {
+        sprite->script_path = this->GetSpriteSheetPath(sprite->script_path);
+    }
     sprite->sprite_sheet_path = parser.GetTableString("sprite_sheet.image");
     // prepend the asset path to the sprite sheet path if one was set
     if (!sprite->sprite_sheet_path.empty()) {

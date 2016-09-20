@@ -29,6 +29,7 @@ class Sprite : public Entity {
     std::string sprite_name;
     std::string sprite_path;
     std::string sprite_sheet_path;
+    std::string script_path;
     float sprite_scale{1.0f};
     int tile_height{0};
     int tile_width{0};

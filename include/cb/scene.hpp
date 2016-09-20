@@ -23,6 +23,7 @@ class Scene {
     std::string scene_name;
     std::string map_path;
     float map_scale{1.0f};
+    std::string script_path;
     SceneState state{SceneState::New};
     SpriteManager sprites;
 

@@ -158,40 +158,34 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
 }
 
-std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script_name) const {
+std::shared_ptr<Script> ScriptEngine::GetScriptHandle(const std::string & script_path) const {
     for (auto & script : this->loaded_scripts) {
-        if (script->script_name == script_name) {
+        if (script->script_path == script_path) {
             return script;
         }
     }
     return nullptr;
 }
 
-std::string ScriptEngine::GetScriptPath(const std::string & asset_name) const {
-    return CB_SCRIPT_PATH PATH_SEP_STR + asset_name + CB_SCRIPT_EXT;
-}
-
-std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_name) {
+std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_path) {
     if (this->context == nullptr) {
         LOG_ERR("ScriptEngine::LoadScript no scripting runtime");
         return nullptr;
     }
 
-    std::shared_ptr<Script> new_script = this->GetScriptHandle(script_name);
+    std::shared_ptr<Script> new_script = this->GetScriptHandle(script_path);
     if (new_script != nullptr) {
-        LOG_INFO("ScriptEngine::LoadScript found existing script " + script_name);
+        LOG_INFO("ScriptEngine::LoadScript found existing script " + script_path);
         return new_script;
     }
 
-    std::string script_path = this->GetScriptPath(script_name);
     LOG_INFO("ScriptEngine::LoadScript about to load " + script_path);
     if (!Engine::GetInstance().GetResourceLoader()->ResourceExists(script_path)) {
-        LOG_INFO("ScriptEngine::LoadScript script not found");
+        LOG_ERR("ScriptEngine::LoadScript script not found " + script_path);
         return nullptr;
     }
 
     new_script = std::make_shared<Script>();
-    new_script->script_name = script_name;
     new_script->script_path = script_path;
 
     // create a new context

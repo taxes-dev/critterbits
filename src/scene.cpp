@@ -16,6 +16,20 @@ void Scene::NotifyLoaded() {
                 LOG_ERR("Scene::NotifyLoaded(pre-update) unable to generate textures for tilemap " + this->map_path);
             }
         }
+
+        // if this scene has a scene-wide script, load it and attach to a special sprite
+        if (!this->script_path.empty()) {
+            LOG_INFO("Scene::NotifyLoaded(pre-update) attempting to load script " + this->script_path);
+            std::shared_ptr<Scripting::Script> script = Engine::GetInstance().scripts.LoadScript(this->script_path);
+            if (script != nullptr) {
+                std::shared_ptr<Sprite> scene_sprite{std::make_shared<Sprite>()};
+                scene_sprite->sprite_name = ":" + this->scene_name;
+                scene_sprite->script = std::move(script);
+                scene_sprite->state = EntityState::Active;
+                this->sprites.sprites.push_back(std::move(scene_sprite));
+            }
+        }
+
         this->state = SceneState::Active;
     });
 }

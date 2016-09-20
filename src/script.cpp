@@ -7,7 +7,7 @@ namespace Critterbits {
 namespace Scripting {
 
 void Script::DiscoverGlobals() {
-    LOG_INFO("Script::DiscoverGlobals starting for " + this->script_name);
+    LOG_INFO("Script::DiscoverGlobals starting for " + this->script_path);
     if (this->context == nullptr) {
         return;
     }

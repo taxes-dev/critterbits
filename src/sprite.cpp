@@ -60,27 +60,31 @@ void Sprite::NotifyLoaded() {
     this->dim.w = this->tile_width * this->sprite_scale;
     this->dim.h = this->tile_height * this->sprite_scale;
 
-    EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
-        LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
-        this->sprite_sheet =
-            Engine::GetInstance().scenes.current_scene->sprites.GetSpriteSheet(this->sprite_sheet_path);
-        if (this->sprite_sheet == nullptr) {
-            LOG_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet");
-        } else {
-            int w, h;
-            SDL_QueryTexture(this->sprite_sheet.get(), NULL, NULL, &w, &h);
-            this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
-            this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
-        }
-        this->sprite_sheet_loaded = true;
-    });
+    if (!this->sprite_sheet_path.empty()) {
+        EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
+            LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
+            this->sprite_sheet =
+                Engine::GetInstance().scenes.current_scene->sprites.GetSpriteSheet(this->sprite_sheet_path);
+            if (this->sprite_sheet == nullptr) {
+                LOG_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet");
+            } else {
+                int w, h;
+                SDL_QueryTexture(this->sprite_sheet.get(), NULL, NULL, &w, &h);
+                this->sprite_sheet_cols = (w - this->tile_offset_x) / this->tile_width;
+                this->sprite_sheet_rows = (h - this->tile_offset_y) / this->tile_height;
+            }
+            this->sprite_sheet_loaded = true;
+        });
+    }
 
-    EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
-        LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite script " + this->sprite_name);
+    if (!this->script_path.empty()) {
+        EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
+            LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite script " + this->script_path);
 
-        this->script = Engine::GetInstance().scripts.LoadScript(this->sprite_name);
-        this->script_loaded = true;
-    });
+            this->script = Engine::GetInstance().scripts.LoadScript(this->script_path);
+            this->script_loaded = true;
+        });
+    }
 }
 
 void Sprite::NotifyUnloaded() {
