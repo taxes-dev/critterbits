@@ -10,8 +10,6 @@
 
 namespace Critterbits {
 
-entity_id_t next_entity_id = CB_ENTITY_ID_FIRST;
-
 Engine::Engine() {
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {

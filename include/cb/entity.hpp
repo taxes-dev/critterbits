@@ -42,7 +42,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     };
 
     bool HasScript() { return this->script != nullptr; };
-    bool IsActive() { return this->state == EntityState::Active; };
+    bool IsActive() { return this->state == EntityState::Active && this->destroyed == false; };
     void MarkDestroy() { this->destroyed = true; };
     void Render(SDL_Renderer *, const CB_ViewClippingInfo &);
     virtual void SetPosition(int x, int y) {
