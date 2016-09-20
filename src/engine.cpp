@@ -34,32 +34,32 @@ Engine::~Engine() {
 
 void Engine::DestroyMarkedEntities() {
     // copy all the entities to a vector first, as destruction will alter underlying collections
-    std::vector<std::shared_ptr<Entity>> entities;
-    this->IterateEntities([&entities](std::shared_ptr<Entity> entity) {
-        entities.push_back(entity);
+    std::vector<std::shared_ptr<Entity>> destroyed_entities;
+    this->IterateEntities([&destroyed_entities](std::shared_ptr<Entity> entity) {
+        if (entity->destroyed) {
+            destroyed_entities.push_back(entity);
+        }
         return false;
     });
 
-    for (auto & entity : entities) {
-        if (entity->destroyed) {
-            switch (entity->GetEntityType()) {
-                case EntityType::Sprite:
-                    if (this->scenes.IsCurrentSceneActive()) {
-                        this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
-                    }
-                    break;
-                case EntityType::Tilemap:
-                case EntityType::Viewport:
-                    // tilemaps and viewports should not be destroyed like this
-                    LOG_ERR("Engine::DestroyMarkedEntities something marked a tilemap or viewport for destruction");
-                    entity->destroyed = false;
-                    break;
-                default:
-                    LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " +
-                            std::to_string(static_cast<int>(entity->GetEntityType())));
-                    entity->destroyed = false;
-                    break;
-            }
+    for (auto & entity : destroyed_entities) {
+        switch (entity->GetEntityType()) {
+            case EntityType::Sprite:
+                if (this->scenes.IsCurrentSceneActive()) {
+                    this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
+                }
+                break;
+            case EntityType::Tilemap:
+            case EntityType::Viewport:
+                // tilemaps and viewports should not be destroyed like this
+                LOG_ERR("Engine::DestroyMarkedEntities something marked a tilemap or viewport for destruction");
+                entity->destroyed = false;
+                break;
+            default:
+                LOG_ERR("Engine::DestroyMarkedEntities unsupported entity type " +
+                        std::to_string(static_cast<int>(entity->GetEntityType())));
+                entity->destroyed = false;
+                break;
         }
     }
 }
