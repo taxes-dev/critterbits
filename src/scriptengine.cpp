@@ -16,6 +16,15 @@ void duktape_fatal_error(duk_context * ctx, duk_errcode_t code, const char * msg
 /*
 * Functions callable from JavaScript code
 */
+duk_ret_t close_gui_panel(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
+    entity_id_t to_close = duk_get_uint(context, 0);
+    bool closed = Engine::GetInstance().gui.ClosePanel(to_close);
+    duk_push_boolean(context, closed);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
+    return 1;
+}
+
 duk_ret_t find_entities_by_tag(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int nargs = duk_get_top(context);
@@ -57,7 +66,25 @@ duk_ret_t is_key_pressed(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     int key_code = duk_get_int(context, 0);
     bool key_pressed = Engine::GetInstance().input.IsKeyPressed(static_cast<CB_KeyCode>(key_code));
-    duk_push_boolean(context, key_pressed ? 1 : 0);
+    duk_push_boolean(context, key_pressed);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
+    return 1;
+}
+
+duk_ret_t open_gui_panel(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
+    entity_id_t opened = CB_ENTITY_ID_INVALID;
+    if (duk_is_string(context, 0)) {
+        std::string panel_name{duk_get_string(context, 0)};
+        if (!panel_name.empty()) {
+            bool multiple = false;
+            if (duk_is_boolean(context, 1)) {
+                multiple = duk_get_boolean(context, 1);
+            }
+            opened = Engine::GetInstance().gui.OpenPanel(panel_name, multiple);
+        }
+    }
+    duk_push_uint(context, opened);
     CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
     return 1;
 }
@@ -131,6 +158,8 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     CB_PUT_KEYCODE(DOWN);
     CB_PUT_KEYCODE(LEFT);
     CB_PUT_KEYCODE(RIGHT);
+    CB_PUT_KEYCODE(RETURN);
+    CB_PUT_KEYCODE(ESCAPE);
     duk_put_prop_string(context, -2, "key_codes");
     duk_push_object(context); // direction
     PushPropertyInt(context, "LEFT", static_cast<int>(InputDirection::Left));
@@ -151,7 +180,9 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     duk_put_prop_string(context, -2, "viewport");
 
     // global functions
+    PushPropertyFunction(context, "close_gui", close_gui_panel, 1);
     PushPropertyFunction(context, "find_by_tag", find_entities_by_tag, DUK_VARARGS);
+    PushPropertyFunction(context, "open_gui", open_gui_panel, 2);
     PushPropertyFunction(context, "spawn", spawn_sprite, 2);
 
     duk_pop(context); // global

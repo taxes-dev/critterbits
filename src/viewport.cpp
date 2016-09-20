@@ -9,9 +9,7 @@ CB_ViewClippingInfo Viewport::GetStaticViewableRect(CB_Rect & entity_dim) const 
 
 CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim) const {
     // set x & y relative to viewport
-    return this->GetViewableRect(entity_dim,
-        entity_dim.x - this->dim.x,
-        entity_dim.y - this->dim.y);
+    return this->GetViewableRect(entity_dim, entity_dim.x - this->dim.x, entity_dim.y - this->dim.y);
 }
 
 CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim, int dest_x, int dest_y) const {

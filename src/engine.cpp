@@ -47,6 +47,9 @@ void Engine::DestroyMarkedEntities() {
                     this->scenes.current_scene->sprites.UnloadSprite(std::dynamic_pointer_cast<Sprite>(entity));
                 }
                 break;
+            case EntityType::GuiPanel:
+                this->gui.UnloadPanel(std::dynamic_pointer_cast<Gui::GuiPanel>(entity));
+                break;
             case EntityType::Tilemap:
             case EntityType::Viewport:
                 // tilemaps and viewports should not be destroyed like this
@@ -255,17 +258,6 @@ int Engine::Run() {
         LOG_ERR("Engine::Run cannot load startup scene");
         return 1;
     }
-
-    // DEBUG
-    std::shared_ptr<Gui::GuiPanel> panel = std::make_shared<Gui::GuiPanel>();
-    panel->panel_name = "test panel";
-    panel->dim.x = 20;
-    panel->dim.y = this->viewport->dim.h - 120;
-    panel->dim.w = this->viewport->dim.w - 40;
-    panel->dim.h = 100;
-    panel->debug = true;
-    this->gui.panels.push_back(std::move(panel));
-    // DEBUG
 
     // start main loop
     SDL_Event e;
