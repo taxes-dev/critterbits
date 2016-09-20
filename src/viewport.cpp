@@ -47,6 +47,8 @@ void Viewport::SetEntityToFollow(std::shared_ptr<Entity> entity) {
     if (entity != nullptr) {
         this->entity_to_follow = entity;
         this->entity_center_view = CB_Point::CenterInside(this->dim.w, this->dim.h, entity->dim.w, entity->dim.h);
+    } else {
+        this->entity_to_follow = std::shared_ptr<Entity>{nullptr};
     }
 }
 

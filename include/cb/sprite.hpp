@@ -41,7 +41,7 @@ class Sprite : public Entity {
 
     Sprite();
     ~Sprite();
-    EntityType GetEntityType() { return EntityType::Sprite; };
+    EntityType GetEntityType() const { return EntityType::Sprite; };
     inline int GetFrame() const { return this->current_frame; };
     inline int GetFrameCount() const { return this->sprite_sheet_rows * this->sprite_sheet_cols; }
     void NotifyCollision(std::weak_ptr<Sprite>);

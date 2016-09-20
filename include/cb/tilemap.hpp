@@ -41,7 +41,7 @@ class Tilemap : public Entity {
     Tilemap(const std::string &);
     ~Tilemap();
     bool CreateTextures(float scale);
-    EntityType GetEntityType() { return EntityType::Tilemap; };
+    EntityType GetEntityType() const { return EntityType::Tilemap; };
   
   protected:
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);

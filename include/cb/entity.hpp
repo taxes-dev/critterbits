@@ -35,12 +35,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     float time_scale{1.0f};
     EntityState state{EntityState::New};
 
-    /* derived classes MUST implement GetEntityType() - not pure virtual due to dynamic casting constraints */
-    virtual EntityType GetEntityType() {
-        assert(false);
-        return EntityType::Undefined;
-    };
-
+    virtual EntityType GetEntityType() const = 0;
     bool HasScript() { return this->script != nullptr; };
     bool IsActive() { return this->state == EntityState::Active && this->destroyed == false; };
     void MarkDestroy() { this->destroyed = true; };
