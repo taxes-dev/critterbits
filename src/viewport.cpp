@@ -2,11 +2,22 @@
 
 namespace Critterbits {
 
+CB_ViewClippingInfo Viewport::GetStaticViewableRect(CB_Rect & entity_dim) const {
+    // assume x & y are relative to viewport instead of world
+    return this->GetViewableRect(entity_dim, entity_dim.x, entity_dim.y);
+}
+
 CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim) const {
-    CB_ViewClippingInfo view_clip;
     // set x & y relative to viewport
-    view_clip.dest.x = entity_dim.x - this->dim.x;
-    view_clip.dest.y = entity_dim.y - this->dim.y;
+    return this->GetViewableRect(entity_dim,
+        entity_dim.x - this->dim.x,
+        entity_dim.y - this->dim.y);
+}
+
+CB_ViewClippingInfo Viewport::GetViewableRect(CB_Rect & entity_dim, int dest_x, int dest_y) const {
+    CB_ViewClippingInfo view_clip;
+    view_clip.dest.x = dest_x;
+    view_clip.dest.y = dest_y;
 
     // determine if clipping is necessary (left, top)
     if (view_clip.dest.x < 0) {

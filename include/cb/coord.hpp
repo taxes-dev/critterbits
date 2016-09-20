@@ -54,11 +54,14 @@ typedef struct CB_Rect {
     inline bool operator!=(const CB_Rect & other) const { return !(*this == other); }
 } CB_Rect;
 
-enum class ZIndex { Background, Midground, Foreground };
+enum class ZIndex { Background, Midground, Foreground, Gui };
 
 typedef struct CB_ViewClippingInfo {
-    CB_Rect source, dest;
+    CB_Rect source{}, dest{};
     ZIndex z_index{ZIndex::Midground};
+
+    CB_ViewClippingInfo() {};
+    CB_ViewClippingInfo(const CB_Rect & source, const CB_Rect & dest, const ZIndex & z_index) : source(source), dest(dest), z_index(z_index) {};
 } CB_ViewClippingInfo;
 }
 

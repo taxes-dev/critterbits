@@ -12,6 +12,7 @@
 #include "input.hpp"
 #include "scene.hpp"
 #include "viewport.hpp"
+#include "gui.hpp"
 #include "scripting/scripting.hpp"
 
 #define CB_DEFAULT_WINDOW_W 1024
@@ -95,6 +96,7 @@ class Engine {
     InputManager input;
     Scripting::ScriptEngine scripts;
     SceneManager scenes;
+    Gui::GuiManager gui;
     std::shared_ptr<Viewport> viewport{std::make_shared<Viewport>()};
 
     ~Engine();
@@ -105,8 +107,9 @@ class Engine {
     int GetMaxTextureWidth() const { return this->max_texture_width; };
     std::shared_ptr<ResourceLoader> GetResourceLoader() const;
     SDL_Renderer * GetRenderer() const { return this->renderer; };
-    void IterateEntities(EntityIterateFunction<Entity> func);
+    void IterateEntities(EntityIterateFunction<Entity>);
     void IterateActiveEntities(EntityIterateFunction<Entity>);
+    void IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel>);
     void IterateActiveSprites(EntityIterateFunction<Sprite>);
     int Run();
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);

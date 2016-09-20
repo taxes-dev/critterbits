@@ -19,6 +19,7 @@
 #include "tilemap.hpp"
 #include "viewport.hpp"
 #include "toml.hpp"
+#include "gui.hpp"
 #include "scripting/scripting.hpp"
 
 #endif

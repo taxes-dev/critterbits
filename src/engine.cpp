@@ -118,6 +118,11 @@ void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
             }
         }
     }
+    for (auto & panel : this->gui.panels) {
+        if (func(panel)) {
+            return;
+        }
+    }
     if (func(this->viewport)) {
         return;
     }
@@ -131,6 +136,20 @@ void Engine::IterateActiveEntities(EntityIterateFunction<Entity> func) {
         return false;
     };
     this->IterateEntities(wrapper);
+}
+
+void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func) {
+    EntityIterateFunction<Gui::GuiPanel> wrapper = [&func](std::shared_ptr<Gui::GuiPanel> panel) {
+        if (panel->IsActive()) {
+            return func(panel);
+        }
+        return false;
+    };
+    for (auto & panel : this->gui.panels) {
+        if (func(panel)) {
+            return;
+        }
+    }
 }
 
 void Engine::IterateActiveSprites(EntityIterateFunction<Sprite> func) {
@@ -237,6 +256,17 @@ int Engine::Run() {
         return 1;
     }
 
+    // DEBUG
+    std::shared_ptr<Gui::GuiPanel> panel = std::make_shared<Gui::GuiPanel>();
+    panel->panel_name = "test panel";
+    panel->dim.x = 20;
+    panel->dim.y = this->viewport->dim.h - 120;
+    panel->dim.w = this->viewport->dim.w - 40;
+    panel->dim.h = 100;
+    panel->debug = true;
+    this->gui.panels.push_back(std::move(panel));
+    // DEBUG
+
     // start main loop
     SDL_Event e;
     bool quit = false;
@@ -291,10 +321,12 @@ int Engine::Run() {
             SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         }
         SDL_RenderClear(this->renderer);
+
+        // render all active entities
         for (auto z_index : {ZIndex::Background, ZIndex::Midground, ZIndex::Foreground}) {
             this->IterateActiveEntities([this, z_index](std::shared_ptr<Entity> entity) {
                 if (entity->dim.intersects(this->viewport->dim)) {
-                    CB_ViewClippingInfo clip{this->viewport->GetViewableRect(entity->dim)};
+                    CB_ViewClippingInfo clip = this->viewport->GetViewableRect(entity->dim);
                     clip.z_index = z_index;
                     entity->Render(this->renderer, clip);
                     if (z_index == ZIndex::Background) {
@@ -308,6 +340,17 @@ int Engine::Run() {
                 return false;
             });
         }
+
+        // finally render GUI on top of everything else
+        CB_Rect gui_view{0, 0, this->viewport->dim.w, this->viewport->dim.h};
+        this->IterateActiveGuiPanels([this, &gui_view](std::shared_ptr<Gui::GuiPanel> panel) {
+            if (panel->dim.intersects(gui_view)) {
+                CB_ViewClippingInfo clip = this->viewport->GetStaticViewableRect(panel->dim);
+                clip.z_index = ZIndex::Gui;
+                panel->Render(this->renderer, clip);
+            }
+            return false;
+        });
 
         if (this->config->debug.draw_info_pane) {
             this->RenderDebugPane(this->counters.GetTotalEntitiesCount());
