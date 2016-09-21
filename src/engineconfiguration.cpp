@@ -58,6 +58,7 @@ bool EngineConfiguration::ReloadConfiguration() {
             this->valid = false;
 
             // debug settings
+            this->debug.draw_gui_rects = config.GetTableBool("debug.draw_gui_rects", this->debug.draw_gui_rects);
             this->debug.draw_info_pane = config.GetTableBool("debug.draw_info_pane", this->debug.draw_info_pane);
             this->debug.draw_map_regions = config.GetTableBool("debug.draw_map_regions", this->debug.draw_map_regions);
             this->debug.draw_sprite_rects = config.GetTableBool("debug.draw_sprite_rects", this->debug.draw_sprite_rects);

@@ -17,6 +17,8 @@ void GuiControl::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInf
 void GuiControl::Resize() {
     if (this->resize_behavior == ResizeBehavior::Resize) {
         this->OnResize();
+        this->dim.w = Clamp(this->dim.w, this->min_w, this->max_w);
+        this->dim.h = Clamp(this->dim.h, this->min_h, this->max_h);
     }
 }
 }

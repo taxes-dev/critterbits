@@ -51,9 +51,11 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
     if (parser.IsReady()) {
         std::shared_ptr<GuiPanel> panel = std::make_shared<GuiPanel>();
         panel->panel_name = gui_name;
+        panel->tag = parser.GetTableString("panel.tag");
         panel->destroy_on_close = parser.GetTableBool("panel.destroy_on_close");
         panel->grid_rows = parser.GetTableInt("panel.grid_rows", panel->grid_rows);
         panel->grid_cols = parser.GetTableInt("panel.grid_cols", panel->grid_cols);
+        panel->grid_padding = parser.GetTablePoint("panel.grid_padding", panel->grid_padding);
         parser.GetTableFlexRect("panel.flex", &panel->flex);
         std::string nineslice_image = parser.GetTableString("decoration.image");
         if (!nineslice_image.empty()) {
@@ -74,6 +76,12 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
                 control->tag = table.GetTableString("tag");
                 control->grid = table.GetTablePoint("grid");
                 control->dim = table.GetTableRect("size");
+                CB_Rect maxes = table.GetTableRect("max_size", CB_Rect{0, 0, control->max_w, control->max_h});
+                control->max_w = Clamp(maxes.w, 0, CB_GUI_DEFAULT_MAX_W);
+                control->max_h = Clamp(maxes.h, 0, CB_GUI_DEFAULT_MAX_H);
+                CB_Rect mins = table.GetTableRect("min_size", CB_Rect{0, 0, control->min_w, control->min_h});
+                control->min_w = Clamp(mins.w, 0, control->max_w);
+                control->min_h = Clamp(mins.h, 0, control->max_h);
                 control->bg_color = table.GetTableColor("background_color", control->bg_color);
                 if (table.GetTableBool("resize", control->resize_behavior == ResizeBehavior::Resize)) {
                     control->resize_behavior = ResizeBehavior::Resize;
@@ -91,9 +99,10 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
                 LOG_ERR("GuiManager::LoadGuiPanel unable to load control with type " + control_type);
             }
         });
-        std::sort(panel->children.begin(), panel->children.end(), [&panel](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
-            return lhs->SortOrder(panel->grid_cols) < rhs->SortOrder(panel->grid_cols);
-        });
+        std::sort(panel->children.begin(), panel->children.end(),
+                  [&panel](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
+                      return lhs->SortOrder(panel->grid_cols) < rhs->SortOrder(panel->grid_cols);
+                  });
         return std::move(panel);
     } else {
         LOG_ERR("GuiManager::LoadGuiPanel unable to load GUI panel: " + parser.GetParserError());
@@ -138,6 +147,5 @@ void GuiManager::UnloadPanel(std::shared_ptr<GuiPanel> panel) {
         }
     }
 }
-
 }
 }

@@ -31,6 +31,7 @@ class EngineConfiguration {
     std::string asset_path;
     std::shared_ptr<ResourceLoader> loader;
     struct {
+        bool draw_gui_rects{false};
         bool draw_info_pane{false};
         bool draw_map_regions{false};
         bool draw_sprite_rects{false};

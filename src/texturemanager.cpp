@@ -27,11 +27,11 @@ std::shared_ptr<SDL_Texture> TextureManager::CreateTargetTexture(int w, int h, f
     SDL_RenderGetScale(renderer, &original_scale_x, &original_scale_y);
     SDL_GetRenderDrawBlendMode(renderer, &original_blend_mode);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_RenderSetScale(renderer, scale, scale);
     
     // clear texture to transparent
     SDL_SetRenderTarget(renderer, new_texture);
     SDL_SetTextureBlendMode(new_texture, SDL_BLENDMODE_BLEND);
+    SDL_RenderSetScale(renderer, scale, scale);
 
     func(renderer, new_texture);
 

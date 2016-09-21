@@ -115,7 +115,7 @@ void Sprite::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_
 }
 
 void Sprite::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
-    if (clip_rect.z_index == ZIndex::Foreground) {
+    if (clip_rect.z_index == ZIndex::Foreground && this->sprite_name[0] != ':') {
         rectangleRGBA(renderer, clip_rect.dest.x, clip_rect.dest.y, clip_rect.dest.right(), clip_rect.dest.bottom(),
                         255, 0, 0, 127);
         boxRGBA(renderer, clip_rect.dest.x, clip_rect.dest.bottom(), clip_rect.dest.x + this->tag.length() * 8 + 2,

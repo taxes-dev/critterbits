@@ -16,6 +16,11 @@
 
 #define CB_GUI_LABEL_CONTROL "label"
 
+#define CB_GUI_DEFAULT_MIN_W 0
+#define CB_GUI_DEFAULT_MAX_W 10000
+#define CB_GUI_DEFAULT_MIN_H 0
+#define CB_GUI_DEFAULT_MAX_H 10000
+
 namespace Critterbits {
 namespace Gui {
 
@@ -41,29 +46,33 @@ class NineSliceImage {
 enum class ResizeBehavior { Static, Resize };
 
 class GuiControl : public Entity {
-    public:
+  public:
     CB_Point grid{0, 0};
     CB_Color bg_color;
     ResizeBehavior resize_behavior{ResizeBehavior::Static};
+    int max_w{CB_GUI_DEFAULT_MAX_W};
+    int max_h{CB_GUI_DEFAULT_MAX_H};
+    int min_w{CB_GUI_DEFAULT_MIN_W};
+    int min_h{CB_GUI_DEFAULT_MIN_H};
 
-    GuiControl() : Entity() { this->debug = true; };
+    GuiControl() : Entity(){};
     EntityType GetEntityType() const { return EntityType::GuiControl; };
     void Resize();
     int SortOrder(int width) { return this->grid.y * width + this->grid.x; }
 
-    protected:
+  protected:
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
-    virtual void OnResize() {};
+    virtual void OnResize(){};
 };
 
 class GuiLabel : public GuiControl {
-    public:
+  public:
     std::string text;
     CB_Color text_color{0, 0, 0, 255};
 
     GuiLabel() : GuiControl() { this->resize_behavior = ResizeBehavior::Resize; };
 
-    protected:
+  protected:
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     void OnResize();
 };
@@ -77,8 +86,9 @@ class GuiPanel : public Entity {
     std::vector<std::shared_ptr<GuiControl>> children;
     int grid_rows{1};
     int grid_cols{1};
+    CB_Point grid_padding;
 
-    GuiPanel() : Entity() { this->debug = true; };
+    GuiPanel();
     void Close();
     EntityType GetEntityType() const { return EntityType::GuiPanel; };
     void Open();
@@ -88,7 +98,7 @@ class GuiPanel : public Entity {
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
 
-    private:
+  private:
     CB_ViewClippingInfo AdjustClipToClientArea(const CB_ViewClippingInfo &, const CB_Rect &) const;
 };
 

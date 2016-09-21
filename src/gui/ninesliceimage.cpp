@@ -24,6 +24,10 @@ SDL_Texture * NineSliceImage::SliceTo(int w, int h) {
             int tbw = this->texture_bounds.w, tbh = this->texture_bounds.h;
             SDL_Texture * srctex = this->texture.get();
 
+            // adjust the target width/height based on our scale
+            w /= scale;
+            h /= scale;
+
             // top left
             CB_Rect src{0, 0, bl, bt};
             CB_Rect dst = src;
