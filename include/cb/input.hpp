@@ -25,6 +25,7 @@ class InputManager {
     bool IsAxisPressed(const InputDirection &);
     bool IsControllerAxisPressed(const InputDirection &);
     bool IsKeyPressed(CB_KeyCode);
+    bool IsKeyPressedOnce(CB_KeyCode);
     void SetControllerActive(bool active);
     void SetKeyboardActive(bool active) { this->keyboard_active = active; };
     void SetMouseActive(bool active) { this->mouse_active = active; };

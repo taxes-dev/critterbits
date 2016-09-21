@@ -10,7 +10,7 @@ InputManager::~InputManager() {
 }
 
 void InputManager::AddSdlEvent(const SDL_Event & event) {
-    if (this->keyboard_active && event.type == SDL_KEYDOWN && event.key.state == SDL_PRESSED) {
+    if (this->keyboard_active && event.type == SDL_KEYDOWN && event.key.state == SDL_PRESSED && event.key.repeat == 0) {
         // keyboard pressed
         auto state = this->keyboard_state.find(event.key.keysym.sym);
         if (state == this->keyboard_state.end()) {
@@ -107,6 +107,16 @@ bool InputManager::IsKeyPressed(CB_KeyCode key_code) {
     auto state = this->keyboard_state.find(key_code);
     if (state != this->keyboard_state.end()) {
         return state->second;
+    }
+    return false;
+}
+
+bool InputManager::IsKeyPressedOnce(CB_KeyCode key_code) {
+    auto state = this->keyboard_state.find(key_code);
+    if (state != this->keyboard_state.end()) {
+        bool value = state->second;
+        state->second = false;
+        return value;
     }
     return false;
 }

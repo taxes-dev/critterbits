@@ -71,6 +71,15 @@ duk_ret_t is_key_pressed(duk_context * context) {
     return 1;
 }
 
+duk_ret_t is_key_pressed_once(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
+    int key_code = duk_get_int(context, 0);
+    bool key_pressed = Engine::GetInstance().input.IsKeyPressedOnce(static_cast<CB_KeyCode>(key_code));
+    duk_push_boolean(context, key_pressed);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
+    return 1;
+}
+
 duk_ret_t open_gui_panel(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     entity_id_t opened = CB_ENTITY_ID_INVALID;
@@ -170,6 +179,7 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     PushPropertyFunction(context, "is_controller_direction_pressed", is_controller_direction_pressed, 1);
     PushPropertyFunction(context, "is_direction_pressed", is_direction_pressed, 1);
     PushPropertyFunction(context, "is_key_pressed", is_key_pressed, 1);
+    PushPropertyFunction(context, "is_key_pressed_once", is_key_pressed_once, 1);
     duk_put_prop_string(context, -2, "input");
 
     // viewport
