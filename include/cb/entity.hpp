@@ -54,6 +54,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     bool debug{false};
 
     Entity(){};
+    bool IsDestroyed() { return this->destroyed; };
     virtual bool OnStart() { return true; };
     virtual void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &) {};
     virtual void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &) {};

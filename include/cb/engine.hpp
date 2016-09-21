@@ -91,7 +91,7 @@ class EngineCounters {
 class Engine {
   public:
     std::shared_ptr<EngineConfiguration> config;
-    SDL_Rect display_bounds;
+    CB_Rect display_bounds;
     EngineCounters counters;
     InputManager input;
     Scripting::ScriptEngine scripts;

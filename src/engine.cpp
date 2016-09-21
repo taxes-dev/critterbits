@@ -196,7 +196,9 @@ int Engine::Run() {
     // initialize controllers, if needed
 
     // discover display bounds
-    SDL_GetDisplayBounds(0, &this->display_bounds);
+    SDL_Rect disp_bounds;
+    SDL_GetDisplayBounds(0, &disp_bounds);
+    this->display_bounds = {disp_bounds.x, disp_bounds.y, disp_bounds.w, disp_bounds.h};
     LOG_INFO("Engine::Run current display size " + std::to_string(this->display_bounds.w) + "x" +
              std::to_string(this->display_bounds.h));
     if (this->config->window.full_screen) {

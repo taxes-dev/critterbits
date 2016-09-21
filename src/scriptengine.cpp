@@ -90,7 +90,10 @@ duk_ret_t open_gui_panel(duk_context * context) {
             if (duk_is_boolean(context, 1)) {
                 multiple = duk_get_boolean(context, 1);
             }
-            opened = Engine::GetInstance().gui.OpenPanel(panel_name, multiple);
+            std::shared_ptr<Gui::GuiPanel> panel = Engine::GetInstance().gui.OpenPanel(panel_name, multiple);
+            if (panel != nullptr) {
+                opened = panel->entity_id;
+            }
         }
     }
     duk_push_uint(context, opened);

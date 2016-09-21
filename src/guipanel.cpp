@@ -4,6 +4,13 @@
 namespace Critterbits {
 namespace Gui {
 
+void GuiPanel::Close() {
+    this->state = EntityState::Inactive;
+    if (this->destroy_on_close) {
+        this->MarkDestroy();
+    }
+}
+
 void GuiPanel::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_info) {
     if (clip_info.z_index == ZIndex::Gui) {
 
@@ -22,5 +29,15 @@ void GuiPanel::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInfo 
     }
 }
 
+void GuiPanel::Open() {
+    if (!this->IsDestroyed()) {
+        this->state = EntityState::Active;
+    }
+}
+
+void GuiPanel::Reflow(const CB_Rect & parent_rect) {
+    this->dim = this->flex.FlexBasedOn(parent_rect);
+    // TODO: iterate and reflow children
+}
 }
 }

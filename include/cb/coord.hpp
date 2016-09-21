@@ -44,6 +44,7 @@ typedef struct CB_Rect {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
     inline CB_Point xy() const { return CB_Point(x, y); };
+    inline void xy(const CB_Point & point) { x = point.x; y = point.y; };
     inline std::string to_string() const {
         return "[" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(w) + "," + std::to_string(h) +
                "]";
@@ -54,14 +55,33 @@ typedef struct CB_Rect {
     inline bool operator!=(const CB_Rect & other) const { return !(*this == other); }
 } CB_Rect;
 
+enum class AnchorPoint { TopLeft, BottomLeft, Center, TopRight, BottomRight };
+
+class FlexRect {
+  public:
+    static const int FLEX = -1;
+
+    AnchorPoint anchor{AnchorPoint::TopLeft};
+    int top{0};
+    int left{0};
+    int bottom{FLEX};
+    int right{FLEX};
+    int width{0};
+    int height{0};
+
+    FlexRect(){};
+    CB_Rect FlexBasedOn(const CB_Rect &) const;
+};
+
 enum class ZIndex { Background, Midground, Foreground, Gui };
 
 typedef struct CB_ViewClippingInfo {
     CB_Rect source{}, dest{};
     ZIndex z_index{ZIndex::Midground};
 
-    CB_ViewClippingInfo() {};
-    CB_ViewClippingInfo(const CB_Rect & source, const CB_Rect & dest, const ZIndex & z_index) : source(source), dest(dest), z_index(z_index) {};
+    CB_ViewClippingInfo(){};
+    CB_ViewClippingInfo(const CB_Rect & source, const CB_Rect & dest, const ZIndex & z_index)
+        : source(source), dest(dest), z_index(z_index){};
 } CB_ViewClippingInfo;
 }
 
