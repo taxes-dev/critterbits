@@ -3,6 +3,7 @@
 #define CBRESOURCE_HPP
 
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -51,11 +52,14 @@ class FileResourceLoader : public ResourceLoader {
     bool ResourceExists(const std::string &) const;
 };
 
+typedef std::function<void(SDL_Renderer *, SDL_Texture *)> TextureCreateFunction;
+
 class TextureManager {
   public:
     static TextureManager & GetInstance();
 
     void CleanUp();
+    std::shared_ptr<SDL_Texture> CreateTargetTexture(int, int, float, TextureCreateFunction);
     std::shared_ptr<SDL_Texture> GetTexture(const std::string &, const std::string & = "");
 
   private:

@@ -1,1 +1,1 @@
-add_library(critterbits-gui OBJECT guimanager.cpp guipanel.cpp)
+add_library(critterbits-gui OBJECT guimanager.cpp guipanel.cpp ninesliceimage.cpp)

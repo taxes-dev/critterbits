@@ -1,6 +1,9 @@
 #include <cb/critterbits.hpp>
 #include <SDL_image.h>
 
+namespace {
+    Critterbits::entity_id_t next_created_texture_id = CB_ENTITY_ID_FIRST;
+}
 namespace Critterbits {
 
 void TextureManager::CleanUp() {
@@ -11,6 +14,36 @@ void TextureManager::CleanUp() {
             it++;
         }
     }
+}
+
+std::shared_ptr<SDL_Texture> TextureManager::CreateTargetTexture(int w, int h, float scale, TextureCreateFunction func) {
+    LOG_INFO("TextureManager::CreateTargetTexture creating new ad hoc texture " + std::to_string(w) + "x" + std::to_string(h));
+    SDL_Renderer * renderer = Engine::GetInstance().GetRenderer();
+    SDL_Texture * new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h);
+
+    // set render target to the new texture
+    float original_scale_x, original_scale_y;
+    SDL_BlendMode original_blend_mode;
+    SDL_RenderGetScale(renderer, &original_scale_x, &original_scale_y);
+    SDL_GetRenderDrawBlendMode(renderer, &original_blend_mode);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderSetScale(renderer, scale, scale);
+    
+    // clear texture to transparent
+    SDL_SetRenderTarget(renderer, new_texture);
+    SDL_SetTextureBlendMode(new_texture, SDL_BLENDMODE_BLEND);
+
+    func(renderer, new_texture);
+
+    // reset render target
+    SDL_SetRenderTarget(renderer, NULL);
+    SDL_SetRenderDrawBlendMode(renderer, original_blend_mode);
+    SDL_RenderSetScale(renderer, original_scale_x, original_scale_y);
+
+    std::shared_ptr<SDL_Texture> texture_ptr{new_texture, [](SDL_Texture * texture) { SDLx::SDL_CleanUp(texture); }};
+    this->textures.insert(std::make_pair(":" + std::to_string(next_created_texture_id++), texture_ptr));
+    LOG_INFO("TextureManager::CreateTargetTexture texture created");
+    return std::move(texture_ptr);
 }
 
 TextureManager & TextureManager::GetInstance() {

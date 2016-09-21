@@ -22,7 +22,10 @@ typedef struct CB_Point {
         point.y = outer_h / 2 - inner_h / 2;
         return point;
     }
-
+    inline bool operator==(const CB_Point & other) const {
+        return x == other.x && y == other.y;
+    }
+    inline bool operator!=(const CB_Point & other) const { return !(*this == other); }
 } CB_Point;
 
 typedef struct CB_Rect {

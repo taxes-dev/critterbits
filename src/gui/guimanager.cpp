@@ -27,6 +27,16 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         panel->panel_name = gui_name;
         panel->destroy_on_close = parser.GetTableBool("panel.destroy_on_close");
         parser.GetTableFlexRect("panel.flex", &panel->flex);
+        std::string nineslice_image = parser.GetTableString("decoration.image");
+        if (!nineslice_image.empty()) {
+            panel->decoration.texture = TextureManager::GetInstance().GetTexture(nineslice_image, gui_path);
+        }
+        panel->decoration.scale = parser.GetTableFloat("decoration.scale", 1.0f);
+        int border = parser.GetTableInt("decoration.border");
+        panel->decoration.border.top = border;
+        panel->decoration.border.left = border;
+        panel->decoration.border.right = border;
+        panel->decoration.border.bottom = border;
         return std::move(panel);
     } else {
         LOG_ERR("GuiManager::LoadGuiPanel unable to load GUI panel: " + parser.GetParserError());

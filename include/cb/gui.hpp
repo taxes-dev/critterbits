@@ -26,6 +26,14 @@ class NineSliceImage {
         int bottom{0};
         int right{0};
     } border;
+    float scale{1.0f};
+
+    SDL_Texture * SliceTo(int, int);
+
+  private:
+    std::shared_ptr<SDL_Texture> sliced;
+    CB_Rect texture_bounds;
+    CB_Point last_sliced_to;
 };
 
 class GuiPanel : public Entity {
@@ -33,7 +41,7 @@ class GuiPanel : public Entity {
     std::string panel_name;
     bool destroy_on_close{false};
     FlexRect flex;
-    std::shared_ptr<NineSliceImage> decoration;
+    NineSliceImage decoration;
 
     GuiPanel() : Entity() { this->debug = true; };
     void Close();
