@@ -142,7 +142,7 @@ void Engine::IterateActiveEntities(EntityIterateFunction<Entity> func) {
     this->IterateEntities(wrapper);
 }
 
-void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func, bool children) {
+void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func) {
     EntityIterateFunction<Gui::GuiPanel> wrapper = [&func](std::shared_ptr<Gui::GuiPanel> panel) {
         if (panel->IsActive()) {
             return func(panel);
@@ -152,9 +152,6 @@ void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func, b
     for (auto & panel : this->gui.panels) {
         if (func(panel)) {
             return;
-        }
-        if (children) {
-            // TODO: iterate children of current panel
         }
     }
 }

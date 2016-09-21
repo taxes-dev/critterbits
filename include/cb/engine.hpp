@@ -109,7 +109,7 @@ class Engine {
     SDL_Renderer * GetRenderer() const { return this->renderer; };
     void IterateEntities(EntityIterateFunction<Entity>);
     void IterateActiveEntities(EntityIterateFunction<Entity>);
-    void IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel>, bool = false);
+    void IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel>);
     void IterateActiveSprites(EntityIterateFunction<Sprite>);
     int Run();
     void SetConfiguration(std::shared_ptr<EngineConfiguration>);

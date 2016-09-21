@@ -3,7 +3,7 @@ add_executable(critterbits
     engineeventqueue.cpp entity.cpp flexrect.cpp inputmanager.cpp memory.cpp
     rectregioncombiner.cpp rendering.cpp resourceloader.cpp scene.cpp
     scenemanager.cpp script.cpp scriptengine.cpp scriptsupport.cpp sprite.cpp
-    spritemanager.cpp tilemap.cpp tilemapregion.cpp tilesetimagemanager.cpp
+    spritemanager.cpp texturemanager.cpp tilemap.cpp tilemapregion.cpp
     tomlparser.cpp viewport.cpp
     $<TARGET_OBJECTS:duktape> $<TARGET_OBJECTS:critterbits-gui>)
 target_link_libraries(critterbits

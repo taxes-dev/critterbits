@@ -2,8 +2,11 @@
 #ifndef CBGUI_HPP
 #define CBGUI_HPP
 
+#include <map>
 #include <memory>
 #include <vector>
+
+#include <SDL.h>
 
 #include "coord.hpp"
 #include "entity.hpp"
@@ -14,13 +17,25 @@
 namespace Critterbits {
 namespace Gui {
 
+class NineSliceImage {
+  public:
+    std::shared_ptr<SDL_Texture> texture;
+    struct {
+        int top{0};
+        int left{0};
+        int bottom{0};
+        int right{0};
+    } border;
+};
+
 class GuiPanel : public Entity {
   public:
     std::string panel_name;
     bool destroy_on_close{false};
     FlexRect flex;
+    std::shared_ptr<NineSliceImage> decoration;
 
-    GuiPanel() : Entity(){ this->debug = true; };
+    GuiPanel() : Entity() { this->debug = true; };
     void Close();
     EntityType GetEntityType() const { return EntityType::GuiPanel; };
     void Open();
@@ -39,8 +54,8 @@ class GuiManager {
     std::shared_ptr<GuiPanel> OpenPanel(const std::string &, bool = false);
     void UnloadPanel(std::shared_ptr<GuiPanel>);
 
-private:
-    std::shared_ptr<GuiPanel> LoadGuiPanel(const std:: string &);
+  private:
+    std::shared_ptr<GuiPanel> LoadGuiPanel(const std::string &);
 };
 }
 }

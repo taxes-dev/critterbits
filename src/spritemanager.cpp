@@ -10,23 +10,6 @@ std::string SpriteManager::GetSpriteSheetPath(const std::string & asset_name) co
     return CB_SPRITE_PATH PATH_SEP_STR + asset_name;
 }
 
-std::shared_ptr<SDL_Texture> SpriteManager::GetSpriteSheet(const std::string & sprite_sheet_path) {
-    auto it = this->sprite_sheets.find(sprite_sheet_path);
-    if (it == this->sprite_sheets.end()) {
-        LOG_INFO("SpriteManager::GetSpriteSheet attempting to load sprite sheet " + sprite_sheet_path);
-        std::shared_ptr<SDL_Texture> sprite_sheet = Engine::GetInstance().GetResourceLoader()->GetImageResource(sprite_sheet_path);
-        if (sprite_sheet == nullptr) {
-            LOG_ERR("SpriteManager::GetSpriteSheet unable to load sprite sheet to texture");
-            return nullptr;
-        }
-        this->sprite_sheets.insert(std::make_pair(sprite_sheet_path, sprite_sheet));
-        return std::move(sprite_sheet);
-    } else {
-        LOG_INFO("SpriteManager::GetSpriteSheet found already loaded sprite sheet " + sprite_sheet_path);
-        return it->second;
-    }
-}
-
 bool SpriteManager::LoadQueuedSprites() {
     bool success = true;
 

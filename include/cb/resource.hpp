@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <memory>
 
 #include <SDL.h>
@@ -50,5 +51,19 @@ class FileResourceLoader : public ResourceLoader {
     bool ResourceExists(const std::string &) const;
 };
 
+class TextureManager {
+  public:
+    static TextureManager & GetInstance();
+
+    void CleanUp();
+    std::shared_ptr<SDL_Texture> GetTexture(const std::string &, const std::string & = "");
+
+  private:
+    std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
+
+    TextureManager(){};
+    TextureManager(const TextureManager &) = delete;
+    TextureManager(TextureManager &&) = delete;
+};
 }
 #endif
