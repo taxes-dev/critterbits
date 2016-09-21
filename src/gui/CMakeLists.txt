@@ -1,0 +1,1 @@
+add_library(critterbits-gui OBJECT guimanager.cpp guipanel.cpp)
