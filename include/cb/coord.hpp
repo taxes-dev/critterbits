@@ -55,17 +55,14 @@ typedef struct CB_Rect {
     inline bool operator!=(const CB_Rect & other) const { return !(*this == other); }
 } CB_Rect;
 
-enum class AnchorPoint { TopLeft, BottomLeft, Center, TopRight, BottomRight };
-
 class FlexRect {
   public:
     static const int FLEX = -1;
 
-    AnchorPoint anchor{AnchorPoint::TopLeft};
     int top{0};
     int left{0};
-    int bottom{FLEX};
-    int right{FLEX};
+    int bottom{0};
+    int right{0};
     int width{0};
     int height{0};
 

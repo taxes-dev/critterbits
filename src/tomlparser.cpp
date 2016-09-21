@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <cb/critterbits.hpp>
 
 namespace Critterbits {
@@ -29,40 +31,23 @@ void TomlParser::GetTableFlexRect(const std::string & key, FlexRect * flex_rect)
     if (flex_rect != nullptr) {
         auto table2 = this->table->get_table_qualified(key);
         if (table2) {
-            // anchor
-            std::string anchor_point = table2->get_as<std::string>("anchor").value_or("");
-            if (anchor_point.empty() || anchor_point == "top_left") {
-                flex_rect->anchor = AnchorPoint::TopLeft;
-            } else if (anchor_point == "top_right") {
-                flex_rect->anchor = AnchorPoint::TopRight;
-            } else if (anchor_point == "center") {
-                flex_rect->anchor = AnchorPoint::Center;
-            } else if (anchor_point == "bottom_left") {
-                flex_rect->anchor = AnchorPoint::BottomLeft;
-            } else if (anchor_point == "bottom_right") {
-                flex_rect->anchor = AnchorPoint::BottomRight;
-            } else {
-                LOG_ERR("TomlParser::GetTableFlexRect incorrect value for anchor: " + anchor_point);
-                flex_rect->anchor = AnchorPoint::TopLeft;
-            }
-
             // top, left
             auto val = table2->get_as<int64_t>("top");
-            flex_rect->top = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->top = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
             val = table2->get_as<int64_t>("left");
-            flex_rect->left = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->left = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
 
             // bottom, right
             val = table2->get_as<int64_t>("bottom");
-            flex_rect->bottom = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->bottom = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
             val = table2->get_as<int64_t>("right");
-            flex_rect->right = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->right = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
 
             // width, height
             val = table2->get_as<int64_t>("width");
-            flex_rect->width = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->width = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
             val = table2->get_as<int64_t>("height");
-            flex_rect->height = val ? static_cast<int>(*val) : FlexRect::FLEX;
+            flex_rect->height = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
 
         }
     }
