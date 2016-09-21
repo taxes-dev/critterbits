@@ -7,6 +7,21 @@
 
 namespace Critterbits {
 
+typedef struct CB_Color {
+    int r;
+    int g;
+    int b;
+    int a;
+
+    CB_Color() : r(0), g(0), b(0), a(0){};
+    CB_Color(int r, int g, int b) : r(r), g(g), b(b), a(255){};
+    CB_Color(int r, int g, int b, int a) : r(r), g(g), b(b), a(a){};
+    inline bool operator==(const CB_Color & other) const {
+        return r == other.r && g == other.g && b == other.b && a == other.a;
+    }
+    inline bool operator!=(const CB_Color & other) const { return !(*this == other); }
+} CB_Color;
+
 typedef struct CB_Point {
     int x;
     int y;
@@ -22,9 +37,7 @@ typedef struct CB_Point {
         point.y = outer_h / 2 - inner_h / 2;
         return point;
     }
-    inline bool operator==(const CB_Point & other) const {
-        return x == other.x && y == other.y;
-    }
+    inline bool operator==(const CB_Point & other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const CB_Point & other) const { return !(*this == other); }
 } CB_Point;
 
@@ -47,7 +60,10 @@ typedef struct CB_Rect {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
     inline CB_Point xy() const { return CB_Point(x, y); };
-    inline void xy(const CB_Point & point) { x = point.x; y = point.y; };
+    inline void xy(const CB_Point & point) {
+        x = point.x;
+        y = point.y;
+    };
     inline std::string to_string() const {
         return "[" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(w) + "," + std::to_string(h) +
                "]";

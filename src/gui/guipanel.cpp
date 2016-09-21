@@ -65,6 +65,7 @@ void GuiPanel::Reflow(const CB_Rect & parent_rect) {
     for (auto & control : this->children) {
         int row = control->grid.y;
         int col = control->grid.x;
+        control->Resize();
         row_widths.at(row) = std::max(row_widths.at(row), control->dim.w);
         col_heights.at(col) = std::max(col_heights.at(col), control->dim.h);
     }

@@ -27,6 +27,30 @@ bool TomlParser::GetTableBool(const std::string & key, bool default_value) const
     return this->table->get_qualified_as<bool>(key).value_or(default_value);
 }
 
+CB_Color TomlParser::GetTableColor(const std::string & key, CB_Color default_value) const {
+    int64_t r = default_value.r, g = default_value.g, b = default_value.b, a = default_value.a;
+    auto string_val = this->table->get_qualified_as<std::string>(key);
+    if (string_val && (*string_val).length() > 6) {
+        int color_val = std::strtol((*string_val).c_str() + 1, NULL, 16);
+        if ((*string_val).length() == 7) {
+            color_val = (color_val << 8) | 0xFF;
+        }
+        r = (color_val >> 24) & 0xFF;
+        g = (color_val >> 16) & 0xFF;
+        b = (color_val >> 8) & 0xFF;
+        a = color_val & 0xFF;
+    } else {
+        auto table2 = this->table->get_table_qualified(key);
+        if (table2) {
+            r = table2->get_as<int64_t>("r").value_or(default_value.r);
+            g = table2->get_as<int64_t>("g").value_or(default_value.g);
+            b = table2->get_as<int64_t>("b").value_or(default_value.b);
+            a = table2->get_as<int64_t>("a").value_or(default_value.a);
+        }
+    }
+    return CB_Color{static_cast<int>(r), static_cast<int>(g), static_cast<int>(b), static_cast<int>(a)};
+}
+
 void TomlParser::GetTableFlexRect(const std::string & key, FlexRect * flex_rect) const {
     if (flex_rect != nullptr) {
         auto table2 = this->table->get_table_qualified(key);

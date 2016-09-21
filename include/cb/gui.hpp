@@ -14,6 +14,8 @@
 #define CB_GUI_PATH "gui"
 #define CB_GUI_EXT ".toml"
 
+#define CB_GUI_LABEL_CONTROL "label"
+
 namespace Critterbits {
 namespace Gui {
 
@@ -36,16 +38,34 @@ class NineSliceImage {
     CB_Point last_sliced_to;
 };
 
+enum class ResizeBehavior { Static, Resize };
+
 class GuiControl : public Entity {
     public:
     CB_Point grid{0, 0};
+    CB_Color bg_color;
+    ResizeBehavior resize_behavior{ResizeBehavior::Static};
 
     GuiControl() : Entity() { this->debug = true; };
     EntityType GetEntityType() const { return EntityType::GuiControl; };
+    void Resize();
     int SortOrder(int width) { return this->grid.y * width + this->grid.x; }
 
     protected:
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+    virtual void OnResize() {};
+};
+
+class GuiLabel : public GuiControl {
+    public:
+    std::string text;
+    CB_Color text_color{0, 0, 0, 255};
+
+    GuiLabel() : GuiControl() { this->resize_behavior = ResizeBehavior::Resize; };
+
+    protected:
+    void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+    void OnResize();
 };
 
 class GuiPanel : public Entity {

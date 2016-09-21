@@ -2,6 +2,32 @@
 
 namespace Critterbits {
 namespace Gui {
+/*
+* Control parsing functions
+*/
+namespace {
+std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
+    std::shared_ptr<GuiLabel> label = std::make_shared<GuiLabel>();
+    label->text = table.GetTableString("text");
+    label->text_color = table.GetTableColor("text_color", label->text_color);
+    return std::move(label);
+}
+
+std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_type, const Toml::TomlParser & table) {
+    if (control_type == CB_GUI_LABEL_CONTROL) {
+        return std::dynamic_pointer_cast<GuiControl>(ParseLabel(table));
+    } else {
+#if NDEBUG
+        return nullptr;
+#else
+        return std::make_shared<GuiControl>();
+#endif
+    }
+}
+}
+/*
+* End control parsing functions
+*/
 
 bool GuiManager::ClosePanel(entity_id_t panel_id) {
     for (auto it = this->panels.begin(); it != this->panels.end(); it++) {
@@ -42,15 +68,27 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         panel->decoration.border.bottom = border;
 
         parser.IterateTableArray("control", [&panel](const Toml::TomlParser & table) {
-            std::shared_ptr<GuiControl> control = std::make_shared<GuiControl>();
-            control->grid = table.GetTablePoint("grid");
-            control->dim = table.GetTableRect("size");
-            if (control->grid.x < 0 || control->grid.x > panel->grid_cols - 1) {
-                LOG_ERR("GuiManager::LoadGuiPanel control grid X outside of grid");
-            } else if (control->grid.y < 0 || control->grid.y > panel->grid_rows - 1) {
-                LOG_ERR("GuiManager::LoadGuiPanel control grid Y outside of grid");
+            std::string control_type = table.GetTableString("type");
+            std::shared_ptr<GuiControl> control = ParseGuiControlOfType(control_type, table);
+            if (control != nullptr) {
+                control->tag = table.GetTableString("tag");
+                control->grid = table.GetTablePoint("grid");
+                control->dim = table.GetTableRect("size");
+                control->bg_color = table.GetTableColor("background_color", control->bg_color);
+                if (table.GetTableBool("resize", control->resize_behavior == ResizeBehavior::Resize)) {
+                    control->resize_behavior = ResizeBehavior::Resize;
+                } else {
+                    control->resize_behavior = ResizeBehavior::Static;
+                }
+                if (control->grid.x < 0 || control->grid.x > panel->grid_cols - 1) {
+                    LOG_ERR("GuiManager::LoadGuiPanel control grid X outside of grid");
+                } else if (control->grid.y < 0 || control->grid.y > panel->grid_rows - 1) {
+                    LOG_ERR("GuiManager::LoadGuiPanel control grid Y outside of grid");
+                } else {
+                    panel->children.push_back(std::move(control));
+                }
             } else {
-                panel->children.push_back(std::move(control));
+                LOG_ERR("GuiManager::LoadGuiPanel unable to load control with type " + control_type);
             }
         });
         std::sort(panel->children.begin(), panel->children.end(), [&panel](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
@@ -77,12 +115,14 @@ std::shared_ptr<GuiPanel> GuiManager::OpenPanel(const std::string & panel_name, 
     std::shared_ptr<GuiPanel> panel = this->LoadGuiPanel(panel_name);
     if (panel != nullptr) {
         this->panels.push_back(panel);
-        CB_Rect viewport_bounds = Engine::GetInstance().viewport->dim;
-        viewport_bounds.x = 0;
-        viewport_bounds.y = 0;
-        panel->Reflow(viewport_bounds);
-        panel->Open();
-        return panel;
+        EngineEventQueue::GetInstance().QueuePreUpdate([panel]() {
+            CB_Rect viewport_bounds = Engine::GetInstance().viewport->dim;
+            viewport_bounds.x = 0;
+            viewport_bounds.y = 0;
+            panel->Reflow(viewport_bounds);
+            panel->Open();
+        });
+        return std::move(panel);
     }
     return nullptr;
 }

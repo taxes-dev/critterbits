@@ -13,5 +13,11 @@ void GuiControl::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInf
         stringRGBA(renderer, clip_info.dest.x + 1, clip_info.dest.bottom() + 1, label.c_str(), 255, 255, 255, 255);
     }
 }
+
+void GuiControl::Resize() {
+    if (this->resize_behavior == ResizeBehavior::Resize) {
+        this->OnResize();
+    }
+}
 }
 }

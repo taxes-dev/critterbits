@@ -28,11 +28,12 @@ class TomlParser {
         }
     };
     bool GetTableBool(const std::string &, bool = false) const;
+    CB_Color GetTableColor(const std::string &, CB_Color = {}) const;
     void GetTableFlexRect(const std::string &, FlexRect *) const;
     float GetTableFloat(const std::string &, float = 0.f) const;
     int GetTableInt(const std::string &, int = 0) const;
-    CB_Point GetTablePoint(const std::string &, const CB_Point & = {0 ,0}) const;
-    CB_Rect GetTableRect(const std::string &, const CB_Rect & = {0, 0, 0, 0}) const;
+    CB_Point GetTablePoint(const std::string &, const CB_Point & = {}) const;
+    CB_Rect GetTableRect(const std::string &, const CB_Rect & = {}) const;
     std::string GetTableString(const std::string &, const std::string & = "") const;
     bool IsReady() const { return this->state == TomlParserState::Ready; };
     void IterateTableArray(const std::string &, const std::function<void(const TomlParser &)> &) const;
