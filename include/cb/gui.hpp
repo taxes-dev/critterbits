@@ -36,12 +36,27 @@ class NineSliceImage {
     CB_Point last_sliced_to;
 };
 
+class GuiControl : public Entity {
+    public:
+    CB_Point grid{0, 0};
+
+    GuiControl() : Entity() { this->debug = true; };
+    EntityType GetEntityType() const { return EntityType::GuiControl; };
+    int SortOrder(int width) { return this->grid.y * width + this->grid.x; }
+
+    protected:
+    void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+};
+
 class GuiPanel : public Entity {
   public:
     std::string panel_name;
     bool destroy_on_close{false};
     FlexRect flex;
     NineSliceImage decoration;
+    std::vector<std::shared_ptr<GuiControl>> children;
+    int grid_rows{1};
+    int grid_cols{1};
 
     GuiPanel() : Entity() { this->debug = true; };
     void Close();
@@ -52,6 +67,9 @@ class GuiPanel : public Entity {
   protected:
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+
+    private:
+    CB_ViewClippingInfo AdjustClipToClientArea(const CB_ViewClippingInfo &, const CB_Rect &) const;
 };
 
 class GuiManager {

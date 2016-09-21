@@ -11,7 +11,7 @@
 
 namespace Critterbits {
 
-enum class EntityType { Undefined, Sprite, Tilemap, Viewport, GuiPanel };
+enum class EntityType { Undefined, Sprite, Tilemap, Viewport, GuiPanel, GuiControl };
 enum class EntityState { New, Active, Inactive, Unloaded };
 typedef unsigned long entity_id_t;
 

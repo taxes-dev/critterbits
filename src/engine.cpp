@@ -125,7 +125,11 @@ void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
         if (func(panel)) {
             return;
         }
-        // TODO: iterate children of current panel
+        for (auto & control : panel->children) {
+            if (func(control)) {
+                return;
+            }
+        }
     }
     if (func(this->viewport)) {
         return;
