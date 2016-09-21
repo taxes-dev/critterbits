@@ -125,6 +125,7 @@ void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
         if (func(panel)) {
             return;
         }
+        // TODO: iterate children of current panel
     }
     if (func(this->viewport)) {
         return;
@@ -141,7 +142,7 @@ void Engine::IterateActiveEntities(EntityIterateFunction<Entity> func) {
     this->IterateEntities(wrapper);
 }
 
-void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func) {
+void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func, bool children) {
     EntityIterateFunction<Gui::GuiPanel> wrapper = [&func](std::shared_ptr<Gui::GuiPanel> panel) {
         if (panel->IsActive()) {
             return func(panel);
@@ -151,6 +152,9 @@ void Engine::IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel> func) {
     for (auto & panel : this->gui.panels) {
         if (func(panel)) {
             return;
+        }
+        if (children) {
+            // TODO: iterate children of current panel
         }
     }
 }
@@ -320,8 +324,7 @@ int Engine::Run() {
         for (auto z_index : {ZIndex::Background, ZIndex::Midground, ZIndex::Foreground}) {
             this->IterateActiveEntities([this, z_index](std::shared_ptr<Entity> entity) {
                 if (entity->dim.intersects(this->viewport->dim)) {
-                    CB_ViewClippingInfo clip = this->viewport->GetViewableRect(entity->dim);
-                    clip.z_index = z_index;
+                    CB_ViewClippingInfo clip = this->viewport->GetViewableRect(entity->dim, z_index);
                     entity->Render(this->renderer, clip);
                     if (z_index == ZIndex::Background) {
                         // guard is to make sure we only count each entity rendered once per frame
@@ -339,8 +342,7 @@ int Engine::Run() {
         CB_Rect gui_view{0, 0, this->viewport->dim.w, this->viewport->dim.h};
         this->IterateActiveGuiPanels([this, &gui_view](std::shared_ptr<Gui::GuiPanel> panel) {
             if (panel->dim.intersects(gui_view)) {
-                CB_ViewClippingInfo clip = this->viewport->GetStaticViewableRect(panel->dim);
-                clip.z_index = ZIndex::Gui;
+                CB_ViewClippingInfo clip = this->viewport->GetStaticViewableRect(panel->dim, ZIndex::Gui);
                 panel->Render(this->renderer, clip);
             }
             return false;
