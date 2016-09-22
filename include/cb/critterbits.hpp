@@ -6,6 +6,7 @@
 
 #include "2d.hpp"
 #include "coord.hpp"
+#include "color.hpp"
 #include "engine.hpp"
 #include "entity.hpp"
 #include "resource.hpp"

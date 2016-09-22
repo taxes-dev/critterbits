@@ -10,6 +10,7 @@
 #include <cpptoml/cpptoml.h>
 
 #include "coord.hpp"
+#include "color.hpp"
 
 namespace Critterbits {
 namespace Toml {

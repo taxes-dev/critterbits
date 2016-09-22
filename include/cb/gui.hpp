@@ -21,6 +21,9 @@
 #define CB_GUI_DEFAULT_MIN_H 0
 #define CB_GUI_DEFAULT_MAX_H 10000
 
+#define CB_SDL_GFX_FONT_W 8
+#define CB_SDL_GFX_FONT_H 8
+
 // forward declaration from SDL_ttf.h
 typedef struct _TTF_Font TTF_Font;
 
@@ -71,10 +74,11 @@ class GuiControl : public Entity {
 class GuiLabel : public GuiControl {
   public:
     std::string font_name;
-    std::string text;
     CB_Color text_color{0, 0, 0, 255};
 
     GuiLabel() : GuiControl() { this->resize_behavior = ResizeBehavior::Resize; };
+    ~GuiLabel();
+    void SetText(const std::string &);
 
   protected:
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
@@ -82,7 +86,13 @@ class GuiLabel : public GuiControl {
     bool OnStart();
 
   private:
+    bool text_is_dirty{false};
+    std::string text;
     std::shared_ptr<TTF_Font> font_resource;
+    SDL_Texture * rendered_text{nullptr};
+    CB_Rect rendered_text_size;
+
+    SDL_Texture * CreateTextureFromText(SDL_Renderer *);
 };
 
 class GuiPanel : public Entity {

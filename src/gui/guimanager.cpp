@@ -8,7 +8,7 @@ namespace Gui {
 namespace {
 std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
     std::shared_ptr<GuiLabel> label = std::make_shared<GuiLabel>();
-    label->text = table.GetTableString("text");
+    label->SetText(table.GetTableString("text"));
     label->text_color = table.GetTableColor("text_color", label->text_color);
     label->font_name = table.GetTableString("font");
     return std::move(label);
@@ -18,11 +18,7 @@ std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_ty
     if (control_type == CB_GUI_LABEL_CONTROL) {
         return std::dynamic_pointer_cast<GuiControl>(ParseLabel(table));
     } else {
-#if NDEBUG
         return nullptr;
-#else
-        return std::make_shared<GuiControl>();
-#endif
     }
 }
 }
