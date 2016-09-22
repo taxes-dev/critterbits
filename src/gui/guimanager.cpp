@@ -60,7 +60,7 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         parser.GetTableFlexRect("panel.flex", &panel->flex);
         std::string nineslice_image = parser.GetTableString("decoration.image");
         if (!nineslice_image.empty()) {
-            panel->decoration.texture = TextureManager::GetInstance().GetTexture(nineslice_image, gui_path);
+            panel->decoration.texture = Engine::GetInstance().textures.GetTexture(nineslice_image, gui_path);
         }
         panel->decoration.scale = parser.GetTableFloat("decoration.scale", panel->decoration.scale);
         int border = parser.GetTableInt("decoration.border");

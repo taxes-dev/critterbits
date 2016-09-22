@@ -31,8 +31,7 @@ std::shared_ptr<TTF_Font> FileResourceLoader::GetFontResource(const std::string 
         LOG_SDL_ERR("FileResourceLoader::GetFontResource unable to load font " + font_path);
         return nullptr;
     }
-    // FIXME: deleter is currently commented out because TTF_CloseFont is causing segmentation faults in libfreetype
-    std::shared_ptr<TTF_Font> font_ptr{font, [](TTF_Font * font) { /*if (font != nullptr) { TTF_CloseFont(font); }*/ }};
+    std::shared_ptr<TTF_Font> font_ptr{font, [](TTF_Font * font) { if (font != nullptr) { TTF_CloseFont(font); } }};
     return std::move(font_ptr);
 }
 

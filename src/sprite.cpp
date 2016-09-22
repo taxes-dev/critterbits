@@ -64,7 +64,7 @@ void Sprite::NotifyLoaded() {
         EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
             LOG_INFO("Sprite::NotifyLoaded(pre-update) attempting to load sprite sheet " + this->sprite_sheet_path);
             this->sprite_sheet =
-                TextureManager::GetInstance().GetTexture(this->sprite_sheet_path);
+                Engine::GetInstance().textures.GetTexture(this->sprite_sheet_path);
             if (this->sprite_sheet == nullptr) {
                 LOG_ERR("Sprite::NotifyLoaded(pre-update) unable to load sprite sheet");
             } else {

@@ -64,16 +64,20 @@ typedef std::function<void(SDL_Renderer *, SDL_Texture *)> TextureCreateFunction
 
 class TextureManager {
   public:
-    static TextureManager & GetInstance();
+    TextureManager();
+    ~TextureManager();
 
     void CleanUp();
     std::shared_ptr<SDL_Texture> CreateTargetTexture(int, int, float, TextureCreateFunction);
     std::shared_ptr<SDL_Texture> GetTexture(const std::string &, const std::string & = "");
+    bool IsInitialized() const { return this->initialized; };
+    void SetResourceLoader(std::shared_ptr<ResourceLoader>);
 
   private:
+    bool initialized{false};
     std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
+    std::shared_ptr<ResourceLoader> loader;
 
-    TextureManager(){};
     TextureManager(const TextureManager &) = delete;
     TextureManager(TextureManager &&) = delete;
 };
@@ -89,18 +93,23 @@ typedef struct CB_NamedFont {
 
 class FontManager {
   public:
-    static FontManager & GetInstance();
+    FontManager();
+    ~FontManager();
 
     void CleanUp();
     std::shared_ptr<TTF_Font> GetFont(const std::string &, int, const std::string & = "");
     std::shared_ptr<TTF_Font> GetNamedFont(const std::string &);
+    bool IsInitialized() const { return this->initialized; };
+    void RegisterNamedFont(const CB_NamedFont &);
     void RegisterNamedFont(const std::string &, const std::string &, int);
+    void SetResourceLoader(std::shared_ptr<ResourceLoader>);
 
   private:
+    bool initialized{false};
     std::map<std::string, std::shared_ptr<TTF_Font>> fonts;
-    std::map<std::string, CB_NamedFont> named_fonts; 
+    std::map<std::string, CB_NamedFont> named_fonts;
+    std::shared_ptr<ResourceLoader> loader; 
 
-    FontManager(){};
     FontManager(const FontManager &) = delete;
     FontManager(FontManager &&) = delete;
 };

@@ -4,9 +4,9 @@
 
 #include <SDL.h>
 #include <functional>
-#include <list>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "resource.hpp"
 #include "input.hpp"
@@ -47,6 +47,7 @@ class EngineConfiguration {
         int height{CB_DEFAULT_WINDOW_H};
         std::string title{CB_DEFAULT_WINDOW_TITLE};
     } window;
+    std::vector<CB_NamedFont> configured_fonts;
 
     EngineConfiguration(){};
     EngineConfiguration(const std::string &);
@@ -92,13 +93,15 @@ class EngineCounters {
 class Engine {
   public:
     std::shared_ptr<EngineConfiguration> config;
+    TextureManager textures;
+    FontManager fonts;
     CB_Rect display_bounds;
     EngineCounters counters;
+    std::shared_ptr<Viewport> viewport{std::make_shared<Viewport>()};
     InputManager input;
     Scripting::ScriptEngine scripts;
     SceneManager scenes;
     Gui::GuiManager gui;
-    std::shared_ptr<Viewport> viewport{std::make_shared<Viewport>()};
 
     ~Engine();
     std::shared_ptr<Entity> FindEntityById(entity_id_t);

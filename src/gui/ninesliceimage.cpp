@@ -13,7 +13,7 @@ SDL_Texture * NineSliceImage::SliceTo(int w, int h) {
         SDL_QueryTexture(this->texture.get(), NULL, NULL, &this->texture_bounds.w, &this->texture_bounds.h);
     }
 
-    this->sliced = TextureManager::GetInstance().CreateTargetTexture(
+    this->sliced = Engine::GetInstance().textures.CreateTargetTexture(
         w, h, this->scale, [&](SDL_Renderer * renderer, SDL_Texture * texture) {
             // clear texture to transparent
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);

@@ -5,6 +5,20 @@ namespace {
     Critterbits::entity_id_t next_created_texture_id = CB_ENTITY_ID_FIRST;
 }
 namespace Critterbits {
+TextureManager::TextureManager() {
+    if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
+        LOG_SDL_ERR("Engine::Engine IMG_Init");
+    } else {
+        this->initialized = true;
+    }
+}
+
+TextureManager::~TextureManager() {
+    for (auto & texture : this->textures) {
+        texture.second.reset();
+    }
+    IMG_Quit();
+}
 
 void TextureManager::CleanUp() {
     for (auto it = this->textures.begin(); it != this->textures.end();) {
@@ -46,12 +60,11 @@ std::shared_ptr<SDL_Texture> TextureManager::CreateTargetTexture(int w, int h, f
     return std::move(texture_ptr);
 }
 
-TextureManager & TextureManager::GetInstance() {
-    static TextureManager instance;
-    return instance;
-}
-
 std::shared_ptr<SDL_Texture> TextureManager::GetTexture(const std::string & asset_path, const std::string & relative_to_file) {
+    if (this->loader == nullptr) {
+        LOG_ERR("TextureManager::GetTexture called before resource loader set (programming error?)");
+        return nullptr;
+    }
     std::string final_path{asset_path};
     if (!relative_to_file.empty()) {
         final_path = ResourceLoader::StripAssetNameFromPath(relative_to_file) + PATH_SEP + asset_path;
@@ -59,7 +72,7 @@ std::shared_ptr<SDL_Texture> TextureManager::GetTexture(const std::string & asse
     auto it = this->textures.find(final_path);
     if (it == this->textures.end()) {
         LOG_INFO("TextureManager::GetTexture attempting to load " + final_path);
-        std::shared_ptr<SDL_Texture> texture_ptr = Engine::GetInstance().GetResourceLoader()->GetImageResource(final_path);
+        std::shared_ptr<SDL_Texture> texture_ptr = this->loader->GetImageResource(final_path);
         if (texture_ptr == nullptr) {
             LOG_ERR("TextureManager::GetTexture unable to load image to texture");
             // push the bad image on to the map to prevent infinite attempts
@@ -74,5 +87,7 @@ std::shared_ptr<SDL_Texture> TextureManager::GetTexture(const std::string & asse
     return nullptr;
 }
 
-
+void TextureManager::SetResourceLoader(std::shared_ptr<ResourceLoader> resource_loader) {
+    this->loader = std::move(resource_loader); 
+}
 }

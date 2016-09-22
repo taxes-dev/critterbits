@@ -5,8 +5,6 @@
 
 #include <cb/critterbits.hpp>
 #include <cb/memory/nadeau.hpp>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
 #include <SDL2_gfxPrimitives.h>
 
 namespace Critterbits {
@@ -15,24 +13,13 @@ Engine::Engine() {
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         LOG_SDL_ERR("Engine::Engine SDL_Init");
-        return;
+    } else {
+        this->initialized = true;
     }
-    if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
-        LOG_SDL_ERR("Engine::Engine IMG_Init");
-        return;
-    }
-    if (TTF_Init() != 0) {
-        LOG_SDL_ERR("Engine::Engine TTF_Init");
-        return;
-    }
-
-    this->initialized = true;
 }
 
 Engine::~Engine() {
     SDLx::SDL_CleanUp(this->renderer, this->window);
-    TTF_Quit();
-    IMG_Quit();
     SDL_Quit();
 }
 
@@ -193,7 +180,7 @@ void Engine::IterateActiveSprites(EntityIterateFunction<Sprite> func) {
 int Engine::Run() {
     LOG_INFO("Entering Engine::Run()");
 
-    if (!this->initialized) {
+    if (!this->initialized || !this->fonts.IsInitialized() || !this->textures.IsInitialized()) {
         LOG_ERR("Engine::Run engine initialization was unsuccessful");
         return 1;
     }
@@ -203,8 +190,6 @@ int Engine::Run() {
         LOG_ERR("Engine::Run engine configuration is not valid");
         return 1;
     }
-
-    // initialize controllers, if needed
 
     // discover display bounds
     SDL_Rect disp_bounds;
@@ -260,6 +245,15 @@ int Engine::Run() {
     this->max_texture_width = r_info.max_texture_width;
     LOG_INFO("Engine::Run renderer max_texture_width " + std::to_string(r_info.max_texture_width));
     LOG_INFO("Engine::Run renderer max_texture_height " + std::to_string(r_info.max_texture_height));
+
+    // configure texture manager
+    this->textures.SetResourceLoader(this->config->loader);
+    
+    // configure font manager
+    this->fonts.SetResourceLoader(this->config->loader);
+    for (auto & named_font : this->config->configured_fonts) {
+        this->fonts.RegisterNamedFont(named_font);
+    }
 
     // setup input methods
     this->input.SetControllerActive(this->config->input.controller);

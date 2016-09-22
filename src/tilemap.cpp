@@ -227,7 +227,7 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     }
 
     std::shared_ptr<SDL_Texture> source_image =
-        TextureManager::GetInstance().GetTexture(image->GetSource(), this->tmx_path);
+        Engine::GetInstance().textures.GetTexture(image->GetSource(), this->tmx_path);
     float op = layer->GetOpacity();
 
     dim.x = layer->GetOffsetX();
@@ -352,7 +352,7 @@ void Tilemap::DrawTileOnMap(SDL_Renderer * renderer, const Tmx::MapTile & tile, 
 
         // select source image
         std::shared_ptr<SDL_Texture> tileset_image =
-            TextureManager::GetInstance().GetTexture(im->GetSource(), this->tmx_path);
+            Engine::GetInstance().textures.GetTexture(im->GetSource(), this->tmx_path);
         if (tileset_image != nullptr) {
 
             // set alpha modulation based on layer opacity

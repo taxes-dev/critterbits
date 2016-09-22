@@ -75,12 +75,13 @@ bool EngineConfiguration::ReloadConfiguration() {
             this->window.width = config.GetTableInt("window.width", this->window.width);
 
             // fonts
-            config.IterateTableArray("font", [](const Toml::TomlParser & table) {
-                FontManager::GetInstance().RegisterNamedFont(
+            config.IterateTableArray("font", [this](const Toml::TomlParser & table) {
+                CB_NamedFont named_font{
                     table.GetTableString("name"),
                     table.GetTableString("file"),
                     table.GetTableInt("size")
-                );
+                };
+                this->configured_fonts.push_back(named_font);
             });
 
             this->Validate();

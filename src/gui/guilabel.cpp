@@ -29,7 +29,7 @@ void GuiLabel::OnResize() {
 bool GuiLabel::OnStart() {
     if (!this->font_name.empty()) {
         LOG_INFO("GuiLabel::OnStart attempting to load font " + this->font_name);
-        this->font_resource = FontManager::GetInstance().GetNamedFont(this->font_name);
+        this->font_resource = Engine::GetInstance().fonts.GetNamedFont(this->font_name);
     }
     return true;
 }
