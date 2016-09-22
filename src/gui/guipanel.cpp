@@ -87,11 +87,11 @@ void GuiPanel::Reflow(const CB_Rect & parent_rect) {
         int row = control->grid.y;
         int col = control->grid.x;
         control->dim.x = 0;
-        std::for_each(row_widths.begin(), row_widths.begin() + row,
-                      [this, &control](int w) { control->dim.x += w + this->grid_padding.x; });
+        std::for_each(row_widths.begin(), row_widths.begin() + col,
+                    [this, &control](int w) { control->dim.x += w + this->grid_padding.x; });
         control->dim.y = 0;
-        std::for_each(col_heights.begin(), col_heights.begin() + col,
-                      [this, &control](int h) { control->dim.y += h + this->grid_padding.y; });
+        std::for_each(col_heights.begin(), col_heights.begin() + row,
+                    [this, &control](int h) { control->dim.y += h + this->grid_padding.y; });
         control->dim.w = row_widths.at(row);
         control->dim.h = col_heights.at(col);
     }

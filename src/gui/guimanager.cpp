@@ -6,6 +6,23 @@ namespace Gui {
 * Control parsing functions
 */
 namespace {
+std::shared_ptr<GuiImage> ParseImage(const Toml::TomlParser & table, const std::string & gui_path) {
+    std::shared_ptr<GuiImage> image = std::make_shared<GuiImage>();
+    std::string image_path = table.GetTableString("image");
+    if (!image_path.empty()) {
+        image->image_texture = Engine::GetInstance().textures.GetTexture(image_path, gui_path);
+    } 
+    std::string image_mode = table.GetTableString("image_mode", "actual");
+    if (image_mode == "actual") {
+        image->image_mode = GuiImageMode::Actual;
+    } else if (image_mode == "fill") {
+        image->image_mode = GuiImageMode::Fill;
+    } else {
+        LOG_ERR("ParseImage unknown image_mode " + image_mode);
+    }
+    return std::move(image);
+}
+
 std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
     std::shared_ptr<GuiLabel> label = std::make_shared<GuiLabel>();
     label->SetText(table.GetTableString("text"));
@@ -14,9 +31,11 @@ std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
     return std::move(label);
 }
 
-std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_type, const Toml::TomlParser & table) {
+std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_type, const Toml::TomlParser & table, const std::string & gui_path) {
     if (control_type == CB_GUI_LABEL_CONTROL) {
         return std::dynamic_pointer_cast<GuiControl>(ParseLabel(table));
+    } else if (control_type == CB_GUI_IMAGE_CONTROL) {
+        return std::dynamic_pointer_cast<GuiControl>(ParseImage(table, gui_path));
     } else {
         return nullptr;
     }
@@ -46,6 +65,7 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
     auto gui_file = Engine::GetInstance().GetResourceLoader()->OpenTextResource(gui_path);
     Toml::TomlParser parser{gui_file};
     if (parser.IsReady()) {
+        // paser GuiPanel
         std::shared_ptr<GuiPanel> panel = std::make_shared<GuiPanel>();
         panel->panel_name = gui_name;
         panel->tag = parser.GetTableString("panel.tag");
@@ -66,9 +86,10 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         panel->decoration.border.right = border;
         panel->decoration.border.bottom = border;
 
-        parser.IterateTableArray("control", [&panel](const Toml::TomlParser & table) {
+        // parse child controls
+        parser.IterateTableArray("control", [&panel, &gui_path](const Toml::TomlParser & table) {
             std::string control_type = table.GetTableString("type");
-            std::shared_ptr<GuiControl> control = ParseGuiControlOfType(control_type, table);
+            std::shared_ptr<GuiControl> control = ParseGuiControlOfType(control_type, table, gui_path);
             if (control != nullptr) {
                 control->tag = table.GetTableString("tag");
                 control->grid = table.GetTablePoint("grid");
@@ -96,10 +117,13 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
                 LOG_ERR("GuiManager::LoadGuiPanel unable to load control with type " + control_type);
             }
         });
+
+        // sort child controls based on grid position
         std::sort(panel->children.begin(), panel->children.end(),
                   [&panel](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
                       return lhs->SortOrder(panel->grid_cols) < rhs->SortOrder(panel->grid_cols);
                   });
+
         return std::move(panel);
     } else {
         LOG_ERR("GuiManager::LoadGuiPanel unable to load GUI panel: " + parser.GetParserError());

@@ -14,6 +14,7 @@
 #define CB_GUI_PATH "gui"
 #define CB_GUI_EXT ".toml"
 
+#define CB_GUI_IMAGE_CONTROL "image"
 #define CB_GUI_LABEL_CONTROL "label"
 
 #define CB_GUI_DEFAULT_MIN_W 0
@@ -61,7 +62,7 @@ class GuiControl : public Entity {
     int min_w{CB_GUI_DEFAULT_MIN_W};
     int min_h{CB_GUI_DEFAULT_MIN_H};
 
-    GuiControl() : Entity(){};
+    GuiControl();
     EntityType GetEntityType() const { return EntityType::GuiControl; };
     void Resize();
     int SortOrder(int width) { return this->grid.y * width + this->grid.x; }
@@ -69,6 +70,25 @@ class GuiControl : public Entity {
   protected:
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     virtual void OnResize(){};
+};
+
+enum class GuiImageMode { Actual, Fill };
+
+class GuiImage : public GuiControl {
+  public:
+    GuiImageMode image_mode{GuiImageMode::Actual};
+    std::shared_ptr<SDL_Texture> image_texture;
+
+    GuiImage() : GuiControl() { this->resize_behavior = ResizeBehavior::Resize; };
+
+  protected:
+    void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
+    void OnResize();
+
+  private:
+    CB_Rect image_size;
+
+    CB_Rect GetImageSize();
 };
 
 class GuiLabel : public GuiControl {
