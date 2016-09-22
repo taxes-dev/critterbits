@@ -21,6 +21,9 @@
 #define CB_GUI_DEFAULT_MIN_H 0
 #define CB_GUI_DEFAULT_MAX_H 10000
 
+// forward declaration from SDL_ttf.h
+typedef struct _TTF_Font TTF_Font;
+
 namespace Critterbits {
 namespace Gui {
 
@@ -67,6 +70,7 @@ class GuiControl : public Entity {
 
 class GuiLabel : public GuiControl {
   public:
+    std::string font_name;
     std::string text;
     CB_Color text_color{0, 0, 0, 255};
 
@@ -75,6 +79,10 @@ class GuiLabel : public GuiControl {
   protected:
     void OnRender(SDL_Renderer *, const CB_ViewClippingInfo &);
     void OnResize();
+    bool OnStart();
+
+  private:
+    std::shared_ptr<TTF_Font> font_resource;
 };
 
 class GuiPanel : public Entity {

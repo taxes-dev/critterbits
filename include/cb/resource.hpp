@@ -18,6 +18,12 @@ const char PATH_SEP = '/';
 #define PATH_SEP_STR "/"
 #endif
 
+#define CB_FONT_MIN_SIZE 6
+#define CB_FONT_MAX_SIZE 72
+
+// forward declaration from SDL_ttf.h
+typedef struct _TTF_Font TTF_Font;
+
 namespace Critterbits {
 enum class ResourceSource { File, Pack };
 
@@ -30,6 +36,7 @@ class ResourceLoader {
   public:
     virtual ~ResourceLoader(){};
     static std::shared_ptr<ResourceLoader> GetResourceLoader(const BaseResourcePath &);
+    virtual std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const = 0;
     virtual std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const = 0;
     virtual bool GetTextResourceContents(const std::string &, std::string **) const = 0;
     virtual std::shared_ptr<std::istream> OpenTextResource(const std::string &) const = 0;
@@ -46,6 +53,7 @@ class FileResourceLoader : public ResourceLoader {
   public:
     FileResourceLoader(const BaseResourcePath & res_path) : ResourceLoader(res_path){};
 
+    std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const;
     std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const;
     bool GetTextResourceContents(const std::string &, std::string **) const;
     std::shared_ptr<std::istream> OpenTextResource(const std::string &) const;
@@ -68,6 +76,33 @@ class TextureManager {
     TextureManager(){};
     TextureManager(const TextureManager &) = delete;
     TextureManager(TextureManager &&) = delete;
+};
+
+typedef struct CB_NamedFont {
+  std::string name;
+  std::string font_path;
+  int pt_size;
+
+  CB_NamedFont() {};
+  CB_NamedFont(const std::string & name, const std::string & font_path, int pt_size) : name(name), font_path(font_path), pt_size(pt_size) {};
+} CB_NamedFont;
+
+class FontManager {
+  public:
+    static FontManager & GetInstance();
+
+    void CleanUp();
+    std::shared_ptr<TTF_Font> GetFont(const std::string &, int, const std::string & = "");
+    std::shared_ptr<TTF_Font> GetNamedFont(const std::string &);
+    void RegisterNamedFont(const std::string &, const std::string &, int);
+
+  private:
+    std::map<std::string, std::shared_ptr<TTF_Font>> fonts;
+    std::map<std::string, CB_NamedFont> named_fonts; 
+
+    FontManager(){};
+    FontManager(const FontManager &) = delete;
+    FontManager(FontManager &&) = delete;
 };
 }
 #endif

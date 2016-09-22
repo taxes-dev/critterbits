@@ -1,5 +1,6 @@
 #include <cb/critterbits.hpp>
 #include <SDL2_gfxPrimitives.h>
+#include <SDL_ttf.h>
 
 namespace Critterbits {
 namespace Gui {
@@ -23,6 +24,14 @@ void GuiLabel::OnResize() {
     // TODO: fonts!
     this->dim.w = 8 * this->text.length() + 4;
     this->dim.h = 10;
+}
+
+bool GuiLabel::OnStart() {
+    if (!this->font_name.empty()) {
+        LOG_INFO("GuiLabel::OnStart attempting to load font " + this->font_name);
+        this->font_resource = FontManager::GetInstance().GetNamedFont(this->font_name);
+    }
+    return true;
 }
 }
 }

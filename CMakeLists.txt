@@ -42,14 +42,14 @@ endif()
 # Look up SDL2 and add the include directory to our include path
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
-#find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 
 # Find TMX parser dependencies (tmxparser, tinyxml2)
 find_package(TINYXML2 REQUIRED)
 find_package(TMXPARSER REQUIRED)
 
-include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR}
+include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR}
 	${TINYXML2_INCLUDE_DIRS}
 	${TMXPARSER_INCLUDE_DIRS} 3pp)
 include_directories(include)

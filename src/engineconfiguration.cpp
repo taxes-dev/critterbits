@@ -74,6 +74,15 @@ bool EngineConfiguration::ReloadConfiguration() {
             this->window.title = config.GetTableString("window.title", this->window.title);
             this->window.width = config.GetTableInt("window.width", this->window.width);
 
+            // fonts
+            config.IterateTableArray("font", [](const Toml::TomlParser & table) {
+                FontManager::GetInstance().RegisterNamedFont(
+                    table.GetTableString("name"),
+                    table.GetTableString("file"),
+                    table.GetTableInt("size")
+                );
+            });
+
             this->Validate();
         }
     } catch (cpptoml::parse_exception & e) {

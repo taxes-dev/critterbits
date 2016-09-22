@@ -6,6 +6,7 @@
 #include <cb/critterbits.hpp>
 #include <cb/memory/nadeau.hpp>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <SDL2_gfxPrimitives.h>
 
 namespace Critterbits {
@@ -13,11 +14,15 @@ namespace Critterbits {
 Engine::Engine() {
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        LOG_SDL_ERR("Engine::Run SDL_Init");
+        LOG_SDL_ERR("Engine::Engine SDL_Init");
         return;
     }
     if (!TestBitMask<int>(IMG_Init(IMG_INIT_PNG), IMG_INIT_PNG)) {
-        LOG_SDL_ERR("Engine::Run IMG_Init");
+        LOG_SDL_ERR("Engine::Engine IMG_Init");
+        return;
+    }
+    if (TTF_Init() != 0) {
+        LOG_SDL_ERR("Engine::Engine TTF_Init");
         return;
     }
 
@@ -26,6 +31,7 @@ Engine::Engine() {
 
 Engine::~Engine() {
     SDLx::SDL_CleanUp(this->renderer, this->window);
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }

@@ -5,6 +5,7 @@
 
 #include <cb/critterbits.hpp>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 namespace Critterbits {
 std::shared_ptr<ResourceLoader> ResourceLoader::GetResourceLoader(const BaseResourcePath & base_path) {
@@ -21,6 +22,18 @@ std::string ResourceLoader::StripAssetNameFromPath(const std::string & asset_pat
     int index_a = asset_path.find_last_of('\\');
     int index_b = asset_path.find_last_of('/');
     return asset_path.substr(0, std::max(index_a, index_b));
+}
+
+std::shared_ptr<TTF_Font> FileResourceLoader::GetFontResource(const std::string & asset_path, int pt_size) const {
+    std::string font_path = this->res_path.base_path + asset_path;
+    TTF_Font * font = TTF_OpenFont(font_path.c_str(), pt_size);
+    if (font == nullptr) {
+        LOG_SDL_ERR("FileResourceLoader::GetFontResource unable to load font " + font_path);
+        return nullptr;
+    }
+    // FIXME: deleter is currently commented out because TTF_CloseFont is causing segmentation faults in libfreetype
+    std::shared_ptr<TTF_Font> font_ptr{font, [](TTF_Font * font) { /*if (font != nullptr) { TTF_CloseFont(font); }*/ }};
+    return std::move(font_ptr);
 }
 
 std::shared_ptr<SDL_Texture> FileResourceLoader::GetImageResource(const std::string & asset_path) const {

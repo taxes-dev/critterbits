@@ -10,6 +10,7 @@ std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
     std::shared_ptr<GuiLabel> label = std::make_shared<GuiLabel>();
     label->text = table.GetTableString("text");
     label->text_color = table.GetTableColor("text_color", label->text_color);
+    label->font_name = table.GetTableString("font");
     return std::move(label);
 }
 
