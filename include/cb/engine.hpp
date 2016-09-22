@@ -129,8 +129,10 @@ class Engine {
     Engine(const Engine &) = delete;
     Engine(Engine &&) = delete;
     void operator=(Engine const &) = delete;
+    bool ConfigureManagers();
+    bool CreateWindowAndRenderer();
     void DestroyMarkedEntities();
-    void RenderDebugPane(int);
+    void RenderDebugPane();
 };
 
 class Sprite;
