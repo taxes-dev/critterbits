@@ -71,6 +71,7 @@ bool EngineConfiguration::ReloadConfiguration() {
             // window settings
             this->window.full_screen = config.GetTableBool("window.full_screen", this->window.full_screen);
             this->window.height = config.GetTableInt("window.height", this->window.height);
+            this->window.icon_path = config.GetTableString("window.icon", this->window.icon_path);
             this->window.title = config.GetTableString("window.title", this->window.title);
             this->window.width = config.GetTableInt("window.width", this->window.width);
 

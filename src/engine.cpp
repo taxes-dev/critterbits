@@ -280,6 +280,9 @@ int Engine::Run() {
         return 1;
     }
 
+    // set icon on SDL window
+    this->SetWindowIcon();
+
     // load first scene
     if (!this->scenes.LoadScene(CB_FIRST_SCENE)) {
         LOG_ERR("Engine::Run cannot load startup scene");
@@ -399,4 +402,15 @@ void Engine::RenderDebugPane() {
 }
 
 void Engine::SetConfiguration(std::shared_ptr<EngineConfiguration> config) { this->config = std::move(config); }
+
+void Engine::SetWindowIcon() {
+    if (!this->config->window.icon_path.empty()) {
+        std::shared_ptr<SDL_Surface> icon = this->config->loader->GetImageResourceAsSurface(this->config->window.icon_path);
+        if (icon != nullptr) {
+            SDL_SetWindowIcon(this->window, icon.get());
+        } else {
+            LOG_ERR("Engine::SetWindowIcon unable to get window icon");
+        }
+    }
+}
 }

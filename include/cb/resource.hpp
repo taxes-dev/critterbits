@@ -38,6 +38,7 @@ class ResourceLoader {
     static std::shared_ptr<ResourceLoader> GetResourceLoader(const BaseResourcePath &);
     virtual std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const = 0;
     virtual std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const = 0;
+    virtual std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const = 0;
     virtual bool GetTextResourceContents(const std::string &, std::string **) const = 0;
     virtual std::shared_ptr<std::istream> OpenTextResource(const std::string &) const = 0;
     virtual bool ResourceExists(const std::string &) const = 0;
@@ -55,6 +56,7 @@ class FileResourceLoader : public ResourceLoader {
 
     std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const;
     std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const;
+    std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const;
     bool GetTextResourceContents(const std::string &, std::string **) const;
     std::shared_ptr<std::istream> OpenTextResource(const std::string &) const;
     bool ResourceExists(const std::string &) const;

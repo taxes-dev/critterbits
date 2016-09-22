@@ -45,6 +45,7 @@ class EngineConfiguration {
         bool full_screen{false};
         int width{CB_DEFAULT_WINDOW_W};
         int height{CB_DEFAULT_WINDOW_H};
+        std::string icon_path;
         std::string title{CB_DEFAULT_WINDOW_TITLE};
     } window;
     std::vector<CB_NamedFont> configured_fonts;
@@ -133,6 +134,7 @@ class Engine {
     bool CreateWindowAndRenderer();
     void DestroyMarkedEntities();
     void RenderDebugPane();
+    void SetWindowIcon();
 };
 
 class Sprite;
