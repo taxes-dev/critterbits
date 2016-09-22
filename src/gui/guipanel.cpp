@@ -79,13 +79,14 @@ void GuiPanel::Reflow(const CB_Rect & parent_rect) {
         int row_span = Clamp(control->grid.row_span, 1, this->grid_rows - row + 1);
         int col_span = Clamp(control->grid.col_span, 1, this->grid_cols - col + 1);
         control->Resize();
-        // FIXME: hmm, this now causes things to flow and compact to the left, which is not exactly what I wanted
-        for (int i = 0; i < row_span; i++) {
-            for (int j = 0; j < col_span; j++) {
-                cell_sizes.at(row + i).at(col + j) = {
-                    std::max(cell_sizes.at(row + i).at(col + j).x, control->dim.w / col_span),
-                    std::max(cell_sizes.at(row + i).at(col + j).y, control->dim.h / row_span)
-                    };
+        for (int i = 0; i < this->grid_rows; i++) {
+            for (int j = 0; j < this->grid_cols; j++) {
+                if (i >= row && i < row + row_span) {
+                    cell_sizes.at(i).at(j).y = std::max(cell_sizes.at(i).at(j).y, control->dim.h / row_span);
+                }
+                if (j >= col && j < col + col_span) {
+                    cell_sizes.at(i).at(j).x = std::max(cell_sizes.at(i).at(j).x, control->dim.w / col_span);
+                }
             }
         }
     }
