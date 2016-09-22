@@ -92,7 +92,9 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
             std::shared_ptr<GuiControl> control = ParseGuiControlOfType(control_type, table, gui_path);
             if (control != nullptr) {
                 control->tag = table.GetTableString("tag");
-                control->grid = table.GetTablePoint("grid");
+                control->grid.at = table.GetTablePoint("grid");
+                control->grid.row_span = table.GetTableInt("row_span", control->grid.row_span);
+                control->grid.col_span = table.GetTableInt("col_span", control->grid.col_span);
                 control->dim = table.GetTableRect("size");
                 CB_Rect maxes = table.GetTableRect("max_size", CB_Rect{0, 0, control->max_w, control->max_h});
                 control->max_w = Clamp(maxes.w, 0, CB_GUI_DEFAULT_MAX_W);
@@ -106,9 +108,9 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
                 } else {
                     control->resize_behavior = ResizeBehavior::Static;
                 }
-                if (control->grid.x < 0 || control->grid.x > panel->grid_cols - 1) {
+                if (control->grid.at.x < 0 || control->grid.at.x > panel->grid_cols - 1) {
                     LOG_ERR("GuiManager::LoadGuiPanel control grid X outside of grid");
-                } else if (control->grid.y < 0 || control->grid.y > panel->grid_rows - 1) {
+                } else if (control->grid.at.y < 0 || control->grid.at.y > panel->grid_rows - 1) {
                     LOG_ERR("GuiManager::LoadGuiPanel control grid Y outside of grid");
                 } else {
                     panel->children.push_back(std::move(control));

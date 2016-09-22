@@ -13,7 +13,7 @@ void GuiControl::OnDebugRender(SDL_Renderer * renderer, const CB_ViewClippingInf
         boxRGBA(renderer, clip_info.dest.x, clip_info.dest.bottom(), clip_info.dest.x + label.length() * 8 + 2,
                 clip_info.dest.bottom() + 10, 255, 69, 0, 127);
         stringRGBA(renderer, clip_info.dest.x + 1, clip_info.dest.bottom() + 1, label.c_str(), 255, 255, 255, 255);
-        std::string grid = this->grid.to_string();
+        std::string grid = this->grid.at.to_string();
         boxRGBA(renderer, clip_info.dest.right() - 8 * grid.length() - 2, clip_info.dest.y - 10,
                 clip_info.dest.right() - 1, clip_info.dest.y - 1, 255, 69, 0, 127);
         stringRGBA(renderer, clip_info.dest.right() - 8 * grid.length() - 1, clip_info.dest.y - 9, grid.c_str(),

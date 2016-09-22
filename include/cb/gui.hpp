@@ -54,7 +54,11 @@ enum class ResizeBehavior { Static, Resize };
 
 class GuiControl : public Entity {
   public:
-    CB_Point grid{0, 0};
+    struct {
+      CB_Point at;
+      int row_span{1};
+      int col_span{1};
+    } grid;
     CB_Color bg_color;
     ResizeBehavior resize_behavior{ResizeBehavior::Static};
     int max_w{CB_GUI_DEFAULT_MAX_W};
@@ -65,7 +69,7 @@ class GuiControl : public Entity {
     GuiControl();
     EntityType GetEntityType() const { return EntityType::GuiControl; };
     void Resize();
-    int SortOrder(int width) { return this->grid.y * width + this->grid.x; }
+    int SortOrder(int width) { return this->grid.at.y * width + this->grid.at.x; }
 
   protected:
     void OnDebugRender(SDL_Renderer *, const CB_ViewClippingInfo &);

@@ -70,30 +70,35 @@ void GuiPanel::Open() {
 
 void GuiPanel::Reflow(const CB_Rect & parent_rect) {
     this->dim = this->flex.FlexBasedOn(parent_rect);
-    std::vector<int> row_widths;
-    row_widths.resize(this->grid_rows);
-    std::vector<int> col_heights;
-    col_heights.resize(this->grid_cols);
+    // TODO: re-factor to use a single-dimension array
+    std::vector<std::vector<CB_Point>> cell_sizes{static_cast<size_t>(this->grid_rows), std::vector<CB_Point>{static_cast<size_t>(this->grid_cols)}};
     // first discover the largest control size in each row and column
     for (auto & control : this->children) {
-        int row = control->grid.y;
-        int col = control->grid.x;
+        int row = control->grid.at.y;
+        int col = control->grid.at.x;
+        int row_span = Clamp(control->grid.row_span, 1, this->grid_rows - row + 1);
+        int col_span = Clamp(control->grid.col_span, 1, this->grid_cols - col + 1);
         control->Resize();
-        row_widths.at(row) = std::max(row_widths.at(row), control->dim.w);
-        col_heights.at(col) = std::max(col_heights.at(col), control->dim.h);
+        // FIXME: hmm, this now causes things to flow and compact to the left, which is not exactly what I wanted
+        for (int i = 0; i < row_span; i++) {
+            for (int j = 0; j < col_span; j++) {
+                cell_sizes.at(row + i).at(col + j) = {
+                    std::max(cell_sizes.at(row + i).at(col + j).x, control->dim.w / col_span),
+                    std::max(cell_sizes.at(row + i).at(col + j).y, control->dim.h / row_span)
+                    };
+            }
+        }
     }
     // now set dimensions on each control based on the largest dimensions needed for each row/column
     for (auto & control : this->children) {
-        int row = control->grid.y;
-        int col = control->grid.x;
+        int row = control->grid.at.y;
+        int col = control->grid.at.x;
         control->dim.x = 0;
-        std::for_each(row_widths.begin(), row_widths.begin() + col,
-                    [this, &control](int w) { control->dim.x += w + this->grid_padding.x; });
+        std::for_each(cell_sizes.at(row).begin(), cell_sizes.at(row).begin() + col,
+                    [this, &control](const CB_Point & xy) { control->dim.x += xy.x + this->grid_padding.x; });
         control->dim.y = 0;
-        std::for_each(col_heights.begin(), col_heights.begin() + row,
-                    [this, &control](int h) { control->dim.y += h + this->grid_padding.y; });
-        control->dim.w = row_widths.at(row);
-        control->dim.h = col_heights.at(col);
+        std::for_each(cell_sizes.begin(), cell_sizes.begin() + row,
+                    [this, &control, &col](const std::vector<CB_Point> & cols) { control->dim.y += cols.at(col).y + this->grid_padding.y; });
     }
 }
 }
