@@ -119,6 +119,39 @@ class GuiLabel : public GuiControl {
     SDL_Texture * CreateTextureFromText(SDL_Renderer *);
 };
 
+typedef struct CB_GridRow {
+  CB_Rect dim;
+  int height{0};
+  bool flex_height{false};
+} CB_GridRow;
+
+typedef struct CB_GridColumn {
+  CB_Rect dim;
+  int width;
+  bool flex_width{false};
+} CB_GridColumn;
+
+class GridLayout {
+  public:
+    static const int FLEX = -1;
+
+    GridLayout(int rows, int cols, int h_padding, int v_padding) : h_padding(h_padding), v_padding(v_padding),
+      rows(static_cast<size_t>(rows)), cols(static_cast<size_t>(cols)) {};
+    GridLayout(int rows, int cols) : GridLayout(rows, cols, 0, 0) {};
+    CB_Rect GetCellRect(int, int, int = 1, int = 1) const;
+    int GetColumnCount() const { return this->cols.size(); };
+    int GetRowCount() const { return this->rows.size(); };
+    void Reflow(const CB_Rect &, bool = false);
+    void SetColumnWidth(int, int);
+    void SetRowHeight(int, int);
+
+  private:
+    int h_padding;
+    int v_padding;
+    std::vector<CB_GridRow> rows;
+    std::vector<CB_GridColumn> cols;
+};
+
 class GuiPanel : public Entity {
   public:
     std::string panel_name;
@@ -126,9 +159,7 @@ class GuiPanel : public Entity {
     FlexRect flex;
     NineSliceImage decoration;
     std::vector<std::shared_ptr<GuiControl>> children;
-    int grid_rows{1};
-    int grid_cols{1};
-    CB_Point grid_padding;
+    std::unique_ptr<GridLayout> layout;
 
     GuiPanel();
     void Close();

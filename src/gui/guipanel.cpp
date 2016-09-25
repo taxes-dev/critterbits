@@ -70,36 +70,10 @@ void GuiPanel::Open() {
 
 void GuiPanel::Reflow(const CB_Rect & parent_rect) {
     this->dim = this->flex.FlexBasedOn(parent_rect);
-    // TODO: re-factor to use a single-dimension array
-    std::vector<std::vector<CB_Point>> cell_sizes{static_cast<size_t>(this->grid_rows), std::vector<CB_Point>{static_cast<size_t>(this->grid_cols)}};
-    // first discover the largest control size in each row and column
+    this->layout->Reflow(this->dim);
     for (auto & control : this->children) {
-        int row = control->grid.at.y;
-        int col = control->grid.at.x;
-        int row_span = Clamp(control->grid.row_span, 1, this->grid_rows - row + 1);
-        int col_span = Clamp(control->grid.col_span, 1, this->grid_cols - col + 1);
-        control->Resize();
-        for (int i = 0; i < this->grid_rows; i++) {
-            for (int j = 0; j < this->grid_cols; j++) {
-                if (i >= row && i < row + row_span) {
-                    cell_sizes.at(i).at(j).y = std::max(cell_sizes.at(i).at(j).y, control->dim.h / row_span);
-                }
-                if (j >= col && j < col + col_span) {
-                    cell_sizes.at(i).at(j).x = std::max(cell_sizes.at(i).at(j).x, control->dim.w / col_span);
-                }
-            }
-        }
-    }
-    // now set dimensions on each control based on the largest dimensions needed for each row/column
-    for (auto & control : this->children) {
-        int row = control->grid.at.y;
-        int col = control->grid.at.x;
-        control->dim.x = 0;
-        std::for_each(cell_sizes.at(row).begin(), cell_sizes.at(row).begin() + col,
-                    [this, &control](const CB_Point & xy) { control->dim.x += xy.x + this->grid_padding.x; });
-        control->dim.y = 0;
-        std::for_each(cell_sizes.begin(), cell_sizes.begin() + row,
-                    [this, &control, &col](const std::vector<CB_Point> & cols) { control->dim.y += cols.at(col).y + this->grid_padding.y; });
+        CB_Rect cell_rect = this->layout->GetCellRect(control->grid.at.x, control->grid.at.y, control->grid.row_span, control->grid.col_span);
+        control->dim = cell_rect;
     }
 }
 }

@@ -23,6 +23,17 @@ TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
     }
 }
 
+void TomlParser::GetArrayString(const std::string & key, std::vector<std::string> * array_of_strings) const {
+    if (array_of_strings == nullptr) {
+        return;
+    }
+
+    auto arr = this->table->get_qualified_array_of<std::string>(key);
+    for (const auto & str : *arr) {
+        array_of_strings->push_back(str);
+    }
+}
+
 bool TomlParser::GetTableBool(const std::string & key, bool default_value) const {
     return this->table->get_qualified_as<bool>(key).value_or(default_value);
 }

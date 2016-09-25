@@ -11,7 +11,7 @@ std::shared_ptr<GuiImage> ParseImage(const Toml::TomlParser & table, const std::
     std::string image_path = table.GetTableString("image");
     if (!image_path.empty()) {
         image->image_texture = Engine::GetInstance().textures.GetTexture(image_path, gui_path);
-    } 
+    }
     std::string image_mode = table.GetTableString("image_mode", "actual");
     if (image_mode == "actual") {
         image->image_mode = GuiImageMode::Actual;
@@ -31,7 +31,46 @@ std::shared_ptr<GuiLabel> ParseLabel(const Toml::TomlParser & table) {
     return std::move(label);
 }
 
-std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_type, const Toml::TomlParser & table, const std::string & gui_path) {
+void ParseGridLayout(const Toml::TomlParser & table, std::shared_ptr<GuiPanel> panel) {
+    CB_Point grid_padding;
+    grid_padding = table.GetTablePoint("panel.grid_padding", grid_padding);
+    std::vector<std::string> col_widths;
+    table.GetArrayString("panel.grid_columns", &col_widths);
+    if (col_widths.size() == 0) {
+        col_widths.push_back("*");
+    }
+    std::vector<std::string> row_heights;
+    table.GetArrayString("panel.grid_rows", &row_heights);
+    if (row_heights.size() == 0) {
+        row_heights.push_back("*");
+    }
+
+    std::unique_ptr<GridLayout> layout{
+        new GridLayout(row_heights.size(), col_widths.size(), grid_padding.x, grid_padding.y)};
+    int i = 0;
+    for (auto & width : col_widths) {
+        if (width == "*") {
+            layout->SetColumnWidth(i, GridLayout::FLEX);
+        } else {
+            layout->SetColumnWidth(i, std::stol(width));
+        }
+        i++;
+    }
+    i = 0;
+    for (auto & height : row_heights) {
+        if (height == "*") {
+            layout->SetRowHeight(i, GridLayout::FLEX);
+        } else {
+            layout->SetRowHeight(i, std::stol(height));
+        }
+        i++;
+    }
+
+    panel->layout = std::move(layout);
+}
+
+std::shared_ptr<GuiControl> ParseGuiControlOfType(const std::string & control_type, const Toml::TomlParser & table,
+                                                  const std::string & gui_path) {
     if (control_type == CB_GUI_LABEL_CONTROL) {
         return std::dynamic_pointer_cast<GuiControl>(ParseLabel(table));
     } else if (control_type == CB_GUI_IMAGE_CONTROL) {
@@ -70,9 +109,7 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         panel->panel_name = gui_name;
         panel->tag = parser.GetTableString("panel.tag");
         panel->destroy_on_close = parser.GetTableBool("panel.destroy_on_close");
-        panel->grid_rows = parser.GetTableInt("panel.grid_rows", panel->grid_rows);
-        panel->grid_cols = parser.GetTableInt("panel.grid_cols", panel->grid_cols);
-        panel->grid_padding = parser.GetTablePoint("panel.grid_padding", panel->grid_padding);
+        ParseGridLayout(parser, panel);
         parser.GetTableFlexRect("panel.flex", &panel->flex);
         std::string nineslice_image = parser.GetTableString("decoration.image");
         if (!nineslice_image.empty()) {
@@ -108,9 +145,9 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
                 } else {
                     control->resize_behavior = ResizeBehavior::Static;
                 }
-                if (control->grid.at.x < 0 || control->grid.at.x > panel->grid_cols - 1) {
+                if (control->grid.at.x < 0 || control->grid.at.x > panel->layout->GetColumnCount() - 1) {
                     LOG_ERR("GuiManager::LoadGuiPanel control grid X outside of grid");
-                } else if (control->grid.at.y < 0 || control->grid.at.y > panel->grid_rows - 1) {
+                } else if (control->grid.at.y < 0 || control->grid.at.y > panel->layout->GetRowCount() - 1) {
                     LOG_ERR("GuiManager::LoadGuiPanel control grid Y outside of grid");
                 } else {
                     panel->children.push_back(std::move(control));
@@ -121,9 +158,10 @@ std::shared_ptr<GuiPanel> GuiManager::LoadGuiPanel(const std::string & gui_name)
         });
 
         // sort child controls based on grid position
+        int column_count = panel->layout->GetColumnCount();
         std::sort(panel->children.begin(), panel->children.end(),
-                  [&panel](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
-                      return lhs->SortOrder(panel->grid_cols) < rhs->SortOrder(panel->grid_cols);
+                  [column_count](const std::shared_ptr<GuiControl> & lhs, const std::shared_ptr<GuiControl> & rhs) {
+                      return lhs->SortOrder(column_count) < rhs->SortOrder(column_count);
                   });
 
         return std::move(panel);

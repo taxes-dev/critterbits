@@ -6,6 +6,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <cpptoml/cpptoml.h>
 
@@ -28,6 +29,7 @@ class TomlParser {
             return std::string{};
         }
     };
+    void GetArrayString(const std::string &, std::vector<std::string> *) const;
     bool GetTableBool(const std::string &, bool = false) const;
     CB_Color GetTableColor(const std::string &, CB_Color = {}) const;
     void GetTableFlexRect(const std::string &, FlexRect *) const;
