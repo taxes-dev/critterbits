@@ -13,15 +13,17 @@ void ArrangeCells(int parent_dim, int parent_offset, int padding, std::vector<CB
     for (size_t i = 0; i < descriptors->size(); i++) {
         CB_GridDescriptor & desc = descriptors->at(i);
         desc.position = pos;
+        
         if (desc.flex) {
             flexors.push_back(i);
         } else {
-            desc.actual_size = std::min(desc.desired_size, remaining_dim - padding);
-            remaining_dim -= desc.actual_size + padding;
-            pos += desc.actual_size + padding;
+            int current_padding = i == descriptors->size() - 1 ? 0 : padding;
+            desc.actual_size = std::min(desc.desired_size, remaining_dim - current_padding);
+            remaining_dim -= desc.actual_size + current_padding;
+            pos += desc.actual_size + current_padding;
         }
     }
-    remaining_dim -= padding * flexors.size();
+    remaining_dim -= padding * (flexors.size() - 1);
     if (flexors.size() > 0 && remaining_dim > 0) {
         int per_cell_dim = remaining_dim / flexors.size();
         for (auto & flex_at : flexors) {
