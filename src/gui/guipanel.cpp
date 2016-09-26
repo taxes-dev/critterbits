@@ -11,19 +11,17 @@ CB_ViewClippingInfo GuiPanel::AdjustClipToClientArea(const CB_ViewClippingInfo &
                                                      const CB_Rect & control_dim) const {
     CB_ViewClippingInfo client_area;
     client_area.source = control_dim;
-    client_area.dest.x = clip_info.dest.x + this->decoration.border.left * this->decoration.scale + control_dim.x;
-    client_area.dest.y = clip_info.dest.y + this->decoration.border.top * this->decoration.scale + control_dim.y;
+    client_area.dest.x = clip_info.dest.x + this->decoration.GetBorderLeftScaled() + control_dim.x;
+    client_area.dest.y = clip_info.dest.y + this->decoration.GetBorderTopScaled() + control_dim.y;
     client_area.dest.w = control_dim.w;
     client_area.dest.h = control_dim.h;
     client_area.z_index = clip_info.z_index;
 
-    if (client_area.dest.right() > clip_info.dest.right() - this->decoration.border.right * this->decoration.scale) {
-        client_area.dest.w =
-            clip_info.dest.right() - client_area.dest.x - this->decoration.border.right * this->decoration.scale;
+    if (client_area.dest.right() > clip_info.dest.right() - this->decoration.GetBorderRightScaled()) {
+        client_area.dest.w = clip_info.dest.right() - client_area.dest.x - this->decoration.GetBorderRightScaled();
     }
-    if (client_area.dest.bottom() > clip_info.dest.bottom() - this->decoration.border.bottom * this->decoration.scale) {
-        client_area.dest.h =
-            clip_info.dest.bottom() - client_area.dest.y - this->decoration.border.bottom * this->decoration.scale;
+    if (client_area.dest.bottom() > clip_info.dest.bottom() - this->decoration.GetBorderBottomScaled()) {
+        client_area.dest.h = clip_info.dest.bottom() - client_area.dest.y - this->decoration.GetBorderBottomScaled();
     }
 
     return client_area;
@@ -70,10 +68,13 @@ void GuiPanel::Open() {
 
 void GuiPanel::Reflow(const CB_Rect & parent_rect) {
     this->dim = this->flex.FlexBasedOn(parent_rect);
-    this->layout->Reflow(this->dim);
+    CB_Rect client_rect{0, 0,
+                        this->dim.w - this->decoration.GetBorderLeftScaled() - this->decoration.GetBorderRightScaled(),
+                        this->dim.h - this->decoration.GetBorderTopScaled() - this->decoration.GetBorderBottomScaled()};
+    this->layout->Reflow(client_rect);
     for (auto & control : this->children) {
-        CB_Rect cell_rect = this->layout->GetCellRect(control->grid.at.x, control->grid.at.y, control->grid.row_span, control->grid.col_span);
-        control->dim = cell_rect;
+        control->dim = this->layout->GetCellRect(control->grid.at.x, control->grid.at.y, control->grid.row_span,
+                                                 control->grid.col_span);
     }
 }
 }

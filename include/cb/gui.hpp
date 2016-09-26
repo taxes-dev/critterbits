@@ -42,6 +42,10 @@ class NineSliceImage {
     } border;
     float scale{1.0f};
 
+    int GetBorderBottomScaled() const { return this->border.bottom * this->scale; };
+    int GetBorderLeftScaled() const { return this->border.left * this->scale; };
+    int GetBorderRightScaled() const { return this->border.right * this->scale; };
+    int GetBorderTopScaled() const { return this->border.top * this->scale; };
     SDL_Texture * SliceTo(int, int);
 
   private:
@@ -55,9 +59,9 @@ enum class ResizeBehavior { Static, Resize };
 class GuiControl : public Entity {
   public:
     struct {
-      CB_Point at;
-      int row_span{1};
-      int col_span{1};
+        CB_Point at;
+        int row_span{1};
+        int col_span{1};
     } grid;
     CB_Color bg_color;
     ResizeBehavior resize_behavior{ResizeBehavior::Static};
@@ -119,25 +123,21 @@ class GuiLabel : public GuiControl {
     SDL_Texture * CreateTextureFromText(SDL_Renderer *);
 };
 
-typedef struct CB_GridRow {
-  CB_Rect dim;
-  int height{0};
-  bool flex_height{false};
-} CB_GridRow;
-
-typedef struct CB_GridColumn {
-  CB_Rect dim;
-  int width;
-  bool flex_width{false};
-} CB_GridColumn;
+typedef struct CB_GridDescriptor {
+    int actual_size{0};
+    int position{0};
+    int desired_size{0};
+    bool flex{false};
+} CB_GridDescriptor;
 
 class GridLayout {
   public:
     static const int FLEX = -1;
 
-    GridLayout(int rows, int cols, int h_padding, int v_padding) : h_padding(h_padding), v_padding(v_padding),
-      rows(static_cast<size_t>(rows)), cols(static_cast<size_t>(cols)) {};
-    GridLayout(int rows, int cols) : GridLayout(rows, cols, 0, 0) {};
+    GridLayout(int rows, int cols, int h_padding, int v_padding)
+        : h_padding(h_padding), v_padding(v_padding), rows(static_cast<size_t>(rows)),
+          cols(static_cast<size_t>(cols)){};
+    GridLayout(int rows, int cols) : GridLayout(rows, cols, 0, 0){};
     CB_Rect GetCellRect(int, int, int = 1, int = 1) const;
     int GetColumnCount() const { return this->cols.size(); };
     int GetRowCount() const { return this->rows.size(); };
@@ -148,8 +148,8 @@ class GridLayout {
   private:
     int h_padding;
     int v_padding;
-    std::vector<CB_GridRow> rows;
-    std::vector<CB_GridColumn> cols;
+    std::vector<CB_GridDescriptor> rows;
+    std::vector<CB_GridDescriptor> cols;
 };
 
 class GuiPanel : public Entity {

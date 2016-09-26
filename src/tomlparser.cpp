@@ -14,7 +14,7 @@ TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
         } catch (cpptoml::parse_exception & e) {
             LOG_ERR("TomlParser::TomlParser TOML parsing error " + std::string(e.what()));
             this->state = TomlParserState::Error;
-            this->parse_error = e.what();            
+            this->parse_error = e.what();
         }
     } else {
         LOG_ERR("TomlParser::TomlParser cannot read from provided stream");
@@ -83,7 +83,6 @@ void TomlParser::GetTableFlexRect(const std::string & key, FlexRect * flex_rect)
             flex_rect->width = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
             val = table2->get_as<int64_t>("height");
             flex_rect->height = val ? std::abs(static_cast<int>(*val)) : FlexRect::FLEX;
-
         }
     }
 }
@@ -115,12 +114,7 @@ CB_Rect TomlParser::GetTableRect(const std::string & key, const CB_Rect & defaul
         w = table2->get_as<int64_t>("w").value_or(default_value.w);
         h = table2->get_as<int64_t>("h").value_or(default_value.h);
     }
-    return CB_Rect{
-        static_cast<int>(x),
-        static_cast<int>(y),
-        static_cast<int>(w),
-        static_cast<int>(h)
-    };
+    return CB_Rect{static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h)};
 }
 
 std::string TomlParser::GetTableString(const std::string & key, const std::string & default_value) const {
