@@ -11,3 +11,4 @@ target_link_libraries(critterbits
     ${TMXPARSER_LIBRARIES} ${TINYXML2_LIBRARIES})
 install(TARGETS critterbits RUNTIME DESTINATION ${BIN_DIR})
 add_subdirectory(gui)
+add_subdirectory(tools/assetpacker)

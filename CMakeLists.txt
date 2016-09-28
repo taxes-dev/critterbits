@@ -11,6 +11,7 @@ set(BIN_DIR ${critterbits_SOURCE_DIR}/bin)
 set(PROJECT_TRDPARTY_DIR ${critterbits_SOURCE_DIR}/3pp)
 set(TINYXML2_ROOT ${PROJECT_TRDPARTY_DIR}/tinyxml2-4.0.1)
 set(TMXPARSER_ROOT ${PROJECT_TRDPARTY_DIR}/tmxparser)
+set(ZSTD_ROOT ${PROJECT_TRDPARTY_DIR}/zstd)
 
 # Bump up warning levels appropriately for clang, gcc & msvc
 # Also set debug/optimization flags depending on the build type. IDE users choose this when
@@ -49,8 +50,12 @@ find_package(SDL2_gfx REQUIRED)
 find_package(TINYXML2 REQUIRED)
 find_package(TMXPARSER REQUIRED)
 
+# Zstandard dependencies
+find_package(ZSTD REQUIRED)
+
 include_directories(SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR}
 	${TINYXML2_INCLUDE_DIRS}
+	${ZSTD_INCLUDE_DIRS}
 	${TMXPARSER_INCLUDE_DIRS} 3pp)
 include_directories(include)
 
