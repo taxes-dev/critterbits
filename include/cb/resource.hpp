@@ -10,6 +10,8 @@
 
 #include <SDL.h>
 
+#include "assetpack.hpp"
+
 #ifdef _WIN32
 const char PATH_SEP = '\\';
 #define PATH_SEP_STR "\\"
@@ -25,7 +27,8 @@ const char PATH_SEP = '/';
 typedef struct _TTF_Font TTF_Font;
 
 namespace Critterbits {
-enum class ResourceSource { File, Pack };
+enum class FileType { File, Directory, Invalid };
+enum class ResourceSource { File, AssetPack };
 
 typedef struct BaseResourcePath {
     std::string base_path;
@@ -35,7 +38,10 @@ typedef struct BaseResourcePath {
 class ResourceLoader {
   public:
     virtual ~ResourceLoader(){};
+    
     static std::shared_ptr<ResourceLoader> GetResourceLoader(const BaseResourcePath &);
+    static FileType IsFileOrDirectory(const std::string &);
+
     virtual std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const = 0;
     virtual std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const = 0;
     virtual std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const = 0;
@@ -48,6 +54,26 @@ class ResourceLoader {
     BaseResourcePath res_path;
 
     ResourceLoader(const BaseResourcePath & res_path) : res_path(res_path){};
+};
+
+class AssetPackResourceLoader : public ResourceLoader {
+  public:
+    AssetPackResourceLoader(const BaseResourcePath &);
+
+    std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const;
+    std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const;
+    std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const;
+    bool GetTextResourceContents(const std::string &, std::string **) const;
+    std::shared_ptr<std::istream> OpenTextResource(const std::string &) const;
+    bool ResourceExists(const std::string &) const;
+
+  private:
+    AssetPack::CB_AssetPackHeader header;
+    std::map<std::string, AssetPack::CB_AssetDictEntry> dict;
+    std::unique_ptr<std::ifstream> pack;
+    bool compressed{false};
+
+    SDL_RWops * GetSdlLoader(const std::string &) const; 
 };
 
 class FileResourceLoader : public ResourceLoader {

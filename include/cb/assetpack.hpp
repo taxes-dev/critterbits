@@ -24,6 +24,7 @@ typedef struct CB_AssetDictEntry {
     unsigned long index{0L};
     char name[CB_ASSETPACK_MAX_NAME_SIZE];
     unsigned long pos{0L};
+    unsigned long length{0L};
 } CB_AssetDictEntry;
 
 }

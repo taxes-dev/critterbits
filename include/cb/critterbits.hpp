@@ -9,6 +9,7 @@
 #include "color.hpp"
 #include "engine.hpp"
 #include "entity.hpp"
+#include "assetpack.hpp"
 #include "resource.hpp"
 #include "input.hpp"
 #include "logging.hpp"

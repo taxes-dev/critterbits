@@ -24,13 +24,27 @@ EngineConfiguration::EngineConfiguration(const std::string & source_path) {
 
     std::string expanded_path = this->GetExpandedPath(unexpanded_path);
     if (!expanded_path.empty()) {
-        this->asset_path = std::string(expanded_path) + PATH_SEP;
-        LOG_INFO("EngineConfiguration expanded source path: " + this->asset_path);
         BaseResourcePath res_path;
-        res_path.base_path = this->asset_path;
-        res_path.source = ResourceSource::File;
+        FileType file_type = ResourceLoader::IsFileOrDirectory(expanded_path); 
+        if (file_type == FileType::Directory) {
+            this->asset_path = expanded_path + PATH_SEP_STR;
+            LOG_INFO("EngineConfiguration expanded source path: " + this->asset_path);
+            res_path.base_path = this->asset_path;
+            res_path.source = ResourceSource::File;
+        } else if (file_type == FileType::File) {
+            this->asset_path = expanded_path;
+            LOG_INFO("EngineConfiguration expanded source pack: " + this->asset_path);
+            res_path.base_path = this->asset_path;
+            res_path.source = ResourceSource::AssetPack;
+        } else {
+            LOG_ERR("EngineConfiguration specified asset source path is invalid: " + expanded_path);
+            std::exit(1);
+        }
         this->loader = ResourceLoader::GetResourceLoader(res_path);
         this->ReloadConfiguration();
+    } else {
+        LOG_ERR("EngineConfiguration specified asset source path is invalid: " + source_path);
+        std::exit(1);
     }
 }
 
@@ -50,7 +64,7 @@ std::string EngineConfiguration::GetExpandedPath(const std::string & unexpanded_
 }
 
 bool EngineConfiguration::ReloadConfiguration() {
-    LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " + this->asset_path + CB_CONFIG_FILE);
+    LOG_INFO("EngineConfiguration::ReloadConfiguration reading configuration from " CB_CONFIG_FILE);
     try {
         auto config_res = this->loader->OpenTextResource(CB_CONFIG_FILE);
         auto config = Toml::TomlParser{config_res};

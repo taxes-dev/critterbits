@@ -94,6 +94,8 @@ void parse_command_line(int argc, char ** argv) {
             settings.quit_on_error = false;
         } else if (arg == "--no-compress") {
             settings.compress = false;
+        } else if (arg[0] == '-') {
+            LogError("Uknown paramater: " + arg);
         } else {
             std::string filename{argv[i]};
             settings.src = filename + PATH_SEP_STR;
@@ -113,7 +115,7 @@ bool should_compress(const std::string & name) {
     return true;
 }
 
-void copy_compressed_stream(std::ifstream & ifs, std::ofstream & ofs) {
+unsigned long copy_compressed_stream(std::ifstream & ifs, std::ofstream & ofs) {
     const size_t cbuf_size = ZSTD_compressBound(CBUF_SIZE);
     char * i_buffer = new char[CBUF_SIZE];
     char * c_buffer = new char[cbuf_size];
@@ -138,11 +140,13 @@ void copy_compressed_stream(std::ifstream & ifs, std::ofstream & ofs) {
     }
     delete[] c_buffer;
     delete[] i_buffer;
+    return bytes_written;
 }
 
 void write_asset(unsigned long index, std::ofstream & ofs, const std::string & name,
                  std::vector<Critterbits::AssetPack::CB_AssetDictEntry> & entries) {
     std::ifstream ifs{settings.src + name, std::ifstream::binary};
+    static char read_buffer[CBUF_SIZE];
     if (ifs.good()) {
         Critterbits::AssetPack::CB_AssetDictEntry dict;
         dict.index = index;
@@ -154,10 +158,14 @@ void write_asset(unsigned long index, std::ofstream & ofs, const std::string & n
         dict.pos = ofs.tellp();
         if (should_compress(name)) {
             LogInfoNoNL("[" + std::to_string(index + 1) + "] Writing compressed asset " + name + " ... ");
-            copy_compressed_stream(ifs, ofs);
+            dict.length = copy_compressed_stream(ifs, ofs);
         } else {
             LogInfo("[" + std::to_string(index + 1) + "] Writing uncompressed asset " + name);
-            ofs << ifs.rdbuf();
+            while (!ifs.eof()) {
+                ifs.read(&read_buffer[0], CBUF_SIZE);
+                dict.length += ifs.gcount();
+                ofs.write(&read_buffer[0], ifs.gcount());
+            }
         }
         entries.push_back(dict);
     } else {

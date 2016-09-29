@@ -8,7 +8,7 @@ namespace Toml {
 TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
     if (stream->good()) {
         try {
-            cpptoml::parser parser{*stream.get()};
+            cpptoml::parser parser{*stream};
             this->table = parser.parse();
             this->state = TomlParserState::Ready;
         } catch (cpptoml::parse_exception & e) {
