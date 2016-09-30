@@ -11,7 +11,7 @@ SDL_Texture * GuiLabel::CreateTextureFromText(SDL_Renderer * renderer) {
         SDLx::SDL_CleanUp(this->rendered_text);
         this->rendered_text = nullptr;
 
-        SDL_Surface * surface = TTF_RenderUTF8_Blended(this->font_resource.get(), this->text.c_str(),
+        SDL_Surface * surface = TTF_RenderUTF8_Blended(this->font_resource->font, this->text.c_str(),
                                                        static_cast<SDL_Color>(this->text_color));
         if (surface != nullptr) {
             this->rendered_text = SDL_CreateTextureFromSurface(renderer, surface);
@@ -46,7 +46,7 @@ void GuiLabel::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & cli
             }
             stringRGBA(renderer, clip_info.dest.x, clip_info.dest.y, label_text.c_str(), this->text_color.r,
                        this->text_color.g, this->text_color.b, this->text_color.a);
-        } else {
+        } else if (this->font_resource != nullptr) {
             // render using custom font
             SDL_Texture * texture = this->CreateTextureFromText(renderer);
             if (texture != nullptr) {
@@ -65,9 +65,9 @@ void GuiLabel::OnResize() {
         // using SDL2_gfx font
         this->dim.w = CB_SDL_GFX_FONT_W * this->text.length();
         this->dim.h = CB_SDL_GFX_FONT_H;
-    } else {
+    } else if (this->font_resource != nullptr) {
         // using custom font
-        if (TTF_SizeText(this->font_resource.get(), this->text.c_str(), &this->dim.w, &this->dim.h) != 0) {
+        if (TTF_SizeText(this->font_resource->font, this->text.c_str(), &this->dim.w, &this->dim.h) != 0) {
             LOG_SDL_ERR("GuiLabel::OnResize unable to size text using custom font");
         }
     }

@@ -10,6 +10,7 @@
 
 #include "coord.hpp"
 #include "entity.hpp"
+#include "resource.hpp"
 
 #define CB_GUI_PATH "gui"
 #define CB_GUI_EXT ".toml"
@@ -24,9 +25,6 @@
 
 #define CB_SDL_GFX_FONT_W 8
 #define CB_SDL_GFX_FONT_H 8
-
-// forward declaration from SDL_ttf.h
-typedef struct _TTF_Font TTF_Font;
 
 namespace Critterbits {
 namespace Gui {
@@ -116,7 +114,7 @@ class GuiLabel : public GuiControl {
   private:
     bool text_is_dirty{false};
     std::string text;
-    std::shared_ptr<TTF_Font> font_resource;
+    std::shared_ptr<TTF_FontWrapper> font_resource;
     SDL_Texture * rendered_text{nullptr};
     CB_Rect rendered_text_size;
 

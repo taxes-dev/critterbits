@@ -27,7 +27,7 @@ void FontManager::CleanUp() {
     }
 }
 
-std::shared_ptr<TTF_Font> FontManager::GetFont(const std::string & asset_path, int pt_size, const std::string & relative_to_file) {
+std::shared_ptr<TTF_FontWrapper> FontManager::GetFont(const std::string & asset_path, int pt_size, const std::string & relative_to_file) {
     if (this->loader == nullptr) {
         LOG_ERR("FontManager::GetFont called before resource loader set (programming error?)");
         return nullptr;
@@ -40,7 +40,7 @@ std::shared_ptr<TTF_Font> FontManager::GetFont(const std::string & asset_path, i
     auto it = this->fonts.find(key_name);
     if (it == this->fonts.end()) {
         LOG_INFO("FontManager::GetFont attempting to load " + final_path + " at size " + std::to_string(pt_size) + " pt");
-        std::shared_ptr<TTF_Font> font_ptr = this->loader->GetFontResource(final_path, pt_size);
+        std::shared_ptr<TTF_FontWrapper> font_ptr = this->loader->GetFontResource(final_path, pt_size);
         if (font_ptr == nullptr) {
             LOG_ERR("FontManager::GetFont unable to load font");
             // push the bad font on to the map to prevent infinite attempts
@@ -56,7 +56,7 @@ std::shared_ptr<TTF_Font> FontManager::GetFont(const std::string & asset_path, i
     return nullptr;
 }
 
-std::shared_ptr<TTF_Font> FontManager::GetNamedFont(const std::string & name) {
+std::shared_ptr<TTF_FontWrapper> FontManager::GetNamedFont(const std::string & name) {
     auto it = this->named_fonts.find(name);
     if (it != this->named_fonts.end()) {
         return this->GetFont(it->second.font_path, it->second.pt_size);

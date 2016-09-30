@@ -29,28 +29,22 @@ AssetPackResourceLoader::AssetPackResourceLoader(const BaseResourcePath & res_pa
     }
 }
 
-std::shared_ptr<TTF_Font> AssetPackResourceLoader::GetFontResource(const std::string & asset_path, int pt_size) const {
+std::shared_ptr<TTF_FontWrapper> AssetPackResourceLoader::GetFontResource(const std::string & asset_path, int pt_size) const {
     auto it = this->dict.find(asset_path);
     if (it != this->dict.end()) {
         LOG_INFO("AssetPackResourceLoader::GetFontResource loading asset " + asset_path + " at position " +
                  std::to_string(it->second.pos) + " with length " + std::to_string(it->second.length));
-        char * buffer = new char[it->second.length];
+        std::shared_ptr<TTF_FontWrapper> wrapper = std::make_shared<TTF_FontWrapper>();
+        wrapper->buffer = new char[it->second.length];
         this->pack->clear();
         this->pack->seekg(it->second.pos);
-        this->pack->read(buffer, it->second.length);
-        SDL_RWops * rwops = SDL_RWFromMem(buffer, it->second.length);
-        TTF_Font * font = TTF_OpenFontRW(rwops, 1, pt_size);
-        //FIXME: nice memory leak... apparently TTF_OpenFontRW is pointing at the underlying buffer rather than copying it
-        //delete[] buffer;
-        if (font == nullptr) {
+        this->pack->read(wrapper->buffer, it->second.length);
+        SDL_RWops * rwops = SDL_RWFromMem(wrapper->buffer, it->second.length);
+        wrapper->font = TTF_OpenFontRW(rwops, 1, pt_size);
+        if (wrapper->font == nullptr) {
             LOG_SDL_ERR("AssetPackResourceLoader::GetFontResource unable to load font " + asset_path);
         } else {
-            std::shared_ptr<TTF_Font> font_ptr{font, [](TTF_Font * font) {
-                                                   if (font != nullptr) {
-                                                       TTF_CloseFont(font);
-                                                   }
-                                               }};
-            return std::move(font_ptr);
+            return std::move(wrapper);
         }
     } else {
         LOG_ERR("AssetPackResourceLoader::GetFontResource asset not found " + asset_path);

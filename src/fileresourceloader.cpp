@@ -8,15 +8,15 @@
 #include <SDL_ttf.h>
 
 namespace Critterbits {
-std::shared_ptr<TTF_Font> FileResourceLoader::GetFontResource(const std::string & asset_path, int pt_size) const {
+std::shared_ptr<TTF_FontWrapper> FileResourceLoader::GetFontResource(const std::string & asset_path, int pt_size) const {
     std::string font_path = this->res_path.base_path + asset_path;
-    TTF_Font * font = TTF_OpenFont(font_path.c_str(), pt_size);
-    if (font == nullptr) {
+    std::shared_ptr<TTF_FontWrapper> wrapper = std::make_shared<TTF_FontWrapper>();
+    wrapper->font = TTF_OpenFont(font_path.c_str(), pt_size);
+    if (wrapper->font == nullptr) {
         LOG_SDL_ERR("FileResourceLoader::GetFontResource unable to load font " + font_path);
         return nullptr;
     }
-    std::shared_ptr<TTF_Font> font_ptr{font, [](TTF_Font * font) { if (font != nullptr) { TTF_CloseFont(font); } }};
-    return std::move(font_ptr);
+    return std::move(wrapper);
 }
 
 std::shared_ptr<SDL_Texture> FileResourceLoader::GetImageResource(const std::string & asset_path) const {

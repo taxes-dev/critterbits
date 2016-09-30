@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 
 #include <cb/critterbits.hpp>
+#include <SDL_ttf.h>
 
 namespace Critterbits {
 std::shared_ptr<ResourceLoader> ResourceLoader::GetResourceLoader(const BaseResourcePath & base_path) {
@@ -29,4 +30,14 @@ std::string ResourceLoader::StripAssetNameFromPath(const std::string & asset_pat
     int index_b = asset_path.find_last_of('/');
     return asset_path.substr(0, std::max(index_a, index_b));
 }
+
+TTF_FontWrapper::~TTF_FontWrapper() {
+    if (this->font != nullptr) {
+        TTF_CloseFont(this->font);
+    }
+    if (this->buffer != nullptr) {
+        delete[] buffer;
+    }
+}
+
 }

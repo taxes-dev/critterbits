@@ -35,14 +35,23 @@ typedef struct BaseResourcePath {
     ResourceSource source{ResourceSource::File};
 } BaseResourcePath;
 
+class TTF_FontWrapper {
+  public:
+    TTF_Font * font{nullptr};
+    char * buffer{nullptr};
+
+    TTF_FontWrapper(){};
+    ~TTF_FontWrapper();
+};
+
 class ResourceLoader {
   public:
     virtual ~ResourceLoader(){};
-    
+
     static std::shared_ptr<ResourceLoader> GetResourceLoader(const BaseResourcePath &);
     static FileType IsFileOrDirectory(const std::string &);
 
-    virtual std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const = 0;
+    virtual std::shared_ptr<TTF_FontWrapper> GetFontResource(const std::string &, int) const = 0;
     virtual std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const = 0;
     virtual std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const = 0;
     virtual bool GetTextResourceContents(const std::string &, std::string **) const = 0;
@@ -60,7 +69,7 @@ class AssetPackResourceLoader : public ResourceLoader {
   public:
     AssetPackResourceLoader(const BaseResourcePath &);
 
-    std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const;
+    std::shared_ptr<TTF_FontWrapper> GetFontResource(const std::string &, int) const;
     std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const;
     std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const;
     bool GetTextResourceContents(const std::string &, std::string **) const;
@@ -78,7 +87,7 @@ class FileResourceLoader : public ResourceLoader {
   public:
     FileResourceLoader(const BaseResourcePath & res_path) : ResourceLoader(res_path){};
 
-    std::shared_ptr<TTF_Font> GetFontResource(const std::string &, int) const;
+    std::shared_ptr<TTF_FontWrapper> GetFontResource(const std::string &, int) const;
     std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const;
     std::shared_ptr<SDL_Surface> GetImageResourceAsSurface(const std::string &) const;
     bool GetTextResourceContents(const std::string &, std::string **) const;
@@ -109,12 +118,13 @@ class TextureManager {
 };
 
 typedef struct CB_NamedFont {
-  std::string name;
-  std::string font_path;
-  int pt_size;
+    std::string name;
+    std::string font_path;
+    int pt_size;
 
-  CB_NamedFont() {};
-  CB_NamedFont(const std::string & name, const std::string & font_path, int pt_size) : name(name), font_path(font_path), pt_size(pt_size) {};
+    CB_NamedFont(){};
+    CB_NamedFont(const std::string & name, const std::string & font_path, int pt_size)
+        : name(name), font_path(font_path), pt_size(pt_size){};
 } CB_NamedFont;
 
 class FontManager {
@@ -123,8 +133,8 @@ class FontManager {
     ~FontManager();
 
     void CleanUp();
-    std::shared_ptr<TTF_Font> GetFont(const std::string &, int, const std::string & = "");
-    std::shared_ptr<TTF_Font> GetNamedFont(const std::string &);
+    std::shared_ptr<TTF_FontWrapper> GetFont(const std::string &, int, const std::string & = "");
+    std::shared_ptr<TTF_FontWrapper> GetNamedFont(const std::string &);
     bool IsInitialized() const { return this->initialized; };
     void RegisterNamedFont(const CB_NamedFont &);
     void RegisterNamedFont(const std::string &, const std::string &, int);
@@ -132,9 +142,9 @@ class FontManager {
 
   private:
     bool initialized{false};
-    std::map<std::string, std::shared_ptr<TTF_Font>> fonts;
+    std::map<std::string, std::shared_ptr<TTF_FontWrapper>> fonts;
     std::map<std::string, CB_NamedFont> named_fonts;
-    std::shared_ptr<ResourceLoader> loader; 
+    std::shared_ptr<ResourceLoader> loader;
 
     FontManager(const FontManager &) = delete;
     FontManager(FontManager &&) = delete;
