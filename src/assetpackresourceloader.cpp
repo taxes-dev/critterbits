@@ -12,15 +12,15 @@ namespace Critterbits {
 AssetPackResourceLoader::AssetPackResourceLoader(const BaseResourcePath & res_path) : ResourceLoader(res_path) {
     // extract the header and the table of resources from the pack
     this->pack = std::unique_ptr<std::ifstream>{new std::ifstream{res_path.base_path, std::ifstream::binary}};
-    if (pack->good()) {
+    if (this->pack->good()) {
         // TODO: account for endianness
-        pack->read(reinterpret_cast<char *>(&this->header), sizeof(AssetPack::CB_AssetPackHeader));
+        this->pack->read(reinterpret_cast<char *>(&this->header), sizeof(AssetPack::CB_AssetPackHeader));
         this->compressed = TestBitMask<unsigned int>(this->header.flags, CB_ASSETPACK_FLAGS_COMPRESSED);
-        pack->seekg(this->header.table_pos);
+        this->pack->seekg(this->header.table_pos);
 
         while (!this->pack->eof()) {
             AssetPack::CB_AssetDictEntry entry;
-            pack->read(reinterpret_cast<char *>(&entry), sizeof(AssetPack::CB_AssetDictEntry));
+            this->pack->read(reinterpret_cast<char *>(&entry), sizeof(AssetPack::CB_AssetDictEntry));
             this->dict.insert(std::make_pair(entry.name, entry));
         }
         this->pack->clear();
@@ -40,7 +40,8 @@ std::shared_ptr<TTF_Font> AssetPackResourceLoader::GetFontResource(const std::st
         this->pack->read(buffer, it->second.length);
         SDL_RWops * rwops = SDL_RWFromMem(buffer, it->second.length);
         TTF_Font * font = TTF_OpenFontRW(rwops, 1, pt_size);
-        delete[] buffer;
+        //FIXME: nice memory leak... apparently TTF_OpenFontRW is pointing at the underlying buffer rather than copying it
+        //delete[] buffer;
         if (font == nullptr) {
             LOG_SDL_ERR("AssetPackResourceLoader::GetFontResource unable to load font " + asset_path);
         } else {
