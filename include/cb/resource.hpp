@@ -72,8 +72,6 @@ class AssetPackResourceLoader : public ResourceLoader {
     std::map<std::string, AssetPack::CB_AssetDictEntry> dict;
     std::unique_ptr<std::ifstream> pack;
     bool compressed{false};
-
-    SDL_RWops * GetSdlLoader(const std::string &) const; 
 };
 
 class FileResourceLoader : public ResourceLoader {

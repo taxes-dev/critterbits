@@ -197,9 +197,21 @@ int main(int argc, char ** argv) {
     unsigned long asset_index = 0L;
     //TODO: iterate assets
     write_asset(asset_index++, pack, "cbconfig.toml", dict);
+    write_asset(asset_index++, pack, "fonts/ds9.ttf", dict);
+    write_asset(asset_index++, pack, "fonts/sample.ttf", dict);
+    write_asset(asset_index++, pack, "gui/grey_panel.png", dict);
+    write_asset(asset_index++, pack, "gui/test.toml", dict);
+    write_asset(asset_index++, pack, "gui/images/trainer.png", dict);
     write_asset(asset_index++, pack, "scenes/startup.toml", dict);
     write_asset(asset_index++, pack, "scenes/maps/example1.tmx", dict);
     write_asset(asset_index++, pack, "scenes/maps/fr-tileset1.png", dict);
+    write_asset(asset_index++, pack, "scenes/scripts/startup.js", dict);
+    write_asset(asset_index++, pack, "sprites/oldman.toml", dict);
+    write_asset(asset_index++, pack, "sprites/player.toml", dict);
+    write_asset(asset_index++, pack, "sprites/firered-f.png", dict);
+    write_asset(asset_index++, pack, "sprites/firered-oldman.png", dict);
+    write_asset(asset_index++, pack, "sprites/scripts/oldman.js", dict);
+    write_asset(asset_index++, pack, "sprites/scripts/player.js", dict);
 
     //TODO: need to write structures out accounting for endianness
     // write asset table
