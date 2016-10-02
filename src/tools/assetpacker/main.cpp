@@ -11,8 +11,10 @@
 #else
 #include <arpa/inet.h>
 #endif
+#include <experimental/filesystem>
 
 #include <cb/assetpack.hpp>
+#include <cb/toml.hpp>
 #include <zstd.h>
 
 #ifdef _WIN32
@@ -24,6 +26,8 @@ const char PATH_SEP = '/';
 #endif
 
 #define CBUF_SIZE 1024
+
+namespace fs = std::experimental::filesystem;
 
 namespace {
 struct {
@@ -103,7 +107,10 @@ void parse_command_line(int argc, char ** argv) {
             LogError("Uknown paramater: " + arg);
         } else {
             std::string filename{argv[i]};
-            settings.src = filename + PATH_SEP_STR;
+            settings.src = filename;
+            if (settings.src[settings.src.length() - 1] != PATH_SEP) {
+                settings.src += PATH_SEP_STR;
+            }
         }
     }
 }
@@ -196,6 +203,133 @@ void write_dict_entry(std::ofstream & ofs, const Critterbits::AssetPack::CB_Asse
 
     ofs.write(reinterpret_cast<const char *>(&entry_to_write), sizeof(Critterbits::AssetPack::CB_AssetDictEntry));
 }
+
+std::vector<std::string> get_directory_entries(const std::string & path, const std::string & ext) {
+    std::vector<std::string> entries;
+    for (auto & dir_entry : fs::recursive_directory_iterator(path)) {
+        if (ext.empty() || ext == dir_entry.path().extension()) {
+            entries.push_back(dir_entry.path());
+        }
+    }
+    return entries;
+}
+
+std::string strip_file_name_from_path(const std::string & file_path) {
+    int index_a = file_path.find_last_of('\\');
+    int index_b = file_path.find_last_of('/');
+    return file_path.substr(0, std::max(index_a, index_b));
+}
+
+std::string make_relative_to(const std::string & parent_file, const std::string & current_file) {
+    return strip_file_name_from_path(parent_file) + PATH_SEP_STR + current_file;
+}
+
+void discover_scenes(std::vector<std::string> & asset_names) {
+    std::vector<std::string> scenes = get_directory_entries(settings.src + "scenes", ".toml");
+    for (auto & scene_file : scenes) {
+        std::string scene_relative_file = scene_file.substr(settings.src.length());
+        asset_names.push_back(scene_relative_file);
+
+        Critterbits::Toml::TomlParser scene_toml{scene_file};
+        if (scene_toml.IsReady()) {
+            std::string map = scene_toml.GetTableString("scene.map");
+            if (!map.empty()) {
+                asset_names.push_back(make_relative_to(scene_relative_file, map));
+                // TODO: extract tileset images from .tmx
+            }
+
+            std::string script = scene_toml.GetTableString("scene.script");
+            if (!script.empty()) {
+                asset_names.push_back(make_relative_to(scene_relative_file, script));
+            }
+        } else { 
+            LogError("Unable to open scene file " + scene_file + ": " + scene_toml.GetParserError());
+        }
+    }
+}
+
+void discover_sprites(std::vector<std::string> & asset_names) {
+    std::vector<std::string> sprites = get_directory_entries(settings.src + "sprites", ".toml");
+    for (auto & sprite_file : sprites) {
+        std::string sprite_relative_file = sprite_file.substr(settings.src.length());
+        asset_names.push_back(sprite_relative_file);
+
+        Critterbits::Toml::TomlParser sprite_toml{sprite_file};
+        if (sprite_toml.IsReady()) {
+            std::string script = sprite_toml.GetTableString("sprite.script");
+            if (!script.empty()) {
+                asset_names.push_back(make_relative_to(sprite_relative_file, script));
+            }
+
+            std::string sprite_sheet = sprite_toml.GetTableString("sprite_sheet.image");
+            if (!sprite_sheet.empty()) {
+                asset_names.push_back(make_relative_to(sprite_relative_file, sprite_sheet));
+            }
+        } else {
+            LogError("Unable to open sprite file " + sprite_file + ": " + sprite_toml.GetParserError());
+        }
+    }
+}
+
+void discover_gui(std::vector<std::string> & asset_names) {
+    std::vector<std::string> guis = get_directory_entries(settings.src + "gui", ".toml");
+    for (auto & gui_file : guis) {
+        std::string gui_relative_file = gui_file.substr(settings.src.length());
+        asset_names.push_back(gui_relative_file);
+
+        Critterbits::Toml::TomlParser gui_toml{gui_file};
+        if (gui_toml.IsReady()) {
+            std::string decoration = gui_toml.GetTableString("decoration.image");
+            if (!decoration.empty()) {
+                asset_names.push_back(make_relative_to(gui_relative_file, decoration));
+            }
+
+            gui_toml.IterateTableArray("control", [&](const Critterbits::Toml::TomlParser & table) {
+                if (table.GetTableString("type") == "image") {
+                    std::string image = table.GetTableString("image");
+                    if (!image.empty()) {
+                        asset_names.push_back(make_relative_to(gui_relative_file, image));
+                    }
+                }
+            });
+        } else {
+            LogError("Unable to open GUI file " + gui_file + ": " + gui_toml.GetParserError());
+        }
+    }
+}
+
+void discover_assets(std::vector<std::string> & asset_names) {
+    // first find the root cbconfig.toml
+    Critterbits::Toml::TomlParser cbconfig{settings.src + "cbconfig.toml"};
+    if (cbconfig.IsReady()) {
+        asset_names.push_back("cbconfig.toml");
+
+        // icon file
+        std::string icon = cbconfig.GetTableString("window.icon");
+        if (!icon.empty()) {
+            asset_names.push_back(icon);
+        }
+
+        // fonts
+        cbconfig.IterateTableArray("font", [&asset_names](const Critterbits::Toml::TomlParser & table){
+            std::string font_file = table.GetTableString("file");
+            if (!font_file.empty()) {
+                asset_names.push_back(font_file);
+            }
+        });
+
+        // scenes
+        discover_scenes(asset_names);
+
+        // sprites
+        discover_sprites(asset_names);
+
+        // gui
+        discover_gui(asset_names);
+    } else {
+        LogError("Unable to open cbconfig.toml: " + cbconfig.GetParserError());
+    }
+}
 }
 
 using namespace Critterbits::AssetPack;
@@ -204,9 +338,13 @@ int main(int argc, char ** argv) {
     parse_command_line(argc, argv);
     banner();
 
+    // iterate list of assets to pack
+    std::vector<std::string> asset_names;
+    discover_assets(asset_names);
+
     // create structures
     CB_AssetPackHeader header;
-    header.first_resource_pos = sizeof(header);
+    header.first_resource_pos = sizeof(CB_AssetPackHeader);
     if (settings.compress) {
         header.flags |= CB_ASSETPACK_FLAGS_COMPRESSED;
     }
@@ -219,23 +357,9 @@ int main(int argc, char ** argv) {
 
     // write each asset and record
     unsigned long asset_index = 0L;
-    //TODO: iterate assets
-    write_asset(asset_index++, pack, "cbconfig.toml", dict);
-    write_asset(asset_index++, pack, "fonts/ds9.ttf", dict);
-    write_asset(asset_index++, pack, "fonts/sample.ttf", dict);
-    write_asset(asset_index++, pack, "gui/grey_panel.png", dict);
-    write_asset(asset_index++, pack, "gui/test.toml", dict);
-    write_asset(asset_index++, pack, "gui/images/trainer.png", dict);
-    write_asset(asset_index++, pack, "scenes/startup.toml", dict);
-    write_asset(asset_index++, pack, "scenes/maps/example1.tmx", dict);
-    write_asset(asset_index++, pack, "scenes/maps/fr-tileset1.png", dict);
-    write_asset(asset_index++, pack, "scenes/scripts/startup.js", dict);
-    write_asset(asset_index++, pack, "sprites/oldman.toml", dict);
-    write_asset(asset_index++, pack, "sprites/player.toml", dict);
-    write_asset(asset_index++, pack, "sprites/firered-f.png", dict);
-    write_asset(asset_index++, pack, "sprites/firered-oldman.png", dict);
-    write_asset(asset_index++, pack, "sprites/scripts/oldman.js", dict);
-    write_asset(asset_index++, pack, "sprites/scripts/player.js", dict);
+    for (auto & asset_name : asset_names) {
+        write_asset(asset_index++, pack, asset_name, dict);
+    }
 
     // write asset table
     header.table_pos = pack.tellp();

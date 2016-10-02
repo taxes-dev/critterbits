@@ -20,6 +20,7 @@ enum class TomlParserState { New, Ready, Error };
 
 class TomlParser {
   public:
+    TomlParser(const std::string &);
     TomlParser(std::shared_ptr<std::istream>);
 
     std::string GetParserError() const {

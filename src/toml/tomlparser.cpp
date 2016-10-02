@@ -4,6 +4,16 @@
 
 namespace Critterbits {
 namespace Toml {
+TomlParser::TomlParser(const std::string & file_name) : TomlParser() {
+    try {
+        this->table = cpptoml::parse_file(file_name);
+        this->state = TomlParserState::Ready;
+    } catch (cpptoml::parse_exception & e) {
+        LOG_ERR("TomlParser::TomlParser TOML parsing error " + std::string(e.what()));
+        this->state = TomlParserState::Error;
+        this->parse_error = e.what();
+    }
+}
 
 TomlParser::TomlParser(std::shared_ptr<std::istream> stream) : TomlParser() {
     if (stream->good()) {

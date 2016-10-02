@@ -67,7 +67,7 @@ std::shared_ptr<SDL_Texture> TextureManager::GetTexture(const std::string & asse
     }
     std::string final_path{asset_path};
     if (!relative_to_file.empty()) {
-        final_path = ResourceLoader::StripAssetNameFromPath(relative_to_file) + PATH_SEP + asset_path;
+        final_path = ResourceLoader::StripAssetNameFromPath(relative_to_file) + PATH_SEP_STR + asset_path;
     }
     auto it = this->textures.find(final_path);
     if (it == this->textures.end()) {
