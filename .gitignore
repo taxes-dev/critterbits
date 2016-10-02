@@ -1,5 +1,6 @@
 # Critterbits asset files
 assets/
+assets.pak
 
 # CMake output
 bin/
