@@ -2,6 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+#ifdef _WIN32
+#include <netinet/in.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 #include <cb/critterbits.hpp>
 #include <SDL_image.h>
@@ -9,18 +14,33 @@
 #include <zstd.h>
 
 namespace Critterbits {
+namespace {
+void read_header(std::ifstream & ifs, AssetPack::CB_AssetPackHeader * header) {
+    ifs.read(reinterpret_cast<char *>(header), sizeof(AssetPack::CB_AssetPackHeader));
+    header->flags = ntohl(header->flags);
+    header->table_pos = ntohl(header->table_pos);
+    header->first_resource_pos = ntohl(header->first_resource_pos);
+}
+
+void read_dict_entry(std::ifstream & ifs, AssetPack::CB_AssetDictEntry * entry) {
+    ifs.read(reinterpret_cast<char *>(entry), sizeof(AssetPack::CB_AssetDictEntry));
+    entry->index = ntohl(entry->index);
+    entry->pos = ntohl(entry->pos);
+    entry->length = ntohl(entry->length);
+}
+}
+
 AssetPackResourceLoader::AssetPackResourceLoader(const BaseResourcePath & res_path) : ResourceLoader(res_path) {
     // extract the header and the table of resources from the pack
     this->pack = std::unique_ptr<std::ifstream>{new std::ifstream{res_path.base_path, std::ifstream::binary}};
     if (this->pack->good()) {
-        // TODO: account for endianness
-        this->pack->read(reinterpret_cast<char *>(&this->header), sizeof(AssetPack::CB_AssetPackHeader));
+        read_header(*this->pack, &this->header);
         this->compressed = TestBitMask<unsigned int>(this->header.flags, CB_ASSETPACK_FLAGS_COMPRESSED);
         this->pack->seekg(this->header.table_pos);
 
         while (!this->pack->eof()) {
             AssetPack::CB_AssetDictEntry entry;
-            this->pack->read(reinterpret_cast<char *>(&entry), sizeof(AssetPack::CB_AssetDictEntry));
+            read_dict_entry(*this->pack, &entry);
             this->dict.insert(std::make_pair(entry.name, entry));
         }
         this->pack->clear();

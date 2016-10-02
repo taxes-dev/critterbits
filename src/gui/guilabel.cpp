@@ -38,9 +38,9 @@ void GuiLabel::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & cli
             boxRGBA(renderer, clip_info.dest.x, clip_info.dest.y, clip_info.dest.right(), clip_info.dest.bottom(),
                     this->bg_color.r, this->bg_color.g, this->bg_color.b, this->bg_color.a);
         }
-        std::string label_text{this->text};
         if (this->font_name.empty()) {
             // render using built-in font
+            std::string label_text{this->text};
             if (CB_SDL_GFX_FONT_W * label_text.length() > static_cast<size_t>(this->dim.w)) {
                 label_text = label_text.substr(0, std::max(this->dim.w / CB_SDL_GFX_FONT_W, 0));
             }

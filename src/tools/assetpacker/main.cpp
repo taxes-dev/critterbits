@@ -6,6 +6,11 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include <netinet/in.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 #include <cb/assetpack.hpp>
 #include <zstd.h>
@@ -172,6 +177,25 @@ void write_asset(unsigned long index, std::ofstream & ofs, const std::string & n
         LogError("Asset " + name + " could not be opened for reading");
     }
 }
+
+void write_header(std::ofstream & ofs, const Critterbits::AssetPack::CB_AssetPackHeader & header) {
+    Critterbits::AssetPack::CB_AssetPackHeader header_to_write{header};
+    header_to_write.flags = htonl(header_to_write.flags);
+    header_to_write.table_pos = htonl(header_to_write.table_pos);
+    header_to_write.first_resource_pos = htonl(header_to_write.first_resource_pos);
+
+    ofs.seekp(0);
+    ofs.write(reinterpret_cast<const char *>(&header_to_write), sizeof(Critterbits::AssetPack::CB_AssetPackHeader));
+}
+
+void write_dict_entry(std::ofstream & ofs, const Critterbits::AssetPack::CB_AssetDictEntry & entry) {
+    Critterbits::AssetPack::CB_AssetDictEntry entry_to_write{entry};
+    entry_to_write.index = htonl(entry_to_write.index);
+    entry_to_write.pos = htonl(entry_to_write.pos);
+    entry_to_write.length = htonl(entry_to_write.length);
+
+    ofs.write(reinterpret_cast<const char *>(&entry_to_write), sizeof(Critterbits::AssetPack::CB_AssetDictEntry));
+}
 }
 
 using namespace Critterbits::AssetPack;
@@ -213,16 +237,14 @@ int main(int argc, char ** argv) {
     write_asset(asset_index++, pack, "sprites/scripts/oldman.js", dict);
     write_asset(asset_index++, pack, "sprites/scripts/player.js", dict);
 
-    //TODO: need to write structures out accounting for endianness
     // write asset table
     header.table_pos = pack.tellp();
     for (auto & entry : dict) {
-        pack.write(reinterpret_cast<const char *>(&entry), sizeof(CB_AssetDictEntry));
+        write_dict_entry(pack, entry);
     }
 
     // write header
-    pack.seekp(0);
-    pack.write(reinterpret_cast<const char *>(&header), sizeof(CB_AssetPackHeader));
+    write_header(pack, header);
 
     return 0;
 }
