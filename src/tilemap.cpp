@@ -83,6 +83,7 @@ bool Tilemap::CreateTextures(float scale) {
 
     this->map.reset(new Tmx::Map());
     map->ParseText(*tmx_data);
+    delete tmx_data;
     if (this->map->HasError()) {
         LOG_ERR("Tilemap::CreateTextures unable to load TMX map " + this->map->GetErrorText());
         return false;

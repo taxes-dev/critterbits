@@ -254,6 +254,7 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_path
         LOG_ERR("ScriptEngine::LoadScript unable to compile script " + script_path + ", error was " + std::string(error));
         return false;
     }
+    delete script_contents;
 
     // prepare the script object
     new_script->DiscoverGlobals();
