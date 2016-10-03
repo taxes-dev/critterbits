@@ -42,6 +42,9 @@ class EngineConfiguration {
         bool mouse{false};
     } input;
     struct {
+        float scale{1.0f};
+    } rendering;
+    struct {
         bool full_screen{false};
         int width{CB_DEFAULT_WINDOW_W};
         int height{CB_DEFAULT_WINDOW_H};

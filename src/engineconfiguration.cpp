@@ -82,6 +82,9 @@ bool EngineConfiguration::ReloadConfiguration() {
             this->input.keyboard = config.GetTableBool("input.keyboard", this->input.keyboard);
             this->input.mouse = config.GetTableBool("input.mouse", this->input.mouse);
 
+            // render seettings
+            this->rendering.scale = config.GetTableFloat("rendering.scale", this->rendering.scale);
+
             // window settings
             this->window.full_screen = config.GetTableBool("window.full_screen", this->window.full_screen);
             this->window.height = config.GetTableInt("window.height", this->window.height);

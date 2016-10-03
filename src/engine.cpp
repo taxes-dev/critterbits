@@ -343,6 +343,7 @@ int Engine::Run() {
             SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
         }
         SDL_RenderClear(this->renderer);
+        SDL_RenderSetScale(this->renderer, this->config->rendering.scale, this->config->rendering.scale);
 
         // render all active entities
         for (auto z_index : {ZIndex::Background, ZIndex::Midground, ZIndex::Foreground}) {
@@ -373,6 +374,7 @@ int Engine::Run() {
         });
 
         if (this->config->debug.draw_info_pane) {
+            SDL_RenderSetScale(this->renderer, 1.0f, 1.0f);
             this->RenderDebugPane();
         }
         SDL_RenderPresent(this->renderer);
