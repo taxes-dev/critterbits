@@ -7,7 +7,6 @@ void RectRegionCombiner::Combine() {
     LOG_INFO("RectRegionCombiner::Combine starting with " + std::to_string(this->regions.size()) +
              " regions to combine");
     int combines;
-    CB_Rect new_rect;
 
     // remove duplicates and completely overlapping rects
     this->regions.erase(std::unique(this->regions.begin(), this->regions.end(),
@@ -18,6 +17,9 @@ void RectRegionCombiner::Combine() {
                                         return rect1 == rect2 || rect1.inside(rect2);
                                     }),
                         this->regions.end());
+
+    // pre-request some breathing room
+    this->regions.reserve(this->regions.size() * 2);
 
     // brute force!
     do {
@@ -31,11 +33,7 @@ void RectRegionCombiner::Combine() {
                 // regions horizontally adjacent
                 if (rect1.y == rect2.y && rect1.h == rect2.h &&
                     (rect1.x == rect2.right() || rect1.right() == rect2.x)) {
-                    new_rect.x = std::min(rect1.x, rect2.x);
-                    new_rect.y = rect1.y;
-                    new_rect.w = rect1.w + rect2.w;
-                    new_rect.h = rect1.h;
-                    this->regions.push_back(new_rect);
+                    this->regions.emplace_back(std::min(rect1.x, rect2.x), rect1.y, rect1.w + rect2.w, rect1.h);
                     rect1.w = 0;
                     rect1.h = 0;
                     rect2.w = 0;
@@ -45,11 +43,7 @@ void RectRegionCombiner::Combine() {
                 // regions vertically adjacent
                 if (rect1.x == rect2.x && rect1.w == rect2.w &&
                     (rect1.y == rect2.bottom() || rect1.bottom() == rect2.y)) {
-                    new_rect.x = rect1.x;
-                    new_rect.y = std::min(rect1.y, rect2.y);
-                    new_rect.w = rect1.w;
-                    new_rect.h = rect1.h + rect2.h;
-                    this->regions.push_back(new_rect);
+                    this->regions.emplace_back(rect1.x, std::min(rect1.y, rect2.y), rect1.w, rect1.h + rect2.h);
                     rect1.w = 0;
                     rect1.h = 0;
                     rect2.w = 0;
