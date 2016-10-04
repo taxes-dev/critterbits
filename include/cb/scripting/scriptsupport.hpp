@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 
+#include <cb/color.hpp>
 #include <cb/coord.hpp>
 #include <cb/entity.hpp>
 #include <duktape/duktape.h>
@@ -54,11 +55,11 @@ inline entity_id_t GetPropertyEntityId(duk_context * context, int stack_index = 
     return entity_id;
 }
 
-inline int GetPropertyFloat(duk_context * context, const char * property_name, int stack_index = -1) {
+inline float GetPropertyFloat(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
-    float value = (float)duk_get_number(context, -1);
+    duk_double_t value = duk_get_number(context, -1);
     duk_pop(context);
-    return value;
+    return static_cast<float>(value);
 }
 
 inline int GetPropertyInt(duk_context * context, const char * property_name, int stack_index = -1) {
@@ -66,6 +67,19 @@ inline int GetPropertyInt(duk_context * context, const char * property_name, int
     int value = duk_get_int(context, -1);
     duk_pop(context);
     return value;
+}
+
+inline CB_Color GetPropertyColor(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    CB_Color value;
+    if (duk_is_object(context, -1)) {
+        value.r = GetPropertyInt(context, "r");
+        value.g = GetPropertyInt(context, "g");
+        value.b = GetPropertyInt(context, "b");
+        value.a = GetPropertyInt(context, "a");
+    }
+    duk_pop(context);
+    return value;    
 }
 
 inline CB_Rect GetPropertyRect(duk_context * context, const char * property_name, int stack_index = -1) {
@@ -114,6 +128,15 @@ inline void PushPropertyFunction(duk_context * context, const char * property_na
 
 inline void PushPropertyInt(duk_context * context, const char * property_name, int value) {
     duk_push_int(context, value);
+    duk_put_prop_string(context, -2, property_name);
+}
+
+inline void PushPropertyColor(duk_context * context, const char * property_name, const CB_Color & value) {
+    duk_push_object(context);
+    PushPropertyInt(context, "r", value.r);
+    PushPropertyInt(context, "g", value.g);
+    PushPropertyInt(context, "b", value.b);
+    PushPropertyInt(context, "a", value.a);
     duk_put_prop_string(context, -2, property_name);
 }
 

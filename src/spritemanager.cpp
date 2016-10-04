@@ -57,6 +57,9 @@ void SpriteManager::ParseSprite(const Toml::TomlParser & parser, std::shared_ptr
     if (!sprite->script_path.empty()) {
         sprite->script_path = this->GetSpriteSheetPath(sprite->script_path);
     }
+    sprite->tint_and_opacity = parser.GetTableColor("sprite.tint", CB_Color{255,255,255,255});
+    float opacity = parser.GetTableFloat("sprite.opacity", 1.0f);
+    sprite->tint_and_opacity.a = Clamp(opacity * 255, 0, 255);
     sprite->sprite_sheet_path = parser.GetTableString("sprite_sheet.image");
     // prepend the asset path to the sprite sheet path if one was set
     if (!sprite->sprite_sheet_path.empty()) {

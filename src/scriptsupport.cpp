@@ -93,6 +93,8 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
     PushPropertyInt(context, "tile_offset_y", sprite->tile_offset_y);
     PushPropertyBool(context, "flip_x", sprite->flip_x);
     PushPropertyBool(context, "flip_y", sprite->flip_y);
+    PushPropertyColor(context, "tint", sprite->tint_and_opacity);
+    PushPropertyFloat(context, "opacity", static_cast<float>(sprite->tint_and_opacity.a) / 255.0f);
 
     duk_push_object(context); // frame
     PushPropertyInt(context, "current", sprite->GetFrame());
@@ -118,6 +120,9 @@ void RetrieveSpriteFromContext(duk_context * context, std::shared_ptr<Sprite> sp
     sprite->tile_offset_y = GetPropertyInt(context, "tile_offset_y", stack_index);
     sprite->flip_x = GetPropertyBool(context, "flip_x", stack_index);
     sprite->flip_y = GetPropertyBool(context, "flip_y", stack_index);
+    sprite->tint_and_opacity = GetPropertyColor(context, "tint", stack_index);
+    float opacity = GetPropertyFloat(context, "opacity", stack_index);
+    sprite->tint_and_opacity.a = Clamp(static_cast<int>(255.0f * opacity), 0, 255);
     duk_get_prop_string(context, stack_index, "frame");
     int current_frame = GetPropertyInt(context, "current", -1);
     sprite->SetFrame(current_frame);

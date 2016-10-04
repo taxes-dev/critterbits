@@ -109,6 +109,8 @@ void Sprite::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_
         dst_rect.y -= clip_rect.source.y;
         dst_rect.w = this->dim.w;
         dst_rect.h = this->dim.h;
+        SDL_SetTextureColorMod(this->sprite_sheet.get(), this->tint_and_opacity.r, this->tint_and_opacity.g, this->tint_and_opacity.b);
+        SDL_SetTextureAlphaMod(this->sprite_sheet.get(), this->tint_and_opacity.a);
         SDLx::SDL_RenderTextureClipped(renderer, this->sprite_sheet.get(), this->GetFrameRect(), dst_rect,
                                         this->flip_x, this->flip_y);
     }
