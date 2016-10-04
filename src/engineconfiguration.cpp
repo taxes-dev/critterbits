@@ -122,6 +122,10 @@ bool EngineConfiguration::Validate() {
         b_valid = false;
     }
 
+    if (this->rendering.scale < 0.1f) {
+        b_valid = false;
+    }
+
     // TODO: validate more settings ...
 
     this->valid = b_valid;

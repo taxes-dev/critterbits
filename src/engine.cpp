@@ -70,7 +70,9 @@ bool Engine::CreateWindowAndRenderer() {
     }
 
     // configure viewport
-    this->viewport->dim = {0, 0, this->config->window.width, this->config->window.height};
+    int viewport_w = static_cast<int>(static_cast<float>(this->config->window.width) / this->config->rendering.scale);
+    int viewport_h = static_cast<int>(static_cast<float>(this->config->window.height) / this->config->rendering.scale);
+    this->viewport->dim = {0, 0, viewport_w, viewport_h};
 
     // create renderer
     this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -398,9 +400,9 @@ void Engine::RenderDebugPane() {
     os << " | " << std::fixed << std::setprecision(1) << this->counters.GetAverageFps() << " fps";
     os << " | " << std::fixed << std::setprecision(2) << mem_mb_current << " MB";
 
-    roundedBoxRGBA(this->renderer, -6, this->viewport->dim.h - 12, info.str().length() * 8 + 10,
-                   this->viewport->dim.h + 6, 6, 0, 0, 0, 127);
-    stringRGBA(this->renderer, 2, this->viewport->dim.h - 10, info.str().c_str(), 255, 255, 255, 255);
+    roundedBoxRGBA(this->renderer, -6, this->config->window.height - 12, info.str().length() * 8 + 10,
+                   this->config->window.height + 6, 6, 0, 0, 0, 127);
+    stringRGBA(this->renderer, 2, this->config->window.height - 10, info.str().c_str(), 255, 255, 255, 255);
 }
 
 void Engine::SetConfiguration(std::shared_ptr<EngineConfiguration> config) { this->config = std::move(config); }

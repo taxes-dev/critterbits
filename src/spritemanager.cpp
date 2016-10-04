@@ -66,7 +66,7 @@ void SpriteManager::ParseSprite(const Toml::TomlParser & parser, std::shared_ptr
     sprite->tile_width = parser.GetTableInt("sprite_sheet.tile_width");
     sprite->tile_offset_x = parser.GetTableInt("sprite_sheet.tile_offset_x");
     sprite->tile_offset_y = parser.GetTableInt("sprite_sheet.tile_offset_y");
-    sprite->sprite_scale = parser.GetTableFloat("sprite_sheet.sprite_scale");
+    sprite->sprite_scale = parser.GetTableFloat("sprite_sheet.sprite_scale", 1.0f);
     std::string collide = parser.GetTableString("2d.collision");
     if (collide == "collide") {
         sprite->collision = CollisionType::Collide;
