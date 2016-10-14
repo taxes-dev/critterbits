@@ -12,6 +12,7 @@
 #include <duktape/duktape.h>
 
 #define CB_SCRIPT_ENTITY_STASH_ARRAY "entities"
+#define CB_SCRIPT_CALLBACK_STASH "callbacks"
 #define CB_SCRIPT_HIDDEN_DESTROYED                                                                                     \
     "\xff"                                                                                                             \
     "destroyed"

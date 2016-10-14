@@ -6,6 +6,28 @@
 namespace Critterbits {
 namespace Scripting {
 
+entity_id_t next_callback_id = CB_ENTITY_ID_FIRST;
+
+void Script::CallCallback(std::shared_ptr<Entity> entity, entity_id_t callback_id) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
+    duk_push_global_stash(this->context);
+    duk_get_prop_string(this->context, -1, CB_SCRIPT_CALLBACK_STASH);
+    if (duk_is_object(this->context, -1)) {
+        duk_get_prop_index(this->context, -1, callback_id);
+        if (duk_is_ecmascript_function(this->context, -1)) {
+            CreateEntityInContext(this->context, entity);
+            if (duk_pcall_method(this->context, 0) != DUK_EXEC_SUCCESS) {
+                LOG_ERR("Script::CallCallback call failed in " + this->script_path + " - " +
+                        std::string(duk_safe_to_string(this->context, -1)));
+            }
+        }
+        duk_pop(this->context);
+        duk_del_prop_index(this->context, -1, callback_id);
+    }
+    duk_pop_2(this->context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(this->context);
+}
+
 void Script::DiscoverGlobals() {
     LOG_INFO("Script::DiscoverGlobals starting for " + this->script_path);
     if (this->context == nullptr) {
@@ -97,8 +119,23 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
         CreateEntityInContext(this->context, entity);
         duk_push_number(this->context, delta_time);
         if (duk_pcall_method(this->context, 1) == DUK_EXEC_SUCCESS) {
-            // clean up and pull any changes to the entity
+            // clean up
             duk_pop_2(this->context);
+
+            // check callbacks
+            for (auto it = this->callbacks.begin(); it != this->callbacks.end();) {
+                CB_ScriptCallback * callback = it->get();
+                callback->accrued += delta_time * 1000;
+                if (callback->accrued >= callback->delay) {
+                    LOG_INFO("calling callback " + std::to_string(callback->callback_id));
+                    this->CallCallback(entity, callback->callback_id);
+                    it = this->callbacks.erase(it);
+                } else {
+                    it++;
+                }
+            }
+
+            // pull any changes to entities
             this->PostCallRetrieveAllEntities();
         } else {
             LOG_ERR("Script::CallUpdate update() call failed in " + this->script_path + " - " +
@@ -137,6 +174,10 @@ void Script::PostCallRetrieveAllEntities() {
     duk_pop_2(this->context); // stash and array
     ClearEntitiesInContext(this->context);
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+}
+
+void Script::QueueCallback(std::unique_ptr<CB_ScriptCallback> callback) {
+    this->callbacks.push_back(std::move(callback));
 }
 }
 }

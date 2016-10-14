@@ -11,6 +11,39 @@ namespace {
 /*
 * Functions callable from JavaScript code
 */
+duk_ret_t delay_callback(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    duk_push_this(context);
+    entity_id_t entity_id = GetPropertyEntityId(context);
+    duk_pop(context);
+    std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+    if (entity != nullptr && entity->HasScript()) {
+        LOG_INFO("adding a delay call for entity " + std::to_string(entity_id));
+        int delay = duk_require_int(context, 0);
+        if (duk_is_object(context, 1)) {
+            LOG_INFO("Got an object, delaying for " + std::to_string(delay) + " ms");
+            std::unique_ptr<CB_ScriptCallback> callback{new CB_ScriptCallback()};
+            callback->delay = delay;
+            duk_push_global_stash(context);
+            duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
+            if (duk_is_object(context, -1) == 0) {
+                // create the callback map
+                duk_pop(context);
+                duk_push_object(context);
+                duk_put_prop_string(context, -2, CB_SCRIPT_CALLBACK_STASH);
+                duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
+            }
+            duk_push_null(context);
+            duk_swap(context, -1, 1);
+            duk_put_prop_index(context, -2, callback->callback_id);
+            duk_pop_2(context);
+            entity->script->QueueCallback(std::move(callback));
+        }
+    }
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;
+}
+
 duk_ret_t mark_entity_destroyed(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_this(context);
@@ -189,6 +222,7 @@ void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity
         PushPropertyString(context, "tag", entity->tag);
         PushPropertyFloat(context, "time_scale", entity->time_scale);
         PushPropertyFunction(context, "destroy", mark_entity_destroyed);
+        PushPropertyFunction(context, "delay", delay_callback, 2);
 
         if (entity->GetEntityType() == EntityType::Sprite) {
             ExtendEntityWithSprite(context, std::dynamic_pointer_cast<Sprite>(entity));

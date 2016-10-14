@@ -19,6 +19,14 @@
 namespace Critterbits {
 namespace Scripting {
 
+extern entity_id_t next_callback_id;
+
+typedef struct CB_ScriptCallback {
+  const entity_id_t callback_id{next_callback_id++};
+  int delay{0};
+  int accrued{0};
+} CB_ScriptCallback;
+
 class Script {
     friend class ScriptEngine;
 
@@ -28,13 +36,16 @@ class Script {
     void CallOnCollision(std::shared_ptr<Entity>, std::shared_ptr<Entity>);
     void CallStart(std::shared_ptr<Entity>);
     void CallUpdate(std::shared_ptr<Entity>, float);
+    void QueueCallback(std::unique_ptr<CB_ScriptCallback>);
 
   private:
     duk_context * context{nullptr};
     bool global_oncollision{false};
     bool global_start{false};
     bool global_update{false};
+    std::vector<std::unique_ptr<CB_ScriptCallback>> callbacks;
 
+    void CallCallback(std::shared_ptr<Entity>, entity_id_t);
     void DiscoverGlobals();
     void PostCallRetrieveAllEntities();
 };
