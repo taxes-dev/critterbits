@@ -25,6 +25,7 @@ typedef struct CB_ScriptCallback {
   const entity_id_t callback_id{next_callback_id++};
   int delay{0};
   int accrued{0};
+  bool once{true};
 } CB_ScriptCallback;
 
 class Script {
@@ -45,7 +46,7 @@ class Script {
     bool global_update{false};
     std::vector<std::unique_ptr<CB_ScriptCallback>> callbacks;
 
-    void CallCallback(std::shared_ptr<Entity>, entity_id_t);
+    bool CallCallback(std::shared_ptr<Entity>, const CB_ScriptCallback &);
     void DiscoverGlobals();
     void PostCallRetrieveAllEntities();
 };

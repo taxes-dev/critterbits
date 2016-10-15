@@ -8,24 +8,32 @@ namespace Scripting {
 
 entity_id_t next_callback_id = CB_ENTITY_ID_FIRST;
 
-void Script::CallCallback(std::shared_ptr<Entity> entity, entity_id_t callback_id) {
+bool Script::CallCallback(std::shared_ptr<Entity> entity, const CB_ScriptCallback & callback) {
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(this->context);
+    bool retval = false;
     duk_push_global_stash(this->context);
     duk_get_prop_string(this->context, -1, CB_SCRIPT_CALLBACK_STASH);
     if (duk_is_object(this->context, -1)) {
-        duk_get_prop_index(this->context, -1, callback_id);
+        duk_get_prop_index(this->context, -1, callback.callback_id);
         if (duk_is_ecmascript_function(this->context, -1)) {
             CreateEntityInContext(this->context, entity);
-            if (duk_pcall_method(this->context, 0) != DUK_EXEC_SUCCESS) {
+            if (duk_pcall_method(this->context, 0) == DUK_EXEC_SUCCESS) {
+                if (!callback.once) {
+                    retval = duk_get_boolean(this->context, -1);
+                }
+            } else {
                 LOG_ERR("Script::CallCallback call failed in " + this->script_path + " - " +
                         std::string(duk_safe_to_string(this->context, -1)));
             }
         }
         duk_pop(this->context);
-        duk_del_prop_index(this->context, -1, callback_id);
+        if (!retval) {
+            duk_del_prop_index(this->context, -1, callback.callback_id);
+        }
     }
     duk_pop_2(this->context);
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(this->context);
+    return retval;
 }
 
 void Script::DiscoverGlobals() {
@@ -127,12 +135,14 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
                 CB_ScriptCallback * callback = it->get();
                 callback->accrued += delta_time * 1000;
                 if (callback->accrued >= callback->delay) {
-                    LOG_INFO("calling callback " + std::to_string(callback->callback_id));
-                    this->CallCallback(entity, callback->callback_id);
-                    it = this->callbacks.erase(it);
-                } else {
-                    it++;
+                    if (this->CallCallback(entity, *callback)) {
+                        callback->accrued = 0;
+                    } else {
+                        it = this->callbacks.erase(it);
+                        continue;
+                    }
                 }
+                it++;
             }
 
             // pull any changes to entities
