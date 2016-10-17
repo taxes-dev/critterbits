@@ -25,7 +25,7 @@ void Entity::Start() {
 }
 
 void Entity::Update(float delta_time) {
-    if (this->IsActive()) {
+    if (this->IsActive() && this->time_scale != 0.f) {
         float scaled_delta_time = delta_time * this->time_scale;
         if (this->HasScript()) {
             this->script->CallUpdate(shared_from_this(), scaled_delta_time);
