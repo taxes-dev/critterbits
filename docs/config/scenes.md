@@ -63,4 +63,4 @@ Tiled object layers are handled in a special way by the Critterbits engine. Firs
 > **this feature is still in development, details forthcoming**
 
 ***
-[[Back to index](../index.md)] [[<< Configuration and Convention](index.md)]
+[[Back to index](../index.md)] [[<< Configuration and Convention](index.md)] [[Sprites >>](sprites.md)]

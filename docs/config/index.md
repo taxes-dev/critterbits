@@ -1,8 +1,7 @@
 # Configuration and Convention
 
 * [Assets](#assets)
-* [TOML](#toml)
-* [PNG](#png)
+* [File Formats](#file-formats)
 * [Compressed Asset Archive](#compressed-asset-archive)
 * [Engine Configuration](#engine-configuration)
 * [Startup Scene](#startup-scene)
@@ -32,13 +31,33 @@ The above line would load the game's assets from a folder called `my-assets` in 
 
 The executable does not need to be named `critterbits`. Common practice when distributing your own game would be to rename the executable to one that matches your game.
 
-## TOML
+## File Formats
+
+For simplicity, Critterbits uses only a few different file formats for assets.
+
+### JS
+
+The scripting language used by Critterbits is JavaScript/ECMAScript. Scripting is described in detail in the [scripting section](../scripting/index.md) of this documentation.
+
+JS files should be saved in UTF-8 encoding.
+
+### PNG
+
+All image files referenced are PNG unless noted otherwise. Critterbits only supports images in PNG format, and typically these should be true color with alpha (RGBA) unless you have a specific need for a different type.
+
+Since images tend to be loaded directly into GPU textures, ideally your PNGs should have [power of 2](http://www.thealmightyguru.com/Pointless/PowersOf2.html) dimensions. Also keep in mind that GPUs have a maximum texture size that varies based on hardware, and for most modern accelerated GPUs that is usually either 8192 or 16384 pixels square. If you ensure your images are 8192 pixels in width/height or less you should be fine. While not strictly necessary, following this guideline will allow the GPU to take advantage of additional optimizations.
+
+### TOML
 
 All game configuration files in Critterbits are written in a general markup language called [TOML](https://github.com/toml-lang/toml). Explanation of TOML in general is outside of the scope of this document, but more information can be found at the provided link. Specific formats used by Critterbits are explained throughout this document.
 
-## PNG
+TOML files should be saved in UTF-8 encoding.
 
-All image files referenced are PNG unless noted otherwise. For simplicity, Critterbits only supports images in PNG format, and typically these should be true color with alpha (RGBA) unless you have a specific need for a different type.
+### TMX
+
+Critterbits uses the [Tiled map editor's](http://www.mapeditor.org/) TMX format for tilemaps. See the [scene configuration page](scenes.md) for more information.
+
+The engine supports both compressed and uncompressed TMX maps.
 
 ## Compressed Asset Archive
 
