@@ -231,17 +231,10 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_path
 
     new_script = std::make_shared<Script>();
     new_script->script_path = script_path;
+    new_script->script_name = ResourceLoader::StripAssetPathFromName(script_path, true);
 
-    // create a new context
-    duk_push_thread_new_globalenv(this->context);
-    new_script->context = duk_get_context(this->context, -1);
-    if (new_script->context == nullptr) {
-        LOG_ERR("ScriptEngine::LoadScript unable to create new script context");
-        return nullptr;
-    }
-
-    // add common globals to the new context
-    this->AddCommonScriptingFunctions(new_script->context);
+    // TODO: eliminate old script-specific contexts
+    new_script->context = this->context;
 
     // load associated script file
     std::string * script_contents = nullptr;
@@ -261,6 +254,10 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_path
 
     this->loaded_scripts.push_back(new_script);
     return new_script;
+}
+
+void ScriptEngine::StartEngine() {
+    this->AddCommonScriptingFunctions(this->context);
 }
 }
 }

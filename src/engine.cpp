@@ -24,7 +24,7 @@ Engine::~Engine() {
 }
 
 bool Engine::ConfigureManagers() {
-        // configure texture manager
+    // configure texture manager
     this->textures.SetResourceLoader(this->config->loader);
 
     // configure font manager
@@ -37,6 +37,9 @@ bool Engine::ConfigureManagers() {
     this->input.SetControllerActive(this->config->input.controller);
     this->input.SetKeyboardActive(this->config->input.keyboard);
     this->input.SetMouseActive(this->config->input.mouse);
+
+    // start scripting engine
+    this->scripts.StartEngine();
 
     return false;
 }

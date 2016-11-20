@@ -50,6 +50,8 @@ class ResourceLoader {
 
     static std::shared_ptr<ResourceLoader> GetResourceLoader(const BaseResourcePath &);
     static FileType IsFileOrDirectory(const std::string &);
+    static std::string StripAssetNameFromPath(const std::string &);
+    static std::string StripAssetPathFromName(const std::string &, bool = false);
 
     virtual std::shared_ptr<TTF_FontWrapper> GetFontResource(const std::string &, int) const = 0;
     virtual std::shared_ptr<SDL_Texture> GetImageResource(const std::string &) const = 0;
@@ -57,7 +59,6 @@ class ResourceLoader {
     virtual bool GetTextResourceContents(const std::string &, std::string **) const = 0;
     virtual std::shared_ptr<std::istream> OpenTextResource(const std::string &) const = 0;
     virtual bool ResourceExists(const std::string &) const = 0;
-    static std::string StripAssetNameFromPath(const std::string &);
 
   protected:
     BaseResourcePath res_path;

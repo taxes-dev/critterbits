@@ -34,6 +34,7 @@ class Script {
 
   public:
     std::string script_path;
+    std::string script_name;
 
     void CallOnCollision(std::shared_ptr<Entity>, std::shared_ptr<Entity>);
     void CallStart(std::shared_ptr<Entity>);
@@ -58,6 +59,7 @@ class ScriptEngine {
     ~ScriptEngine();
     std::shared_ptr<Script> GetScriptHandle(const std::string &) const;
     std::shared_ptr<Script> LoadScript(const std::string &);
+    void StartEngine();
 
   private:
     duk_context * context{nullptr};

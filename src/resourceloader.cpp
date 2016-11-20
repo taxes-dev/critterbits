@@ -31,6 +31,17 @@ std::string ResourceLoader::StripAssetNameFromPath(const std::string & asset_pat
     return asset_path.substr(0, std::max(index_a, index_b));
 }
 
+std::string ResourceLoader::StripAssetPathFromName(const std::string & asset_path, bool strip_ext) {
+    int index_a = asset_path.find_last_of('\\');
+    int index_b = asset_path.find_last_of('/');
+    std::string stripped_name{asset_path.substr(std::max(index_a, index_b) + 1)};
+    int index_c = stripped_name.find_last_of('.');
+    if (strip_ext && static_cast<size_t>(index_c) != std::string::npos) {
+        return stripped_name.substr(0, index_c);
+    }
+    return stripped_name;
+}
+
 TTF_FontWrapper::~TTF_FontWrapper() {
     if (this->font != nullptr) {
         TTF_CloseFont(this->font);
