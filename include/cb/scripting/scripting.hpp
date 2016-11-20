@@ -23,6 +23,7 @@ extern entity_id_t next_callback_id;
 
 typedef struct CB_ScriptCallback {
   const entity_id_t callback_id{next_callback_id++};
+  std::weak_ptr<Entity> owner;
   int delay{0};
   int accrued{0};
   bool once{true};

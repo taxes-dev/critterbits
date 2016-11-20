@@ -133,14 +133,25 @@ void Script::CallUpdate(std::shared_ptr<Entity> entity, float delta_time) {
             // check callbacks
             for (auto it = this->callbacks.begin(); it != this->callbacks.end();) {
                 CB_ScriptCallback * callback = it->get();
-                callback->accrued += delta_time * 1000;
-                if (callback->accrued >= callback->delay) {
-                    if (this->CallCallback(entity, *callback)) {
-                        callback->accrued = 0;
-                    } else {
-                        it = this->callbacks.erase(it);
-                        continue;
+                if (auto callback_owner = callback->owner.lock()) {
+                    if (callback_owner->entity_id == entity->entity_id) {
+                        // update time elapsed and check if we've passed interval
+                        callback->accrued += delta_time * 1000;
+                        if (callback->accrued >= callback->delay) {
+                            if (this->CallCallback(entity, *callback)) {
+                                // callback continuing, reset timer
+                                callback->accrued = 0;
+                            } else {
+                                // callback isn't interested in continuing
+                                it = this->callbacks.erase(it);
+                                continue;
+                            }
+                        }
                     }
+                } else {
+                    // callbacks's owner no longer exists, dump it
+                    it = this->callbacks.erase(it);
+                    continue;
                 }
                 it++;
             }

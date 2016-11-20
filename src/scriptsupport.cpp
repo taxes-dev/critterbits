@@ -37,6 +37,7 @@ duk_ret_t queue_callback(duk_context * context, bool once) {
             std::unique_ptr<CB_ScriptCallback> callback{new CB_ScriptCallback()};
             callback->delay = delay;
             callback->once = once;
+            callback->owner = entity;
             duk_push_global_stash(context);
             duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
             if (duk_is_object(context, -1) == 0) {
