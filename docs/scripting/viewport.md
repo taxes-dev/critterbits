@@ -36,7 +36,7 @@ Tell the viewport to automatically follow the given `entity`. The viewport's cen
 * `entity`. The entity to follow.
 
 ```
-function start() {
+mymodule.start = function() {
     // tell the viewport to follow the current entity
     viewport.follow(this);
 }

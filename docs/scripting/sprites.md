@@ -24,7 +24,7 @@ This function is called when the current sprite collides with another entity and
 Example:
 
 ```
-function oncollision(other) {
+mymodule.oncollision = function(other) {
     // I touched an enemy, reduce my HP
     if (other.tag == "enemy") {
         hp -= 1;
@@ -113,7 +113,7 @@ Plays one of the sprite's animations (see [sprites](../config/sprites.md) in the
 **Note:** Calling this function with the name of an animation that is already playing has no effect. (I.e., it does not reset the animation or anything like that.)
 
 ```
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     // play the "fire" animation if the enter key is pressed
     if (input.is_key_pressed(input.key_codes.ENTER)) {
         this.animation.play("fire");
@@ -130,7 +130,7 @@ Stops one of the sprite's animations (see [sprites](../config/sprites.md) in the
 **Note:** Calling this function with the name of an animation that is not playing has no effect. (I.e. it is not an error.)
 
 ```
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     // toggle the "fire" animation based on whether the enter key is pressed
     if (input.is_key_pressed(input.key_codes.ENTER)) {
         this.animation.play("fire");
@@ -145,7 +145,7 @@ function update(delta_time) {
 Stops all of the sprite's animations.
 
 ```
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     this.animation.stop_all();
 }
 ```

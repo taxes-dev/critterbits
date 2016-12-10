@@ -33,7 +33,7 @@ Closes the GUI panel with instance identifier `panel_id`.
 
 ```
 var panel_id = 0;
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     // toggles the GUI "menu" opened/closed when ESC is pressed
     if (input.is_key_pressed_once(input.key_codes.ESCAPE)) {
         if (panel_id == 0) {
@@ -54,7 +54,7 @@ Find entities in the current scene with the given tag(s).
 * `tag`. One or more tags to search for.
 
 ```
-function start() {
+mymodule.start = function() {
     // move the entities tagged with enemy1, enemy2, enemy3 down 50 pixels
     var entities = find_by_tag("enemy1", "enemy2", "enemy3");
     for (var i = 0; i < entities.length; i++) {
@@ -72,7 +72,7 @@ Opens (displays) the GUI named by `panel`.
 * `multiple`. This optional parameter, if set to `true`, allows multiple instances of `panel` to be opened at one time. Otherwise, opening the same panel again has no effect. Defaults to `false`.
 
 ```
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     // opens the GUI "menu" when ESC is pressed
     if (input.is_key_pressed_once(input.key_codes.ESCAPE)) {
         open_gui("menu");
@@ -90,7 +90,7 @@ Spawns a sprite in the current scene. This creates a new instance of the named `
 **Note:** Sprites are not spawned immediately, which is why this function has no return value. The sprite will be queued for creation, which usually takes place at the beginning of the next update frame.
 
 ```
-function start() {
+mymodule.start = function() {
     // spawn a sprite at (50, 120)
     spawn("my_sprite", { "x": 50, "y": 120 });
 }

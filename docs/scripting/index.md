@@ -10,13 +10,33 @@ Entities such as sprites can be scripted using standard JavaScript. The engine s
 
 ## Script Modules
 
-Scripts are stored in discrete files in the `assets` folder. It is important to keep in mind that when Critterbits loads a script, it only ever loads it _once_. That is to say, if two sprites are using the same script file, it will be loaded and parsed once and only allocated in memory once, meaning those two objects will share any objects defined in the script. For the most part this is not an issue since most of the engine interfaces call into functions that will run in the context of the object they are modifying, but it can trip you up if you define global variables in your script file that end up being modified by multiple objects.
+Scripts are stored in discrete files in the `assets` folder. Each script uses a [module pattern](http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html) to load a single object named the same as the script file itself. (For example, if the script is called `player.js`, it must return a JavaScript object called `player`.) An example of what that looks like is shown below:
+
+```
+// declare module
+var player = (function() {
+var player_module = {};
+player_module.start = function() {
+    // do initialization stuff ...
+}
+player_module.update = function(delta) {
+    // do per-frame updates ...
+}
+// end module
+return player_module;
+}());
+
+```
+
+Each function to be exposed by the module must be added to the object returned. The specific signatures of functions that Critterbits understands are detailed in individual pages in this section.
+
+It is important to keep in mind that when Critterbits loads a script, it only ever loads it _once_. That is to say, if two sprites are using the same script file, it will be loaded and parsed once and only allocated in memory once, meaning those two objects will share any objects defined in the script. For the most part this is not an issue since most of the engine interfaces call into functions that will run in the context of the object they are modifying, but it can trip you up if you define global variables in your script file that end up being modified by multiple objects.
 
 For example, consider the following snippet:
 
 ```
 var my_variable = 0;
-function update() {
+    mymodule.update = function(delta_time) {
     if (this.dim.x < 100) {
         my_variable = this.dim.x;
     } else {
