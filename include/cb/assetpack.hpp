@@ -13,6 +13,10 @@ namespace AssetPack {
 #define CB_ASSETPACK_FLAGS_COMPRESSED 1
 
 typedef struct CB_AssetPackHeader {
+#ifdef _MSC_VER
+	CB_AssetPackHeader() {};
+	CB_AssetPackHeader(const CB_AssetPackHeader &) =default;
+#endif
     const unsigned char _header[12]{CB_ASSETPACK_HDR_BYTES};
     const unsigned char _version[4]{CB_ASSETPACK_VER_MAJ, CB_ASSETPACK_VER_MIN, 0, 0};
     unsigned int flags{CB_ASSETPACK_FLAGS_NONE};

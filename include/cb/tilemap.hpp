@@ -24,7 +24,7 @@ class TilemapRegion : public Sprite {
   public:
     TilemapRegion();
 
-    void SetPosition(int new_x, int new_y){}; // map regions are static
+    void SetPosition(int, int){}; // map regions are static
 
   protected:
     bool OnStart() { return true; }
@@ -63,9 +63,9 @@ class Tilemap : public Entity {
 
     bool RenderMap(SDL_Renderer *, float);
     void CreateCollisionRegion(const CB_Rect &);
-    void DrawImageLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ImageLayer *);
-    void DrawMapLayer(SDL_Renderer *, SDL_Texture *, const Tmx::TileLayer *, RectRegionCombiner *);
-    void DrawObjectLayer(SDL_Renderer *, SDL_Texture *, const Tmx::ObjectGroup *);
+    void DrawImageLayer(SDL_Renderer *, const Tmx::ImageLayer *);
+    void DrawMapLayer(SDL_Renderer *, const Tmx::TileLayer *, RectRegionCombiner *);
+    void DrawObjectLayer(SDL_Renderer *, const Tmx::ObjectGroup *);
     inline void DrawTileOnMap(SDL_Renderer *, const Tmx::MapTile &, const MapTileInfo &,
                               RectRegionCombiner * = nullptr);
 };

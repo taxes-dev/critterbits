@@ -10,7 +10,7 @@
 # Set ZSTD_ROOT to give a hint where the libraries are installed
 
 FIND_LIBRARY(ZSTD_LIBRARY
-  NAMES libzstd zstd
+  NAMES libzstd zstd zstdlib_x64 zstdlib_x86
   PATHS
     ${ZSTD_ROOT}
     $ENV{ZSTD_ROOT}

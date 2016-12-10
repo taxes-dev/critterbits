@@ -3,7 +3,7 @@
 #include <sstream>
 #include <limits>
 #ifdef _WIN32
-#include <netinet/in.h>
+#include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif

@@ -11,6 +11,9 @@ add_executable(critterbits
 target_link_libraries(critterbits
     ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_GFX_LIBRARY} ${SDL2_TTF_LIBRARY}
     ${TMXPARSER_LIBRARIES} ${TINYXML2_LIBRARIES})
+if(WIN32)
+  target_link_libraries(critterbits wsock32 ws2_32)
+endif()
 install(TARGETS critterbits RUNTIME DESTINATION ${BIN_DIR})
 add_subdirectory(gui)
 add_subdirectory(toml)

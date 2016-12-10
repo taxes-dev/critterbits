@@ -7,7 +7,8 @@
 #include <vector>
 #include <sys/stat.h>
 #ifdef _WIN32
-#include <netinet/in.h>
+#define NOMINMAX
+#include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
@@ -208,7 +209,7 @@ std::vector<std::string> get_directory_entries(const std::string & path, const s
     std::vector<std::string> entries;
     for (auto & dir_entry : fs::recursive_directory_iterator(path)) {
         if (ext.empty() || ext == dir_entry.path().extension()) {
-            entries.push_back(dir_entry.path());
+            entries.push_back(dir_entry.path().string());
         }
     }
     return entries;
@@ -334,6 +335,10 @@ void discover_assets(std::vector<std::string> & asset_names) {
 
 using namespace Critterbits::AssetPack;
 
+#ifdef _MSC_VER
+// SDL macro creates some confusion for MSVC
+#undef main
+#endif
 int main(int argc, char ** argv) {
     parse_command_line(argc, argv);
     banner();

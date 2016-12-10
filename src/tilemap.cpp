@@ -127,7 +127,6 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
         return false;
     }
 
-    SDL_Texture * current_texture = nullptr;
     SDL_Texture * fg_texture =
         SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->dim.w, this->dim.h);
     if (fg_texture == nullptr) {
@@ -179,23 +178,21 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
 
             if (is_foreground) {
                 SDL_SetRenderTarget(renderer, fg_texture);
-                current_texture = fg_texture;
             } else {
                 SDL_SetRenderTarget(renderer, bg_texture);
-                current_texture = bg_texture;
             }
             SDL_RenderSetScale(renderer, scale, scale);
 
             switch (current_layer->GetLayerType()) {
                 case Tmx::TMX_LAYERTYPE_TILE:
-                    this->DrawMapLayer(renderer, current_texture, static_cast<Tmx::TileLayer *>(current_layer),
+                    this->DrawMapLayer(renderer, static_cast<Tmx::TileLayer *>(current_layer),
                                        is_collide ? &collision_regions : nullptr);
                     break;
                 case Tmx::TMX_LAYERTYPE_OBJECTGROUP:
-                    this->DrawObjectLayer(renderer, current_texture, static_cast<Tmx::ObjectGroup *>(current_layer));
+                    this->DrawObjectLayer(renderer, static_cast<Tmx::ObjectGroup *>(current_layer));
                     break;
                 case Tmx::TMX_LAYERTYPE_IMAGE_LAYER:
-                    this->DrawImageLayer(renderer, current_texture, static_cast<Tmx::ImageLayer *>(current_layer));
+                    this->DrawImageLayer(renderer, static_cast<Tmx::ImageLayer *>(current_layer));
                     break;
                 default:
                     LOG_INFO("Tilemap::RenderMap encountered unknown layer type in TMX file");
@@ -220,7 +217,7 @@ bool Tilemap::RenderMap(SDL_Renderer * renderer, float scale) {
     return true;
 }
 
-void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ImageLayer * layer) {
+void Tilemap::DrawImageLayer(SDL_Renderer * renderer, const Tmx::ImageLayer * layer) {
     SDL_Rect dim;
     const Tmx::Image * image = layer->GetImage();
     if (image == nullptr) {
@@ -244,7 +241,7 @@ void Tilemap::DrawImageLayer(SDL_Renderer * renderer, SDL_Texture * texture, con
     }
 }
 
-void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::TileLayer * layer,
+void Tilemap::DrawMapLayer(SDL_Renderer * renderer, const Tmx::TileLayer * layer,
                            RectRegionCombiner * collision_regions) {
     // set layer opacity
     int alpha_mod = layer->GetOpacity() * SDL_ALPHA_OPAQUE;
@@ -263,7 +260,7 @@ void Tilemap::DrawMapLayer(SDL_Renderer * renderer, SDL_Texture * texture, const
     }
 }
 
-void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, SDL_Texture * texture, const Tmx::ObjectGroup * object_group) {
+void Tilemap::DrawObjectLayer(SDL_Renderer * renderer, const Tmx::ObjectGroup * object_group) {
     SDL_Rect rect;
     SDL_Color obj_color;
     if (object_group->GetColor().empty()) {
