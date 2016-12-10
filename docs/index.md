@@ -1,5 +1,6 @@
 # Critterbits Developer Guide
 
+* [Building from Source](building/index.md)
 * [Configuration and Convention](config/index.md)
   * [Scenes](config/scenes.md)
   * [Sprites](config/sprites.md)
