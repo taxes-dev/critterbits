@@ -149,7 +149,9 @@ void Sprite::SetPosition(int new_x, int new_y) {
 
     // check collisions at new position if we collide
     if (this->collision == CollisionType::Collide) {
-        CB_Rect new_dim{new_x, new_y, this->collision_box.w, this->collision_box.h};
+        CB_Rect new_dim{this->collision_box};
+        new_dim.x += new_x;
+        new_dim.y += new_y;
 
         do {
             // these get reset on each loop to check if we got moved by collision
@@ -192,8 +194,8 @@ void Sprite::SetPosition(int new_x, int new_y) {
     }
 
     // update position if valid
-    this->dim.x = new_x;
-    this->dim.y = new_y;
+    this->dim.x = new_x - this->collision_box.x;
+    this->dim.y = new_y - this->collision_box.y;
 }
 
 bool Sprite::OnStart() {
