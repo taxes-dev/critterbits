@@ -16,6 +16,10 @@ inline CB_Point Lerp2D(const CB_Point & start, const CB_Point & end, float perce
   return start + percent * (end - start);
 }
 
+inline CB_Point QuadEaseIn2D(const CB_Point & start, const CB_Point & end, float percent) {
+  return (end - start) * percent * percent + start;
+}	
+
 class RectRegionCombiner {
   public:
     std::vector<CB_Rect> regions;

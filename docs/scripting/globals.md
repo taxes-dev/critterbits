@@ -46,6 +46,15 @@ mymodule.update = function(delta_time) {
 }
 ```
 
+### ease_in(start, end, percent)
+
+Quadratically eases in (accelerates from zero) a starting point and ending point over time.
+
+* `(returns)`. A point (x, y) coordinates.
+* `start`. The starting point (x, y) coordinates.
+* `end`. The ending point (x, y) coordinates.
+* `percent`. A number from 0 to 1 representing the percentage of time passed.
+
 ### find_by_tag(tag, [tag, ...])
 
 Find entities in the current scene with the given tag(s).
@@ -62,6 +71,15 @@ mymodule.start = function() {
     }
 }
 ```
+
+### lerp(start, end, percent)
+
+Linearly interpolates a starting point and ending point over time.
+
+* `(returns)`. A point (x, y) coordinates.
+* `start`. The starting point (x, y) coordinates.
+* `end`. The ending point (x, y) coordinates.
+* `percent`. A number from 0 to 1 representing the percentage of time passed.
 
 ### open_gui(panel, [multiple])
 
