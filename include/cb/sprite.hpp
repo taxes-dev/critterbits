@@ -38,6 +38,7 @@ class Sprite : public Entity {
     bool flip_x{false};
     bool flip_y{false};
     CollisionType collision{CollisionType::None};
+    CB_Rect collision_box;
     CB_Color tint_and_opacity{255,255,255,255};
     std::vector<std::shared_ptr<Animation>> animations;
 

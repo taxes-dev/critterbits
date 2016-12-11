@@ -59,6 +59,10 @@ void Sprite::NotifyLoaded() {
     LOG_INFO("Sprite::NotifyLoaded sprite was loaded " + this->sprite_name);
     this->dim.w = this->tile_width * this->sprite_scale;
     this->dim.h = this->tile_height * this->sprite_scale;
+    if (this->collision != CollisionType::None && this->collision_box.w == 0 && this->collision_box.h == 0) {
+        this->collision_box.w = this->dim.w;
+        this->collision_box.h = this->dim.h;
+    }
 
     if (!this->sprite_sheet_path.empty()) {
         EngineEventQueue::GetInstance().QueuePreUpdate((PreUpdateEvent)[this]() {
@@ -145,7 +149,7 @@ void Sprite::SetPosition(int new_x, int new_y) {
 
     // check collisions at new position if we collide
     if (this->collision == CollisionType::Collide) {
-        CB_Rect new_dim{new_x, new_y, this->dim.w, this->dim.h};
+        CB_Rect new_dim{new_x, new_y, this->collision_box.w, this->collision_box.h};
 
         do {
             // these get reset on each loop to check if we got moved by collision
@@ -156,18 +160,21 @@ void Sprite::SetPosition(int new_x, int new_y) {
                 if (sprite->entity_id != this->entity_id) {
                     if (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger) {
                         // check for collision
-                        if (AabbCollision(new_dim, sprite->dim)) {
+                        CB_Rect coll_box{sprite->collision_box};
+                        coll_box.x += sprite->dim.x;
+                        coll_box.y += sprite->dim.y;
+                        if (AabbCollision(new_dim, coll_box)) {
                             // if full collision, adjust new x/y so they're not inside the collided sprite
                             if (sprite->collision == CollisionType::Collide) {
                                 if (new_dim.x > this->dim.x) {
-                                    new_dim.x = std::max(this->dim.x, sprite->dim.x - this->dim.w);
+                                    new_dim.x = std::max(this->dim.x, coll_box.x - this->dim.w);
                                 } else if (new_dim.x < this->dim.x) {
-                                    new_dim.x = std::min(this->dim.x, sprite->dim.right());
+                                    new_dim.x = std::min(this->dim.x, coll_box.right());
                                 }
                                 if (new_dim.y > this->dim.y) {
-                                    new_dim.y = std::max(this->dim.y, sprite->dim.y - this->dim.h);
+                                    new_dim.y = std::max(this->dim.y, coll_box.y - this->dim.h);
                                 } else if (new_dim.y < this->dim.y) {
-                                    new_dim.y = std::min(this->dim.y, sprite->dim.bottom());
+                                    new_dim.y = std::min(this->dim.y, coll_box.bottom());
                                 }
                             }
 

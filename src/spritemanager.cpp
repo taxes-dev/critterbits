@@ -76,6 +76,7 @@ void SpriteManager::ParseSprite(const Toml::TomlParser & parser, std::shared_ptr
     } else if (collide == "trigger") {
         sprite->collision = CollisionType::Trigger;
     }
+    sprite->collision_box = parser.GetTableRect("2d.box");
     // animations
     parser.IterateTableArray("animation", [&sprite](const Toml::TomlParser & table) {
         std::string animation_name = table.GetTableString("name");

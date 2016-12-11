@@ -25,6 +25,7 @@ sprite_scale = 2.0
 
 [2d]
 collision = "collide"
+box = { x = 2, y = 2, w = 24, h = 36 }
 
 [[animation]]
 name = "walk"
@@ -68,6 +69,8 @@ This section describes the graphics associated with the sprite, if any.
 ### 2d
 
 This section affects the sprite's behavior with regards to 2D calculations made within the engine.
+
+`box`. This sets the collision box for the sprite. If not specified, it will be equal to the dimensions of the sprite's tile. This is a rectangle (x, y, w, h). The `w` and `h` values specify the width and height of the collision box, while the `x` and `y` values specify an offset within the dimensions of the sprite's tile.
 
 `collision`. This sets the sprite's collision behavior with regards to other sprites and map tiles. It has three possible values:
 

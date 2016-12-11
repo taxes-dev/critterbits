@@ -65,6 +65,7 @@ void Tilemap::CreateCollisionRegion(const CB_Rect & dim) {
     region->dim.w = dim.w * this->render_scale;
     region->dim.h = dim.h * this->render_scale;
     region->collision = CollisionType::Collide;
+    region->collision_box.wh(region->dim.wh());
     this->regions.push_back(std::move(region));
 }
 
