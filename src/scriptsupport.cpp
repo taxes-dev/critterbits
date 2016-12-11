@@ -245,7 +245,11 @@ void CreateEntityInContext(duk_context * context, std::shared_ptr<Entity> entity
     if (found_stash_idx == -1) {
         // doesn't exist, create a new one
         duk_push_object(context); // root
-        PushPropertyRect(context, "dim", entity->dim);
+        duk_push_object(context); // dim
+        PushPropertyInt(context, "w", entity->dim.w);
+        PushPropertyInt(context, "h", entity->dim.h);
+        duk_put_prop_string(context, -2, "dim");
+        PushPropertyPoint(context, "pos", entity->dim.xy());
         PushPropertyEntityId(context, entity->entity_id);
         PushPropertyString(context, "tag", entity->tag);
         PushPropertyFloat(context, "time_scale", entity->time_scale);
@@ -321,13 +325,13 @@ void RetrieveEntityFromContextAt(duk_context * context, std::shared_ptr<Entity> 
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     if (duk_is_object(context, stack_index)) {
         // only mutable properties are retrieved
-        CB_Rect new_dim = GetPropertyRect(context, "dim", stack_index);
-        entity->dim.w = new_dim.w;
-        entity->dim.h = new_dim.h;
+        CB_Point new_dim = GetPropertyRectDimOnly(context, "dim", stack_index);
+        entity->dim.wh(new_dim);
+        CB_Point new_pos = GetPropertyPoint(context, "pos", stack_index);
         entity->time_scale = GetPropertyFloat(context, "time_scale", stack_index);
 
         // set position (may result in collisions)
-        entity->SetPosition(new_dim.x, new_dim.y);
+        entity->SetPosition(new_pos.x, new_pos.y);
 
         // special case: "destroyed flag"
         bool destroyed = GetPropertyBool(context, CB_SCRIPT_HIDDEN_DESTROYED, stack_index);

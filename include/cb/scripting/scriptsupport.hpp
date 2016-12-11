@@ -83,6 +83,17 @@ inline CB_Color GetPropertyColor(duk_context * context, const char * property_na
     return value;    
 }
 
+inline CB_Point GetPropertyPoint(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    CB_Point value;
+    if (duk_is_object(context, -1)) {
+        value.x = GetPropertyInt(context, "x");
+        value.y = GetPropertyInt(context, "y");
+    }
+    duk_pop(context);
+    return value;
+}
+
 inline CB_Rect GetPropertyRect(duk_context * context, const char * property_name, int stack_index = -1) {
     duk_get_prop_string(context, stack_index, property_name);
     CB_Rect value;
@@ -91,6 +102,17 @@ inline CB_Rect GetPropertyRect(duk_context * context, const char * property_name
         value.y = GetPropertyInt(context, "y");
         value.w = GetPropertyInt(context, "w");
         value.h = GetPropertyInt(context, "h");
+    }
+    duk_pop(context);
+    return value;
+}
+
+inline CB_Point GetPropertyRectDimOnly(duk_context * context, const char * property_name, int stack_index = -1) {
+    duk_get_prop_string(context, stack_index, property_name);
+    CB_Point value;
+    if (duk_is_object(context, -1)) {
+        value.x = GetPropertyInt(context, "w");
+        value.y = GetPropertyInt(context, "h");
     }
     duk_pop(context);
     return value;
@@ -138,6 +160,13 @@ inline void PushPropertyColor(duk_context * context, const char * property_name,
     PushPropertyInt(context, "g", value.g);
     PushPropertyInt(context, "b", value.b);
     PushPropertyInt(context, "a", value.a);
+    duk_put_prop_string(context, -2, property_name);
+}
+
+inline void PushPropertyPoint(duk_context * context, const char * property_name, const CB_Point & value) {
+    duk_push_object(context);
+    PushPropertyInt(context, "x", value.x);
+    PushPropertyInt(context, "y", value.y);
     duk_put_prop_string(context, -2, property_name);
 }
 

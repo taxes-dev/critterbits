@@ -20,7 +20,7 @@ This function is called once when the entity is first loaded into the current sc
 Example:
 
 ```
-function start() {
+mymodule.start = function() {
     // tell the viewport to follow this object
     viewport.follow(this);
 }
@@ -36,9 +36,9 @@ Example:
 
 ```
 var VELOCITY = 100;
-function update(delta_time) {
+mymodule.update = function(delta_time) {
     // move at a steady velocity (100 pixels/sec) to the right
-    this.dim.x += VELOCITY * delta_time;
+    this.pos.x += VELOCITY * delta_time;
 }
 ```
 
@@ -48,12 +48,17 @@ The following data are available on all entities. Unless otherwise noted, proper
 
 ### dim
 
-The dimensions/position of the current entity. This is an object containg the following properties:
+The dimensions of the current entity. This is an object containg the following properties:
+
+* `w`. The width of the entity in pixels.
+* `h`. The height of the entity in pixels.
+
+### pos
+
+The position of the current entity. This is an object containing the following properties:
 
 * `x`. The X coordinate in pixels.
 * `y`. The Y coordinate in pixels.
-* `w`. The width of the entity in pixels.
-* `h`. The height of the entity in pixels.
 
 ### tag
 
@@ -118,7 +123,7 @@ When `callback` is called, the context of `this` is set to the entity that initi
 ```
 function my_callback() {
     // move me to the right
-    this.dim.x += 50;
+    this.pos.x += 50;
 }
 
 function start() {
@@ -142,7 +147,7 @@ When `callback` is called the context of `this` is set to the entity that initia
 ```
 function my_callback() {
     // move me to the right until I pass the 500 pixel mark
-    this.dim.x += 50;
+    this.pos.x += 50;
     return this.dim.x < 500;
 }
 

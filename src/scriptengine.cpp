@@ -80,6 +80,29 @@ duk_ret_t is_key_pressed_once(duk_context * context) {
     return 1;
 }
 
+duk_ret_t lerp(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
+    CB_Point start, end;
+    float scalar{0.0f};
+    if (duk_is_object(context, 0)) {
+        start.x = GetPropertyInt(context, "x", 0);
+        start.y = GetPropertyInt(context, "y", 0);
+    }
+    if (duk_is_object(context, 1)) {
+        end.x = GetPropertyInt(context, "x", 1);
+        end.y = GetPropertyInt(context, "y", 1);
+    }
+    if (duk_is_number(context, 2)) {
+        scalar = duk_get_number(context, 2);
+    }
+    start = Lerp2D(start, end, scalar); 
+    duk_push_object(context);
+    PushPropertyInt(context, "x", start.x);
+    PushPropertyInt(context, "y", start.y);
+    CB_SCRIPT_ASSERT_STACK_RETURN1_END(context);
+    return 1;
+}
+
 duk_ret_t open_gui_panel(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     entity_id_t opened = CB_ENTITY_ID_INVALID;
@@ -195,6 +218,7 @@ void ScriptEngine::AddCommonScriptingFunctions(duk_context * context) const {
     // global functions
     PushPropertyFunction(context, "close_gui", close_gui_panel, 1);
     PushPropertyFunction(context, "find_by_tag", find_entities_by_tag, DUK_VARARGS);
+    PushPropertyFunction(context, "lerp", lerp, 3);
     PushPropertyFunction(context, "open_gui", open_gui_panel, 2);
     PushPropertyFunction(context, "spawn", spawn_sprite, 2);
 

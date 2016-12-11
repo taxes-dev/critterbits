@@ -12,6 +12,10 @@ inline bool AabbCollision(const CB_Rect & rect1, const CB_Rect & rect2) {
             rect1.h + rect1.y > rect2.y);
 }
 
+inline CB_Point Lerp2D(const CB_Point & start, const CB_Point & end, float percent) {
+  return start + percent * (end - start);
+}
+
 class RectRegionCombiner {
   public:
     std::vector<CB_Rect> regions;

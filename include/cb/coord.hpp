@@ -24,7 +24,12 @@ typedef struct CB_Point {
     }
     inline bool operator==(const CB_Point & other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const CB_Point & other) const { return !(*this == other); }
+    inline CB_Point operator+(const CB_Point & other) const { return {x + other.x, y + other.y}; }
+    inline CB_Point operator-(const CB_Point & other) const { return {x - other.x, y - other.y}; }
 } CB_Point;
+
+inline CB_Point operator*(const CB_Point & point, float scalar) { return { static_cast<int>(point.x * scalar), static_cast<int>(point.y * scalar) }; }
+inline CB_Point operator*(float scalar, const CB_Point & point) { return { static_cast<int>(point.x * scalar), static_cast<int>(point.y * scalar) }; }
 
 typedef struct CB_Rect {
     int x;
@@ -44,10 +49,15 @@ typedef struct CB_Rect {
     inline bool intersects(const CB_Rect & rect) const {
         return !(rect.x > right() || rect.right() < x || rect.y > bottom() || rect.bottom() < y);
     };
-    inline CB_Point xy() const { return CB_Point(x, y); };
+    inline CB_Point xy() const { return CB_Point{x, y}; };
     inline void xy(const CB_Point & point) {
         x = point.x;
         y = point.y;
+    };
+    inline CB_Point wh() const { return CB_Point{w, h}; };
+    inline void wh(const CB_Point & point) {
+        w = point.x;
+        h = point.y;
     };
     inline std::string to_string() const {
         return "[" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(w) + "," + std::to_string(h) +
