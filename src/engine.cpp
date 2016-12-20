@@ -211,6 +211,30 @@ void Engine::IterateEntities(EntityIterateFunction<Entity> func) {
     }
 }
 
+void Engine::IterateActiveColliders(EntityIterateFunction<BoxCollider> func) {
+    EntityIterateFunction<BoxCollider> wrapper = [&func](std::shared_ptr<BoxCollider> collider) {
+        if (collider->IsActive()) {
+            return func(collider);
+        }
+        return false;
+    };
+
+    if (this->scenes.IsCurrentSceneActive()) {
+        if (this->scenes.current_scene->HasTilemap()) {
+            for (auto & region : this->scenes.current_scene->GetTilemap()->regions) {
+                if (wrapper(region)) {
+                    return;
+                }
+            }
+        }
+        for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
+            if (wrapper(sprite)) {
+                return;
+            }
+        }
+    }
+}
+
 void Engine::IterateActiveEntities(EntityIterateFunction<Entity> func) {
     EntityIterateFunction<Entity> wrapper = [&func](std::shared_ptr<Entity> entity) {
         if (entity->IsActive()) {
@@ -244,13 +268,6 @@ void Engine::IterateActiveSprites(EntityIterateFunction<Sprite> func) {
     };
 
     if (this->scenes.IsCurrentSceneActive()) {
-        if (this->scenes.current_scene->HasTilemap()) {
-            for (auto & region : this->scenes.current_scene->GetTilemap()->regions) {
-                if (wrapper(region)) {
-                    return;
-                }
-            }
-        }
         for (auto & sprite : this->scenes.current_scene->sprites.sprites) {
             if (wrapper(sprite)) {
                 return;

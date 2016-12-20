@@ -20,10 +20,11 @@
 #define CB_TILEMAP_TMX_PROP_BOOL_TRUE "true"
 
 namespace Critterbits {
-class TilemapRegion : public Sprite {
+class TilemapRegion : public BoxCollider {
   public:
     TilemapRegion();
 
+    EntityType GetEntityType() const { return EntityType::TilemapRegion; };
     void SetPosition(int, int){}; // map regions are static
 
   protected:

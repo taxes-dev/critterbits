@@ -1,5 +1,5 @@
 add_executable(critterbits
-    main.cpp animation.cpp assetpackresourceloader.cpp engine.cpp
+    main.cpp animation.cpp assetpackresourceloader.cpp boxcollider.cpp engine.cpp
     engineconfiguration.cpp enginecounters.cpp engineeventqueue.cpp
     entity.cpp fileresourceloader.cpp flexrect.cpp fontmanager.cpp
     inputmanager.cpp memory.cpp rectregioncombiner.cpp rendering.cpp

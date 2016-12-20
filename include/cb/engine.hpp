@@ -9,6 +9,9 @@
 #include <vector>
 
 #include "resource.hpp"
+#include "entity.hpp"
+#include "boxcollider.hpp"
+#include "sprite.hpp"
 #include "input.hpp"
 #include "scene.hpp"
 #include "viewport.hpp"
@@ -116,6 +119,7 @@ class Engine {
     std::shared_ptr<ResourceLoader> GetResourceLoader() const;
     SDL_Renderer * GetRenderer() const { return this->renderer; };
     void IterateEntities(EntityIterateFunction<Entity>);
+    void IterateActiveColliders(EntityIterateFunction<BoxCollider>);
     void IterateActiveEntities(EntityIterateFunction<Entity>);
     void IterateActiveGuiPanels(EntityIterateFunction<Gui::GuiPanel>);
     void IterateActiveSprites(EntityIterateFunction<Sprite>);

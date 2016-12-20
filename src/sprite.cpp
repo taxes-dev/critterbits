@@ -18,43 +18,6 @@ CB_Rect Sprite::GetFrameRect() const {
     return frame_rect;
 }
 
-bool Sprite::IsCollidingWith(entity_id_t entity_id) {
-    for (auto & eid : this->is_colliding_with) {
-        if (eid == entity_id) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void Sprite::NotifyCollision(std::weak_ptr<Sprite> other_sprite) {
-    if (auto spr = other_sprite.lock()) {
-        if (spr->IsActive() && !this->IsCollidingWith(spr->entity_id)) {
-            // record the collision (this is used for de-dupe)
-            this->is_colliding_with.push_back(spr->entity_id);
-
-            // queue up an event for the collision
-            std::weak_ptr<Sprite> this_sprite = std::dynamic_pointer_cast<Sprite>(shared_from_this());
-            EngineEventQueue::GetInstance().QueueCollision([other_sprite, this_sprite]() {
-                if (auto tspr = this_sprite.lock()) {
-                    if (auto ospr = other_sprite.lock()) {
-                        // call oncollision script if it exists
-                        if (tspr->HasScript()) {
-                            tspr->script->CallOnCollision(tspr, ospr);
-                        }
-
-                        // full colliders reset after every hit, triggers will collide only once until the colliding
-                        // object leaves the trigger area
-                        if (tspr->collision == CollisionType::Collide && ospr->collision != CollisionType::Trigger) {
-                            tspr->RemoveCollisionWith(ospr->entity_id);
-                        }
-                    }
-                }
-            });
-        }
-    }
-}
-
 void Sprite::NotifyLoaded() {
     LOG_INFO("Sprite::NotifyLoaded sprite was loaded " + this->sprite_name);
     this->dim.w = this->tile_width * this->sprite_scale;
@@ -94,15 +57,6 @@ void Sprite::NotifyLoaded() {
 void Sprite::NotifyUnloaded() {
     LOG_INFO("Sprite::NotifyUnloaded sprite was unloaded " + this->sprite_name);
     this->state = EntityState::Unloaded;
-}
-
-void Sprite::RemoveCollisionWith(entity_id_t entity_id) {
-    for (auto it = this->is_colliding_with.begin(); it != this->is_colliding_with.end(); it++) {
-        if (*it == entity_id) {
-            this->is_colliding_with.erase(it);
-            break;
-        }
-    }
 }
 
 void Sprite::OnRender(SDL_Renderer * renderer, const CB_ViewClippingInfo & clip_rect) {
@@ -147,55 +101,11 @@ void Sprite::SetPosition(int new_x, int new_y) {
         return;
     }
 
-    // check collisions at new position if we collide
-    if (this->collision == CollisionType::Collide) {
-        CB_Rect new_dim{this->collision_box};
-        new_dim.x += new_x;
-        new_dim.y += new_y;
+    CB_Point new_xy = this->GetValidPosition(this->dim.x + this->collision_box.x, this->dim.y + this->collision_box.y,
+        new_x + this->collision_box.x, new_y + this->collision_box.y);
 
-        do {
-            // these get reset on each loop to check if we got moved by collision
-            new_x = new_dim.x;
-            new_y = new_dim.y;
-
-            Engine::GetInstance().IterateActiveSprites([&](std::shared_ptr<Sprite> sprite) {
-                if (sprite->entity_id != this->entity_id) {
-                    if (sprite->collision == CollisionType::Collide || sprite->collision == CollisionType::Trigger) {
-                        // check for collision
-                        CB_Rect coll_box{sprite->collision_box};
-                        coll_box.x += sprite->dim.x;
-                        coll_box.y += sprite->dim.y;
-                        if (AabbCollision(new_dim, coll_box)) {
-                            // if full collision, adjust new x/y so they're not inside the collided sprite
-                            if (sprite->collision == CollisionType::Collide) {
-                                if (new_dim.x > this->dim.x) {
-                                    new_dim.x = std::max(this->dim.x, coll_box.x - this->dim.w);
-                                } else if (new_dim.x < this->dim.x) {
-                                    new_dim.x = std::min(this->dim.x, coll_box.right());
-                                }
-                                if (new_dim.y > this->dim.y) {
-                                    new_dim.y = std::max(this->dim.y, coll_box.y - this->dim.h);
-                                } else if (new_dim.y < this->dim.y) {
-                                    new_dim.y = std::min(this->dim.y, coll_box.bottom());
-                                }
-                            }
-
-                            // notify both sprites that a collision occurred
-                            this->NotifyCollision(sprite);
-                            sprite->NotifyCollision(std::dynamic_pointer_cast<Sprite>(shared_from_this()));
-                        } else {
-                            this->RemoveCollisionWith(sprite->entity_id);
-                        }
-                    }
-                }
-                return false;
-            });
-        } while (new_dim.x != new_x || new_dim.y != new_y);
-    }
-
-    // update position if valid
-    this->dim.x = new_x - this->collision_box.x;
-    this->dim.y = new_y - this->collision_box.y;
+    this->dim.x = new_xy.x - this->collision_box.x;
+    this->dim.y = new_xy.y - this->collision_box.y;
 }
 
 bool Sprite::OnStart() {
