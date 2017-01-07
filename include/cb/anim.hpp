@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "entity.hpp"
+#include "scripting/scripting.hpp"
 
 namespace Critterbits {
 namespace Animation {
@@ -71,6 +72,7 @@ class TransformAnimation : public Animation {
     TransformAnimation(const TransformAlgorithm & algorithm, float duration)
         : Animation(""), algorithm(algorithm), duration(duration){};
     void Animate(std::shared_ptr<Entity>, float);
+    void SetCallback(std::unique_ptr<Scripting::CB_ScriptCallback> callback);
 
   protected:
     float GetTransformedValue(float, float, float);
@@ -82,6 +84,7 @@ class TransformAnimation : public Animation {
     TransformAlgorithm algorithm;
     float duration;
     float elapsed{0.f};
+    std::unique_ptr<Scripting::CB_ScriptCallback> callback;
 };
 
 class TranslateAnimation : public TransformAnimation {

@@ -24,6 +24,18 @@ duk_ret_t cancel_callback(duk_context * context) {
     return 0;
 }
 
+void push_callback_stack(duk_context * context) {
+    duk_push_global_stash(context);
+    duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
+    if (duk_is_object(context, -1) == 0) {
+        // create the callback map
+        duk_pop(context);
+        duk_push_object(context);
+        duk_put_prop_string(context, -2, CB_SCRIPT_CALLBACK_STASH);
+        duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
+    }
+}
+
 duk_ret_t queue_callback(duk_context * context, bool once) {
     CB_SCRIPT_ASSERT_STACK_RETURN1_BEGIN(context);
     duk_push_this(context);
@@ -38,19 +50,12 @@ duk_ret_t queue_callback(duk_context * context, bool once) {
             callback->delay = delay;
             callback->once = once;
             callback->owner = entity;
-            duk_push_global_stash(context);
-            duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
-            if (duk_is_object(context, -1) == 0) {
-                // create the callback map
-                duk_pop(context);
-                duk_push_object(context);
-                duk_put_prop_string(context, -2, CB_SCRIPT_CALLBACK_STASH);
-                duk_get_prop_string(context, -1, CB_SCRIPT_CALLBACK_STASH);
-            }
+            push_callback_stack(context);
+            // push a null object and swap it with the function on the stack
             duk_push_null(context);
             duk_swap(context, -1, 1);
             duk_put_prop_index(context, -2, callback->callback_id);
-            duk_pop_2(context);
+            duk_pop_2(context); // push_callback_stack returns the stack and global stash
             callback_id = callback->callback_id;
             entity->script->QueueCallback(std::move(callback));
         }
@@ -98,16 +103,26 @@ duk_ret_t move_to(duk_context * context) {
             LOG_ERR("move_to: Unknown value for algorithm " + alg_name);
         }
     }
-    if (duk_is_object(context, 3)) {
-        //TODO:callback
-    }
     duk_push_this(context);
     entity_id_t entity_id = GetPropertyEntityId(context);
     duk_pop(context);
     std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
     if (entity != nullptr && entity->GetEntityType() == EntityType::Sprite && duration > 0.f) {
-        LOG_INFO("starting animation " + std::to_string(duration) + " " + end.to_string());
-        std::shared_ptr<Animation::TranslateAnimation> translate = std::make_shared<Animation::TranslateAnimation>(algorithm, duration, entity->dim.xy(), end);
+        std::shared_ptr<Animation::TranslateAnimation> translate =
+            std::make_shared<Animation::TranslateAnimation>(algorithm, duration, entity->dim.xy(), end);
+        if (entity->HasScript() && duk_is_object(context, 3)) {
+            std::unique_ptr<CB_ScriptCallback> callback{new CB_ScriptCallback()};
+            callback->delay = 0;
+            callback->once = true;
+            callback->owner = entity;
+            push_callback_stack(context);
+            // push a null object and swap it with the function on the stack
+            duk_push_null(context);
+            duk_swap(context, -1, 3);
+            duk_put_prop_index(context, -2, callback->callback_id);
+            duk_pop_2(context); // push_callback_stack returns the stack and global stash
+            translate->SetCallback(std::move(callback));
+        }
         translate->Play();
         std::dynamic_pointer_cast<Sprite>(entity)->animations.push_back(std::move(translate));
     }

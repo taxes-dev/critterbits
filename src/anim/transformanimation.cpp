@@ -10,6 +10,11 @@ void TransformAnimation::Animate(std::shared_ptr<Entity> entity, float delta_tim
             this->AnimateValues(entity, percent);
         } else {
             this->Stop();
+            if (this->callback != nullptr) {
+                if (auto ent = this->callback->owner.lock()) {
+                    ent->script->QueueCallback(std::move(this->callback));
+                }
+            }
         }
     }
 }
@@ -33,5 +38,10 @@ CB_Point TransformAnimation::GetTransformedValue(CB_Point start, CB_Point end, f
     }
     return {0, 0};
 }
+
+void TransformAnimation::SetCallback(std::unique_ptr<Scripting::CB_ScriptCallback> callback) {
+    this->callback = std::move(callback);
+}
+
 }
 }
