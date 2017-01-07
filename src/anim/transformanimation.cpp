@@ -6,7 +6,7 @@ void TransformAnimation::Animate(std::shared_ptr<Entity> entity, float delta_tim
     if (this->IsPlaying()) {
         this->elapsed += delta_time;
         if (this->elapsed < this->duration) {
-            float percent = Clamp(this->elapsed / this->duration, 0.f, 1.f);
+            float percent = Clampf(this->elapsed / this->duration, 0.f, 1.f);
             this->AnimateValues(entity, percent);
         } else {
             this->Stop();

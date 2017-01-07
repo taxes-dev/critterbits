@@ -64,6 +64,14 @@ inline int Clamp(int value, int min, int max) {
     return value;
 }
 
+inline float Clampf(float value, float min, float max) {
+    if (value < min)
+        return min;
+    if (value > max)
+        return max;
+    return value;
+}
+
 // Source: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 //  compute the next highest power of 2 of 32-bit v
 inline unsigned int NextPowerOf2(unsigned int v) {

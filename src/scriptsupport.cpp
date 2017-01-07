@@ -64,19 +64,53 @@ duk_ret_t queue_callback(duk_context * context, bool once) {
     return 1;
 }
 
-duk_ret_t delay_callback(duk_context * context) {
-    return queue_callback(context, true);
-}
+duk_ret_t delay_callback(duk_context * context) { return queue_callback(context, true); }
 
-duk_ret_t interval_callback(duk_context * context) {
-    return queue_callback(context, false);
-}
+duk_ret_t interval_callback(duk_context * context) { return queue_callback(context, false); }
 
 duk_ret_t mark_entity_destroyed(duk_context * context) {
     CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
     duk_push_this(context);
     PushPropertyBool(context, CB_SCRIPT_HIDDEN_DESTROYED, true);
     duk_pop(context);
+    CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
+    return 0;
+}
+
+duk_ret_t move_to(duk_context * context) {
+    CB_SCRIPT_ASSERT_STACK_CLEAN_BEGIN(context);
+    CB_Point end{0, 0};
+    if (duk_is_object(context, 0)) {
+        end.x = GetPropertyInt(context, "x", 0);
+        end.y = GetPropertyInt(context, "y", 0);
+    }
+    float duration{0.f};
+    if (duk_is_number(context, 1)) {
+        int millis = duk_get_int(context, 1);
+        duration = static_cast<float>(millis) / 1000.f;
+    }
+    Animation::TransformAlgorithm algorithm{Animation::TransformAlgorithm::Lerp};
+    if (duk_is_string(context, 2)) {
+        std::string alg_name{duk_get_string(context, 2)};
+        if (alg_name == "ease-in") {
+            algorithm = Animation::TransformAlgorithm::QuadEaseIn;
+        } else if (alg_name != "lerp") {
+            LOG_ERR("move_to: Unknown value for algorithm " + alg_name);
+        }
+    }
+    if (duk_is_object(context, 3)) {
+        //TODO:callback
+    }
+    duk_push_this(context);
+    entity_id_t entity_id = GetPropertyEntityId(context);
+    duk_pop(context);
+    std::shared_ptr<Entity> entity = Engine::GetInstance().FindEntityById(entity_id);
+    if (entity != nullptr && entity->GetEntityType() == EntityType::Sprite && duration > 0.f) {
+        LOG_INFO("starting animation " + std::to_string(duration) + " " + end.to_string());
+        std::shared_ptr<Animation::TranslateAnimation> translate = std::make_shared<Animation::TranslateAnimation>(algorithm, duration, entity->dim.xy(), end);
+        translate->Play();
+        std::dynamic_pointer_cast<Sprite>(entity)->animations.push_back(std::move(translate));
+    }
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
     return 0;
 }
@@ -134,11 +168,13 @@ duk_ret_t stop_all_animation(duk_context * context) {
     if (entity != nullptr) {
         std::shared_ptr<Sprite> sprite = std::dynamic_pointer_cast<Sprite>(entity);
         for (auto & anim : sprite->animations) {
-            anim->Stop();
+            if (anim->name.length() > 0) { //TODO:better definition of user-defined animations
+                anim->Stop();
+            }
         }
     }
     CB_SCRIPT_ASSERT_STACK_CLEAN_END(context);
-    return 0;    
+    return 0;
 }
 
 /*
@@ -156,6 +192,7 @@ void ExtendEntityWithSprite(duk_context * context, std::shared_ptr<Sprite> sprit
     PushPropertyBool(context, "flip_y", sprite->flip_y);
     PushPropertyColor(context, "tint", sprite->tint_and_opacity);
     PushPropertyFloat(context, "opacity", static_cast<float>(sprite->tint_and_opacity.a) / 255.0f);
+    PushPropertyFunction(context, "move_to", move_to, 4);
 
     duk_push_object(context); // frame
     PushPropertyInt(context, "current", sprite->GetFrame());
