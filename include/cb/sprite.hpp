@@ -38,7 +38,7 @@ class Sprite : public BoxCollider {
     bool flip_x{false};
     bool flip_y{false};
     CB_Color tint_and_opacity{255,255,255,255};
-    std::vector<std::shared_ptr<Animation>> animations;
+    std::vector<std::shared_ptr<Animation::Animation>> animations;
 
     Sprite();
     ~Sprite();

@@ -81,10 +81,10 @@ void SpriteManager::ParseSprite(const Toml::TomlParser & parser, std::shared_ptr
     parser.IterateTableArray("animation", [&sprite](const Toml::TomlParser & table) {
         std::string animation_name = table.GetTableString("name");
         if (!animation_name.empty()) {
-            std::shared_ptr<Animation> anim = std::make_shared<Animation>(animation_name);
+            std::shared_ptr<Animation::KeyFrameAnimation> anim = std::make_shared<Animation::KeyFrameAnimation>(animation_name);
             anim->loop = table.GetTableBool("loop");
             table.IterateTableArray("frames", [&anim](const Toml::TomlParser & table) {
-                KeyFrame key_frame{
+                Animation::KeyFrame key_frame{
                     table.GetTableString("prop"),
                     table.GetTableString("val"),
                     table.GetTableInt("dur")

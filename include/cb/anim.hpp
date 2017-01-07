@@ -8,6 +8,7 @@
 #include "entity.hpp"
 
 namespace Critterbits {
+namespace Animation {
 
 enum class AnimationState { Stopped, Paused, Playing };
 
@@ -16,8 +17,8 @@ typedef struct KeyFrame {
     std::string value;
     int duration;
 
-    KeyFrame(const std::string & property, const std::string & value, int duration) :
-        property(property), value(value), duration(duration) {};
+    KeyFrame(const std::string & property, const std::string & value, int duration)
+        : property(property), value(value), duration(duration){};
 } KeyFrame;
 
 class Animation {
@@ -25,16 +26,32 @@ class Animation {
     std::string name;
     bool loop;
 
-    Animation(const std::string & name) : name(name), loop(false) {};
-    void AddKeyFrame(const KeyFrame & key_frame);
-    void Animate(std::shared_ptr<Entity>, float);
+    Animation(const std::string & name) : name(name), loop(false){};
+    virtual void Animate(std::shared_ptr<Entity>, float) = 0;
     bool IsPlaying() { return this->state == AnimationState::Playing; };
-    void Pause() { this->state = AnimationState::Paused; };
-    void Play() { this->state = AnimationState::Playing; };
+    void Pause();
+    void Play();
     void Stop();
+
+  protected:
+    virtual void OnPause(){};
+    virtual void OnPlay(){};
+    virtual void OnStop(){};
 
   private:
     AnimationState state{AnimationState::Stopped};
+};
+
+class KeyFrameAnimation : public Animation {
+  public:
+    KeyFrameAnimation(const std::string & name) : Animation(name){};
+    void AddKeyFrame(const KeyFrame & key_frame);
+    void Animate(std::shared_ptr<Entity>, float);
+
+  protected:
+    void OnStop();
+
+  private:
     int next_key_frame{0};
     int key_frame_count{0};
     float key_frame_delta{0.f};
@@ -43,5 +60,6 @@ class Animation {
 
     void AnimateKeyFrame(std::shared_ptr<Entity>, const KeyFrame &);
 };
+}
 }
 #endif

@@ -1,12 +1,13 @@
 #include <cb/critterbits.hpp>
 
 namespace Critterbits {
-void Animation::AddKeyFrame(const KeyFrame & key_frame) {
+namespace Animation {
+void KeyFrameAnimation::AddKeyFrame(const KeyFrame & key_frame) {
     this->key_frames.push_back(key_frame);
     this->key_frame_count++;
 }
 
-void Animation::Animate(std::shared_ptr<Entity> entity, float delta_time) {
+void KeyFrameAnimation::Animate(std::shared_ptr<Entity> entity, float delta_time) {
     if (this->IsPlaying()) {
         this->key_frame_delta += delta_time;
         if (this->key_frame_delta >= this->next_key_frame_at) {
@@ -22,14 +23,14 @@ void Animation::Animate(std::shared_ptr<Entity> entity, float delta_time) {
                 } 
                 this->next_key_frame_at = (float)key_frame.duration / 1000.f;
             } else {
-                LOG_ERR("Animation::Animate animated past end of key frames");
+                LOG_ERR("KeyFrameAnimation::Animate animated past end of key frames");
                 this->Stop();
             }
         }
     }
 }
 
-void Animation::AnimateKeyFrame(std::shared_ptr<Entity> entity, const KeyFrame & key_frame) {
+void KeyFrameAnimation::AnimateKeyFrame(std::shared_ptr<Entity> entity, const KeyFrame & key_frame) {
     // entity properties
 
     // sprite properties
@@ -46,10 +47,11 @@ void Animation::AnimateKeyFrame(std::shared_ptr<Entity> entity, const KeyFrame &
     }
 }
 
-void Animation::Stop() {
-    this->state = AnimationState::Stopped;
+void KeyFrameAnimation::OnStop() {
     this->next_key_frame = 0;
     this->next_key_frame_at = 0.f;
     this->key_frame_delta = 0.f;
+}
+
 }
 }
