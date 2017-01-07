@@ -117,8 +117,13 @@ bool Sprite::OnStart() {
 }
 
 void Sprite::OnUpdate(float delta_time) {
-    for (auto & anim : this->animations) {
-        anim->Animate(shared_from_this(), delta_time);
+    for (auto it = this->animations.begin(); it != this->animations.end();) {
+        if ((*it)->IsDestroyed()) {
+            it = this->animations.erase(it);
+        } else {
+            (*it)->Animate(shared_from_this(), delta_time);
+            it++;
+        }
     }
 }
 }

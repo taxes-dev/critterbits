@@ -10,7 +10,7 @@
 namespace Critterbits {
 namespace Animation {
 
-enum class AnimationState { Stopped, Paused, Playing };
+enum class AnimationState { Stopped, Paused, Playing, Destroyed };
 
 typedef struct KeyFrame {
     std::string property;
@@ -28,12 +28,15 @@ class Animation {
 
     Animation(const std::string & name) : name(name), loop(false){};
     virtual void Animate(std::shared_ptr<Entity>, float) = 0;
+    bool IsDestroyed() { return this->state == AnimationState::Destroyed; };
     bool IsPlaying() { return this->state == AnimationState::Playing; };
     void Pause();
     void Play();
     void Stop();
 
   protected:
+    void Destroy();
+    virtual void OnDestroy(){};
     virtual void OnPause(){};
     virtual void OnPlay(){};
     virtual void OnStop(){};
@@ -59,6 +62,38 @@ class KeyFrameAnimation : public Animation {
     std::vector<KeyFrame> key_frames{};
 
     void AnimateKeyFrame(std::shared_ptr<Entity>, const KeyFrame &);
+};
+
+enum class TransformAlgorithm { Lerp, QuadEaseIn };
+
+class TransformAnimation : public Animation {
+  public:
+    TransformAnimation(const TransformAlgorithm & algorithm, float duration)
+        : Animation(""), algorithm(algorithm), duration(duration){};
+    void Animate(std::shared_ptr<Entity>, float);
+
+  protected:
+    float GetTransformedValue(float, float, float);
+    CB_Point GetTransformedValue(CB_Point, CB_Point, float);
+    virtual void AnimateValues(std::shared_ptr<Entity>, float) = 0;
+    virtual void OnStop() { this->Destroy(); };
+
+  private:
+    TransformAlgorithm algorithm;
+    float duration;
+    float elapsed{0.f};
+};
+
+class TranslateAnimation : public TransformAnimation {
+  public:
+    TranslateAnimation(const TransformAlgorithm & algorithm, float duration, CB_Point start, CB_Point end)
+        : TransformAnimation(algorithm, duration), start(start), end(end){};
+
+  protected:
+    void AnimateValues(std::shared_ptr<Entity>, float);
+
+  private:
+    CB_Point start, end;
 };
 }
 }

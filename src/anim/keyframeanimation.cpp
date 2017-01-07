@@ -11,7 +11,7 @@ void KeyFrameAnimation::Animate(std::shared_ptr<Entity> entity, float delta_time
     if (this->IsPlaying()) {
         this->key_frame_delta += delta_time;
         if (this->key_frame_delta >= this->next_key_frame_at) {
-            if ((size_t)this->next_key_frame < this->key_frames.size()) {
+            if (static_cast<size_t>(this->next_key_frame) < this->key_frames.size()) {
                 const KeyFrame & key_frame = this->key_frames.at(this->next_key_frame);
                 this->AnimateKeyFrame(entity, key_frame);
                 this->key_frame_delta = 0.f;
