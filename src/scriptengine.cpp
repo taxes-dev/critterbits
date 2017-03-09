@@ -288,12 +288,12 @@ std::shared_ptr<Script> ScriptEngine::LoadScript(const std::string & script_path
     std::string * script_contents = nullptr;
     if (Engine::GetInstance().GetResourceLoader()->GetTextResourceContents(script_path, &script_contents) == false) {
         LOG_ERR("ScriptEngine::LoadScript unable to get script " + script_path);
-        return false;
+        return nullptr;
     }
     if (duk_peval_string_noresult(new_script->context, (*script_contents).c_str()) != 0) {
         const char * error = duk_safe_to_string(new_script->context, -1);
         LOG_ERR("ScriptEngine::LoadScript unable to compile script " + script_path + ", error was " + std::string(error));
-        return false;
+        return nullptr;
     }
     delete script_contents;
 
