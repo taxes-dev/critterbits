@@ -1,0 +1,50 @@
+[sprite]
+tag = "elk"
+script = "scripts/elk.js"
+
+[sprite_sheet]
+image = "sheets/monster_elk.png"
+tile_height = 64
+tile_width = 64
+
+[2d]
+collision = "collide"
+box = { x = 15, y = 17, w = 31, h = 44 }
+
+[[animation]]
+name = "walk_left"
+loop = true
+frames = [
+    { prop = "flip_x", val = "false", dur = 0 },
+    { prop = "frame.current", val = "3", dur = 400 },
+    { prop = "frame.current", val = "4", dur = 400 },
+    { prop = "frame.current", val = "5", dur = 400 }
+]
+
+[[animation]]
+name = "walk_right"
+loop = true
+frames = [
+    { prop = "flip_x", val = "true", dur = 0},
+    { prop = "frame.current", val = "3", dur = 400 },
+    { prop = "frame.current", val = "4", dur = 400 },
+    { prop = "frame.current", val = "5", dur = 400 }
+]
+
+[[animation]]
+name = "walk_up"
+loop = true
+frames = [
+    { prop = "frame.current", val = "3", dur = 200 },
+    { prop = "frame.current", val = "10", dur = 200 },
+    { prop = "frame.current", val = "17", dur = 200 }
+]
+
+[[animation]]
+name = "walk_down"
+loop = true
+frames = [
+    { prop = "frame.current", val = "0", dur = 200 },
+    { prop = "frame.current", val = "1", dur = 200 },
+    { prop = "frame.current", val = "2", dur = 200 }
+]

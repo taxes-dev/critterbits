@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="20" height="16" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="tf_winter_terrain" tilewidth="16" tileheight="16" tilecount="880" columns="40">
+  <image source="tf_winter_terrain.png" width="640" height="352"/>
+ </tileset>
+ <layer name="Ground" width="20" height="16">
+  <data encoding="base64" compression="zlib">
+   eJxrZmJgaAHiZirRq4F4DRVparmLEvfFM9DffSA7h0v4keo+kN/p7b5EHOFNyD5HhsEXfsMpf8Qz0Db8AHbZvhg=
+  </data>
+ </layer>
+ <layer name="Collide" width="20" height="16">
+  <properties>
+   <property name="collide" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYKA+2A+lD1HJvOdA/AKIX1HJPHNGBgYLILZipJKBo2AUjIIhCQCPtATn
+  </data>
+ </layer>
+ <layer name="Foreground" width="20" height="16">
+  <properties>
+   <property name="foreground" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYGBgyAfiAiAuZBgFo2AUjIKRAwCK0gFR
+  </data>
+ </layer>
+</map>

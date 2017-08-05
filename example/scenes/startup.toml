@@ -1,0 +1,11 @@
+[scene]
+persistent = false
+map = "maps/test_map.tmx"
+
+[[sprite]]
+name = "player"
+at = { x = 124, y = 96 }
+
+[[sprite]]
+name = "elk"
+at = { x = 150, y = 96 }

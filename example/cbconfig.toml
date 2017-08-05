@@ -1,0 +1,16 @@
+[debug]
+draw_info_pane = true
+draw_map_regions = false
+draw_sprite_rects = false
+
+[window]
+width = 960
+height = 640
+title = "Critterbits Example App"
+
+[rendering]
+scale = 4.0
+
+[input]
+keyboard = true
+controller = false

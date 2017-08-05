@@ -1,0 +1,47 @@
+[sprite]
+tag = "player"
+script = "scripts/player.js"
+
+[sprite_sheet]
+image = "sheets/red.png"
+tile_height = 30
+tile_width = 18
+
+[2d]
+collision = "collide"
+
+[[animation]]
+name = "walk_left"
+loop = true
+frames = [
+    { prop = "frame.current", val = "7", dur = 200 },
+    { prop = "frame.current", val = "8", dur = 200 },
+    { prop = "frame.current", val = "9", dur = 200 }
+]
+
+[[animation]]
+name = "walk_right"
+loop = true
+frames = [
+    { prop = "frame.current", val = "14", dur = 200 },
+    { prop = "frame.current", val = "15", dur = 200 },
+    { prop = "frame.current", val = "16", dur = 200 }
+]
+
+[[animation]]
+name = "walk_up"
+loop = true
+frames = [
+    { prop = "frame.current", val = "3", dur = 200 },
+    { prop = "frame.current", val = "10", dur = 200 },
+    { prop = "frame.current", val = "17", dur = 200 }
+]
+
+[[animation]]
+name = "walk_down"
+loop = true
+frames = [
+    { prop = "frame.current", val = "0", dur = 200 },
+    { prop = "frame.current", val = "1", dur = 200 },
+    { prop = "frame.current", val = "2", dur = 200 }
+]
